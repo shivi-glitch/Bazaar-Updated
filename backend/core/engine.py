@@ -13,6 +13,7 @@ from backend.database import AsyncSessionLocal
 from backend.models import StatPurchase, Team, SessionBlock
 from backend.core.news_ledger import SCRIPTED_NEWS_DATABASE
 from backend.core.r2_math import R2InstrumentState
+from backend.core.liquidity import LiquidityBots
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), '..', '..', 'data')
 
@@ -366,9 +367,51 @@ class MarketEngine:
                 await self.check_and_dispatch_scripted_news()
 
                 # 3. Broadcast prices via websocket
+                prices_payload = {}
+                for ticker, data in self.current_prices.items():
+                    current_paise = data[0]
+                    current_vol = data[1]
+                    
+                    # 1. INJECT CONTINUOUS STOCHASTIC DRIFT (The "Heartbeat")
+                    # Default micro-volatility range (+/- 0.1%)
+                    noise_limit = 0.001 
+                    
+                    # Apply asset-specific multipliers based on their fundamental Beta
+                    if ticker in ["BZR-V", "PULSE"]:
+                        noise_limit = 0.0035  # Highly volatile, wide swings
+                    elif ticker in ["INFY-Z", "HDFC-W"]:
+                        noise_limit = 0.0015  # Trending, moderate noise
+                    elif ticker == "GOLDCORE":
+                        noise_limit = 0.0004  # Safe haven, very tight noise
+                    
+                    # Generate the random walk percentage for this specific tick
+                    drift_percent = random.uniform(-noise_limit, noise_limit)
+                    
+                    # Apply the drift and add baseline bot volume
+                    current_paise = int(current_paise * (1.0 + drift_percent))
+                    
+                    # Generate a baseline "background" volume so the volume bars aren't empty
+                    background_vol = random.randint(100, 500)
+                    volume = max(background_vol, current_vol)
+                    
+                    # Update the engine's state (preserve shock volume if it's currently spiking)
+                    self.current_prices[ticker] = [current_paise, volume]
+                    
+                    # Determine if news bots need to react
+                    active_impact = 0.0
+                    for shock in self.active_shocks:
+                        if shock["ticker"] == ticker:
+                            active_impact = shock["impact_per_tick"]
+                    
+                    # Generate the live limit order book
+                    bids, asks = LiquidityBots.generate_order_book(current_paise, active_impact)
+                    
+                    # Append the DOM arrays to the standard price payload
+                    prices_payload[ticker] = [current_paise, volume, bids, asks]
+
                 if self.ws_manager:
                     await self.ws_manager.broadcast({
-                        "type": "tick", "g": self.current_g, "n": self.n, "prices": self.current_prices
+                        "type": "tick", "g": self.current_g, "n": self.n, "prices": prices_payload
                     })
 
                 self.n += 1
