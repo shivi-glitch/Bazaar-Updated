@@ -1,0 +1,62 @@
+import os
+import time
+import random
+import string
+import asyncio
+from fastapi import APIRouter, Depends, HTTPException, Header
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import delete
+
+from backend.database import AsyncSessionLocal
+from backend.models import Team, TeamLedger
+from backend.core.security import hash_pin
+
+router = APIRouter(prefix="/admin", tags=["admin"])
+ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "admin-master-secret")
+
+def verify_admin(authorization: str = Header(None)):
+    if not authorization or authorization != f"Bearer {ADMIN_TOKEN}":
+        raise HTTPException(status_code=403, detail="Forbidden: Admin access only")
+
+async def get_db():
+    async with AsyncSessionLocal() as session:
+        yield session
+
+def generate_single_team(i: int):
+    team_id = f"T{i:03d}"
+    pin = ''.join(random.choices(string.digits, k=6))
+    hashed = hash_pin(pin)
+    return team_id, pin, hashed
+
+@router.post("/teams/generate", dependencies=[Depends(verify_admin)])
+async def generate_teams(db: AsyncSession = Depends(get_db)):
+    # Adjusted to 300 teams to accommodate local CPU constraints
+    tasks = [asyncio.to_thread(generate_single_team, i) for i in range(1, 301)]
+    results = await asyncio.gather(*tasks)
+
+    teams = []
+    ledgers = []
+    plain_credentials = []
+    created_time = int(time.time())
+    
+    for team_id, pin, hashed in results:
+        teams.append(Team(
+            id=team_id,
+            name=f"Team {int(team_id[1:])}",
+            pin=pin,
+            pin_hash=hashed,
+            created_at=created_time
+        ))
+        ledgers.append(TeamLedger(
+            team_id=team_id,
+            cash_paise=100000000 # 10 Lakhs INR
+        ))
+        plain_credentials.append({"team_id": team_id, "pin": pin})
+        
+    await db.execute(delete(TeamLedger))
+    await db.execute(delete(Team))
+    db.add_all(teams)
+    db.add_all(ledgers)
+    await db.commit()
+    
+    return {"message": "300 teams generated", "teams": plain_credentials}

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "R1S1-01",
+    "t": 120,
+    "source": "NP",
+    "event": "E1.1",
+    "implied": "HDFC-W",
+    "dir": 1,
+    "truth_target": false
+  },
+  {
+    "id": "R1S1-02",
+    "t": 200,
+    "source": "FF",
+    "event": "E1.2",
+    "implied": "BZR-V",
+    "dir": 1,
+    "truth_target": false
+  }
+]

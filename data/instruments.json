@@ -1,0 +1,65 @@
+[
+  {
+    "ticker": "RELI-X",
+    "name": "Reliant Energy Corp",
+    "sector": "Energy",
+    "live_from": "R1S1",
+    "s_i": 1.5,
+    "d_i_pct": 0.6,
+    "open_price_paise": 245000
+  },
+  {
+    "ticker": "TATA-Y",
+    "name": "Tyrell Autoworks",
+    "sector": "Infrastructure",
+    "live_from": "R1S1",
+    "s_i": 0.9,
+    "d_i_pct": 0.4,
+    "open_price_paise": 88000
+  },
+  {
+    "ticker": "INFY-Z",
+    "name": "Infinity Systems",
+    "sector": "IT",
+    "live_from": "R1S1",
+    "s_i": 1.2,
+    "d_i_pct": 0.5,
+    "open_price_paise": 152000
+  },
+  {
+    "ticker": "HDFC-W",
+    "name": "Horizon Commercial Bank",
+    "sector": "Banking",
+    "live_from": "R1S1",
+    "s_i": 1.4,
+    "d_i_pct": 0.5,
+    "open_price_paise": 164000
+  },
+  {
+    "ticker": "BZR-V",
+    "name": "Bazaar Ventures Media",
+    "sector": "Consumables",
+    "live_from": "R1S1",
+    "s_i": 1.0,
+    "d_i_pct": 0.3,
+    "open_price_paise": 64000
+  },
+  {
+    "ticker": "GOLDCORE",
+    "name": "Goldcore Reserve Trust",
+    "sector": "Safe Haven",
+    "live_from": "R1S1",
+    "s_i": 0.6,
+    "d_i_pct": 0.8,
+    "open_price_paise": 620000
+  },
+  {
+    "ticker": "PULSE",
+    "name": "Pulsechain Token",
+    "sector": "Digital Assets",
+    "live_from": "R1S1",
+    "s_i": 1.6,
+    "d_i_pct": 0.25,
+    "open_price_paise": 85000
+  }
+]

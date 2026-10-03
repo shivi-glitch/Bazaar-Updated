@@ -1,0 +1,236 @@
+import os
+import uuid
+from fastapi import APIRouter, Depends, HTTPException, Header
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import update, delete, select
+
+from backend.database import AsyncSessionLocal
+from backend.models import Team, TeamLedger, Position, Order, StatPurchase
+from backend.core.engine import engine_app
+from backend.core.news_ledger import SCRIPTED_NEWS_DATABASE
+
+router = APIRouter(prefix="/admin", tags=["admin_sessions"])
+ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "admin-master-secret")
+
+def verify_admin(authorization: str = Header(None)):
+    if not authorization or authorization != f"Bearer {ADMIN_TOKEN}":
+        raise HTTPException(status_code=403, detail="Forbidden: Admin access only")
+
+async def get_db():
+    async with AsyncSessionLocal() as session:
+        yield session
+
+@router.post("/sessions/{g}/start", dependencies=[Depends(verify_admin)])
+async def start_session_route(g: int):
+    try:
+        res = await engine_app.start_session(g)
+        return res
+    except ValueError as e:
+        raise HTTPException(status_code=409, detail=str(e))
+
+@router.post("/sessions/{g}/pause", dependencies=[Depends(verify_admin)])
+async def pause_session_route(g: int):
+    try:
+        res = await engine_app.pause_session(g)
+        return res
+    except ValueError as e:
+        raise HTTPException(status_code=409, detail=str(e))
+
+@router.post("/sessions/{g}/resume", dependencies=[Depends(verify_admin)])
+async def resume_session_route(g: int):
+    try:
+        res = await engine_app.resume_session(g)
+        return res
+    except ValueError as e:
+        raise HTTPException(status_code=409, detail=str(e))
+
+@router.post("/sessions/{g}/end", dependencies=[Depends(verify_admin)])
+async def end_session_route(g: int):
+    try:
+        res = await engine_app.end_session(g)
+        return res
+    except ValueError as e:
+        raise HTTPException(status_code=409, detail=str(e))
+
+@router.post("/round2/unlock", dependencies=[Depends(verify_admin)])
+async def unlock_round2_route(db: AsyncSession = Depends(get_db)):
+    try:
+        # Engine rule: Can only unlock if R1S6 is FINISHED
+        res = await engine_app.unlock_round2()
+        
+        # 1. Wipe all current positions
+        await db.execute(delete(Position))
+        
+        # 2. Reset every ledger to exactly 1 Crore INR (1,000,000,000 paise)
+        await db.execute(update(TeamLedger).values(cash_paise=1000000000))
+        
+        # 3. Reset team stats and clear eliminations
+        await db.execute(
+            update(Team).values(
+                research_level=0, 
+                capital_level=0, 
+                speed_level=0, 
+                eliminated=False
+            )
+        )
+        
+        await db.commit()
+        return res
+    except ValueError as e:
+        raise HTTPException(status_code=409, detail=str(e))
+
+@router.post("/freeze", dependencies=[Depends(verify_admin)])
+async def freeze_route():
+    return await engine_app.freeze()
+
+@router.post("/unfreeze", dependencies=[Depends(verify_admin)])
+async def unfreeze_route():
+    return await engine_app.unfreeze()
+
+@router.get("/sessions", dependencies=[Depends(verify_admin)])
+async def get_sessions():
+    return {
+        "current_g": engine_app.current_g,
+        "n": engine_app.n,
+        "states": engine_app.session_states,
+        "is_frozen": engine_app.is_frozen,
+        "r2_unlocked": engine_app.r2_unlocked,
+        "news_history": engine_app.news_ledger,
+        "scripted_news": SCRIPTED_NEWS_DATABASE
+    }
+
+@router.get("/news/scripted", dependencies=[Depends(verify_admin)])
+async def get_scripted_news_endpoint():
+    return {"scripted_news": SCRIPTED_NEWS_DATABASE}
+
+@router.post("/reset", dependencies=[Depends(verify_admin)])
+@router.post("/sessions/reset", dependencies=[Depends(verify_admin)])
+async def reset_entire_event(db: AsyncSession = Depends(get_db)):
+    try:
+        # 1. Wipe all transactions and positions
+        await db.execute(delete(Position))
+        await db.execute(delete(Order))
+        await db.execute(delete(StatPurchase))
+        
+        # 2. Reset Ledger back to exactly 10 Lakhs (R1 Start)
+        await db.execute(update(TeamLedger).values(cash_paise=100000000))
+        
+        # 3. Strip all upgrades
+        await db.execute(
+            update(Team).values(research_level=0, capital_level=0, speed_level=0, eliminated=False)
+        )
+        await db.commit()
+        
+        # 4. Snap the engine back to R1S1
+        await engine_app.reset_event()
+        return {"status": "SUCCESS", "message": "Event hard reset to R1S1"}
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+from pydantic import BaseModel
+import random
+
+class JumpRequest(BaseModel):
+    target_g: int
+
+@router.post("/jump", dependencies=[Depends(verify_admin)])
+@router.post("/sessions/jump", dependencies=[Depends(verify_admin)])
+async def jump_to_session(req: JumpRequest, db: AsyncSession = Depends(get_db)):
+    if not 1 <= req.target_g <= 11:
+        raise HTTPException(status_code=400, detail="Invalid session number")
+
+    try:
+        # 1. Wipe all active transactions and positions
+        await db.execute(delete(Position))
+        await db.execute(delete(Order))
+        await db.execute(delete(StatPurchase))
+        
+        # 2. Assign the correct starting capital based on the Round
+        cash = 1000000000 if req.target_g >= 7 else 100000000
+        await db.execute(update(TeamLedger).values(cash_paise=cash))
+        
+        # 3. Strip all upgrades
+        await db.execute(
+            update(Team).values(research_level=0, capital_level=0, speed_level=0, eliminated=False)
+        )
+        await db.commit()
+        
+        # 4. Snap the engine
+        res = await engine_app.jump_to(req.target_g)
+        return res
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/news/fire", dependencies=[Depends(verify_admin)])
+async def fire_custom_news(req: dict):
+    news_item = {
+        "id": str(uuid.uuid4()),
+        "source": req.get("source", "IN"),
+        "ticker": req.get("ticker", "GLOBAL"),
+        "text": req.get("text", "Market breaking event.")
+    }
+    await engine_app.inject_live_news(news_item)
+    return {"status": "SUCCESS", "news": news_item}
+
+from backend.core.security import hash_pin
+
+class TeamActionReq(BaseModel):
+    team_id: str
+
+@router.get("/teams", dependencies=[Depends(verify_admin)])
+async def get_all_teams(db: AsyncSession = Depends(get_db)):
+    """Returns all teams with their real PINs and Cash Balances."""
+    teams_res = await db.execute(select(Team))
+    teams = teams_res.scalars().all()
+    
+    ledgers_res = await db.execute(select(TeamLedger))
+    ledgers = {l.team_id: l.cash_paise for l in ledgers_res.scalars().all()}
+    
+    return {"teams": [
+        {
+            "id": t.id, 
+            "pin": t.pin or "796688", 
+            "cash_paise": ledgers.get(t.id, 100000000), # 1 Crore default
+            "eliminated": t.eliminated
+        } for t in teams
+    ]}
+
+@router.post("/teams/create", dependencies=[Depends(verify_admin)])
+async def create_team(req: TeamActionReq, db: AsyncSession = Depends(get_db)):
+    """Creates a new team with a custom name and a random 6-digit PIN."""
+    new_pin = str(random.randint(100000, 999999))
+    pin_h = hash_pin(new_pin)
+    new_team = Team(id=req.team_id, name=req.team_id, pin=new_pin, pin_hash=pin_h)
+    db.add(new_team)
+    
+    # 1 Crore for Round 1, 10 Crore if starting in Round 2
+    cash = 1000000000 if engine_app.current_g >= 7 else 100000000
+    new_ledger = TeamLedger(team_id=req.team_id, cash_paise=cash)
+    db.add(new_ledger)
+    
+    await db.commit()
+    return {"status": "SUCCESS", "team_id": req.team_id, "pin": new_pin}
+
+@router.post("/teams/reset-pin", dependencies=[Depends(verify_admin)])
+async def reset_team_pin(req: TeamActionReq, db: AsyncSession = Depends(get_db)):
+    """Generates a new PIN for a team."""
+    new_pin = str(random.randint(100000, 999999))
+    pin_h = hash_pin(new_pin)
+    await db.execute(update(Team).where(Team.id == req.team_id).values(pin=new_pin, pin_hash=pin_h))
+    await db.commit()
+    return {"status": "SUCCESS", "new_pin": new_pin}
+
+@router.post("/teams/remove", dependencies=[Depends(verify_admin)])
+async def remove_team(req: TeamActionReq, db: AsyncSession = Depends(get_db)):
+    """Completely deletes a team and all their trading history."""
+    await db.execute(delete(StatPurchase).where(StatPurchase.team_id == req.team_id))
+    await db.execute(delete(Order).where(Order.team_id == req.team_id))
+    await db.execute(delete(Position).where(Position.team_id == req.team_id))
+    await db.execute(delete(TeamLedger).where(TeamLedger.team_id == req.team_id))
+    await db.execute(delete(Team).where(Team.id == req.team_id))
+    await db.commit()
+    return {"status": "SUCCESS"}
+
+
