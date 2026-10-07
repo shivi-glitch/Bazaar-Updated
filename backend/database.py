@@ -1,4 +1,6 @@
 import os
+import ssl
+from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy.orm import declarative_base
 from dotenv import load_dotenv
@@ -11,12 +13,24 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL environment variable is missing.")
 
-# Render provides postgres:// but asyncpg needs postgresql+asyncpg://
+# 1. Convert postgres:// / postgresql:// to postgresql+asyncpg://
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
 elif DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
-engine = create_async_engine(DATABASE_URL, echo=False)
+# 2. Remove incompatible sslmode query param and convert to asyncpg connect_args
+parsed = urlparse(DATABASE_URL)
+query_params = parse_qs(parsed.query)
+connect_args = {}
+
+if "sslmode" in query_params:
+    sslmode_val = query_params.pop("sslmode")[0]
+    if sslmode_val in ["require", "prefer", "verify-ca", "verify-full"]:
+        connect_args["ssl"] = True
+    new_query = urlencode(query_params, doseq=True)
+    DATABASE_URL = urlunparse(parsed._replace(query=new_query))
+
+engine = create_async_engine(DATABASE_URL, echo=False, connect_args=connect_args)
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 Base = declarative_base()
