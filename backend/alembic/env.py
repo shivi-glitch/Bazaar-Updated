@@ -24,9 +24,10 @@ from models import Base
 
 target_metadata = Base.metadata
 
-database_url = os.environ.get("DATABASE_URL")
-if database_url:
-    config.set_main_option("sqlalchemy.url", database_url)
+from database import DATABASE_URL
+
+if DATABASE_URL:
+    config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -70,17 +71,12 @@ async def run_async_migrations() -> None:
     and associate a connection with the context.
 
     """
+    from database import engine
 
-    connectable = async_engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
-
-    async with connectable.connect() as connection:
+    async with engine.connect() as connection:
         await connection.run_sync(do_run_migrations)
 
-    await connectable.dispose()
+    await engine.dispose()
 
 
 def run_migrations_online() -> None:
