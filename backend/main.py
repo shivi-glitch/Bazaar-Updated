@@ -1,3 +1,8 @@
+import sys
+import os
+# Add parent directory to sys.path so 'backend.*' imports work from any working directory
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 import asyncio
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
