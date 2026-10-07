@@ -33,6 +33,14 @@ if "sslmode" in query_params:
 # We strip the entire query string to avoid 'unexpected keyword argument' errors.
 DATABASE_URL = urlunparse(parsed._replace(query=""))
 
-engine = create_async_engine(DATABASE_URL, echo=False, connect_args=connect_args)
+engine = create_async_engine(
+    DATABASE_URL, 
+    echo=False, 
+    connect_args=connect_args,
+    pool_size=20,
+    max_overflow=40,
+    pool_timeout=10,
+    pool_pre_ping=True
+)
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 Base = declarative_base()

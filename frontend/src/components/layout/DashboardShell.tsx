@@ -59,13 +59,31 @@ export function DashboardShell({ children, activeTab = "explore", onTabChange = 
 
   const formatMoney = (paise: number) => `₹${(paise / 100).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   
-  let remainingSecs = Math.max(0, Math.floor((200 - currentTick) * 1.5));
-  if (sessionState === "FINISHED") {
-    remainingSecs = 0;
-  } else if (sessionState === "LOCKED" || sessionState === "READY") {
-    remainingSecs = 300;
-  }
-  const formattedTime = `${Math.floor(remainingSecs / 60).toString().padStart(2, '0')}:${(remainingSecs % 60).toString().padStart(2, '0')}`;
+  const [timeLeft, setTimeLeft] = useState(300);
+
+  useEffect(() => {
+    // Local independent clock: ticks down smoothly every second
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => (prev > 0 && sessionState === "RUNNING" ? prev - 1 : prev));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [sessionState]);
+
+  // Gentle resync with server time
+  useEffect(() => {
+    let serverSecs = Math.max(0, Math.floor((200 - currentTick) * 1.5));
+    if (sessionState === "FINISHED") serverSecs = 0;
+    else if (sessionState === "LOCKED" || sessionState === "READY") serverSecs = 300;
+    
+    setTimeLeft((prev) => {
+      if (Math.abs(prev - serverSecs) > 2) {
+        return serverSecs;
+      }
+      return prev;
+    });
+  }, [currentTick, sessionState]);
+
+  const formattedTime = `${Math.floor(timeLeft / 60).toString().padStart(2, '0')}:${(timeLeft % 60).toString().padStart(2, '0')}`;
 
   return (
     <div className="flex flex-col h-screen w-full bg-[#070B14] text-slate-200 overflow-hidden font-sans relative">

@@ -28,27 +28,32 @@ class ConnectionManager:
 
     async def broadcast(self, message: dict):
         text = json.dumps(message)
-        dead_connections = []
-        for connection in list(self.active_connections.keys()):
+        
+        async def safe_send(ws):
             try:
-                await connection.send_text(text)
+                await asyncio.wait_for(ws.send_text(text), timeout=0.2)
             except Exception:
-                dead_connections.append(connection)
-        for dead in dead_connections:
-            self.disconnect(dead)
+                self.disconnect(ws)
+
+        await asyncio.gather(*(safe_send(ws) for ws in list(self.active_connections.keys())))
 
     async def broadcast_to_specific_teams(self, team_ids: list, message: dict):
         text = json.dumps(message)
-        dead_connections = []
         target_ids = {str(t).lower() for t in team_ids}
-        for connection, data in list(self.active_connections.items()):
-            if str(data.get("team_id", "")).lower() in target_ids:
-                try:
-                    await connection.send_text(text)
-                except Exception:
-                    dead_connections.append(connection)
-        for dead in dead_connections:
-            self.disconnect(dead)
+        
+        async def safe_send(ws):
+            try:
+                await asyncio.wait_for(ws.send_text(text), timeout=0.2)
+            except Exception:
+                self.disconnect(ws)
+
+        tasks = [
+            safe_send(ws) 
+            for ws, data in list(self.active_connections.items())
+            if str(data.get("team_id", "")).lower() in target_ids
+        ]
+        if tasks:
+            await asyncio.gather(*tasks)
 
     async def dispatch_targeted_news(self, news_item: dict):
         """Routes news asynchronously based on Research Level delays."""
