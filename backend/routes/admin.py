@@ -29,10 +29,17 @@ def generate_single_team(i: int):
     return team_id, pin, hashed
 
 @router.post("/teams/generate", dependencies=[Depends(verify_admin)])
-async def generate_teams(db: AsyncSession = Depends(get_db)):
-    # Adjusted to 300 teams to accommodate local CPU constraints
-    tasks = [asyncio.to_thread(generate_single_team, i) for i in range(1, 301)]
-    results = await asyncio.gather(*tasks)
+async def generate_teams(num_teams: int = 300, db: AsyncSession = Depends(get_db)):
+    # Limit number of teams based on request
+    count = min(num_teams, 300)
+    
+    # Process sequentially in small chunks so we don't completely freeze the 0.1vCPU Render instance
+    results = []
+    for i in range(1, count + 1):
+        # We await each thread one by one (or in small batches) to yield to the event loop
+        res = await asyncio.to_thread(generate_single_team, i)
+        results.append(res)
+        await asyncio.sleep(0.01)  # Yield explicitly to keep server responsive to other requests
 
     teams = []
     ledgers = []
