@@ -33,22 +33,19 @@ export default function AdminDashboard() {
   // Danger Zone State
   const [jumpTarget, setJumpTarget] = useState(1);
 
-  const adminToken = "admin-master-secret";
+  const getAdminToken = () => sessionStorage.getItem("admin_auth") || "";
 
   useEffect(() => {
-    if (sessionStorage.getItem("admin_auth") === adminToken) {
+    if (getAdminToken()) {
       setIsAuthenticated(true);
     }
   }, []);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (passwordInput === (process.env.NEXT_PUBLIC_ADMIN_PASSWORD || "admin") || passwordInput === adminToken) {
-      sessionStorage.setItem("admin_auth", adminToken);
+    if (passwordInput) {
+      sessionStorage.setItem("admin_auth", passwordInput);
       setIsAuthenticated(true);
-    } else {
-      alert("UNAUTHORIZED: Invalid Credentials");
-      setPasswordInput("");
     }
   };
 
@@ -60,9 +57,9 @@ export default function AdminDashboard() {
   const fetchData = async () => {
     try {
       const [stateRes, lbRes, teamsRes] = await Promise.all([
-        api.get("/admin/sessions", adminToken),
-        api.get("/admin/leaderboard/live", adminToken),
-        api.get("/admin/teams", adminToken)
+        api.get("/admin/sessions", getAdminToken()),
+        api.get("/admin/leaderboard/live", getAdminToken()),
+        api.get("/admin/teams", getAdminToken())
       ]);
       setSysState(stateRes);
       setLeaderboard(lbRes);
@@ -80,7 +77,7 @@ export default function AdminDashboard() {
   const handleAction = async (endpoint: string, payload: any = {}) => {
     setLoading(true);
     try {
-      await api.post(endpoint, payload, adminToken);
+      await api.post(endpoint, payload, getAdminToken());
       await fetchData();
     } catch (err: any) {
       alert(err.message || "Action failed");
