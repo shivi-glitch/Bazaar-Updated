@@ -37,9 +37,9 @@ engine = create_async_engine(
     DATABASE_URL, 
     echo=False, 
     connect_args=connect_args,
-    pool_size=20,
-    max_overflow=40,
-    pool_timeout=10,
+    pool_size=15,
+    max_overflow=15,
+    pool_timeout=60,
     pool_pre_ping=True
 )
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
