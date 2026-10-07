@@ -13,6 +13,10 @@ from backend.core.engine import engine_app
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Ensure database schema is created on fresh deployments
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
     # Initialize Engine state from persistent database
     await engine_app.sync_state_from_db()
     
