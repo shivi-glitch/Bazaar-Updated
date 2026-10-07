@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 # Force dotenv to look exactly in the backend directory
 env_path = os.path.join(os.path.dirname(__file__), '.env')
-load_dotenv(env_path)
+load_dotenv(env_path, override=True)
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:

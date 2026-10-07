@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from models import Instrument, SessionBlock, Team, TeamLedger, Base
 from core.security import hash_pin
 
-load_dotenv()
+load_dotenv(override=True)
 DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_async_engine(DATABASE_URL, echo=False)
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)

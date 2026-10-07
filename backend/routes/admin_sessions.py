@@ -188,12 +188,16 @@ async def get_all_teams(db: AsyncSession = Depends(get_db)):
     ledgers_res = await db.execute(select(TeamLedger))
     ledgers = {l.team_id: l.cash_paise for l in ledgers_res.scalars().all()}
     
+    from backend.routes.ws import manager
+    online_teams = manager.get_online_team_ids()
+    
     return {"teams": [
         {
             "id": t.id, 
             "pin": t.pin or "796688", 
             "cash_paise": ledgers.get(t.id, 100000000), # 1 Crore default
-            "eliminated": t.eliminated
+            "eliminated": t.eliminated,
+            "is_online": t.id in online_teams
         } for t in teams
     ]}
 

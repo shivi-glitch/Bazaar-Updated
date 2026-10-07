@@ -23,6 +23,9 @@ class ConnectionManager:
         if websocket in self.active_connections:
             del self.active_connections[websocket]
 
+    def get_online_team_ids(self) -> set:
+        return {data.get("team_id") for data in self.active_connections.values() if data.get("team_id")}
+
     async def broadcast(self, message: dict):
         text = json.dumps(message)
         dead_connections = []
