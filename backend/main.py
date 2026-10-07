@@ -17,6 +17,10 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Bazaar API", lifespan=lifespan)
 
+import os
+
+frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -24,6 +28,7 @@ app.add_middleware(
         "http://localhost:3001",
         "http://127.0.0.1:3000",
         "http://127.0.0.1:3001",
+        frontend_url,
     ],
     allow_credentials=True,
     allow_methods=["*"],
