@@ -114,13 +114,22 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(None)):
     await manager.connect(websocket, team_id, research_level)
     
     try:
+        initial_prices = engine_app.get_live_or_initial_prices()
         await websocket.send_json({
             "type": "hello",
             "server_time": time.time(),
             "state": engine_app.get_current_session_state(),
             "g": engine_app.current_g,
-            "n": engine_app.n
+            "n": engine_app.n,
+            "prices": initial_prices
         })
+        if initial_prices:
+            await websocket.send_json({
+                "type": "tick",
+                "g": engine_app.current_g,
+                "n": engine_app.n,
+                "prices": initial_prices
+            })
         while True:
             await websocket.receive_text()
     except (WebSocketDisconnect, Exception):

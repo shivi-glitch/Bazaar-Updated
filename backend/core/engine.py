@@ -108,6 +108,29 @@ class MarketEngine:
             with open(news_path, 'r') as f:
                 self.news_ledger = json.load(f)
 
+        # Ensure Round 1 Session 1 assets are ready as baseline so teams can view all stocks before R1 starts
+        if not self.current_prices:
+            r1_s1 = self.price_table.get(1, {}).get(0, {})
+            if r1_s1:
+                self.current_prices = dict(r1_s1)
+
+    def get_live_or_initial_prices(self) -> Dict[str, list]:
+        """Returns live prices if session is running, or initial baseline for Round 1 Session 1."""
+        if self.current_prices:
+            return dict(self.current_prices)
+        r1_s1 = self.price_table.get(1, {}).get(0, {})
+        if r1_s1:
+            return dict(r1_s1)
+        return {
+            "RELI-X": [245000, 1000],
+            "INFY-Z": [152000, 1200],
+            "HDFC-W": [168000, 1100],
+            "BZR-V": [32000, 2500],
+            "PULSE": [11500, 3000],
+            "GOLDCORE": [620000, 500],
+            "TATA-Y": [98000, 1500]
+        }
+
     def get_current_session_state(self, g: Optional[int] = None) -> str:
         target_g = g if g is not None else self.current_g
         return self.session_states.get(target_g, "LOCKED")

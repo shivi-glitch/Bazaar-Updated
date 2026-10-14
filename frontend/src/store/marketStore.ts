@@ -37,13 +37,23 @@ interface MarketState {
   setPortfolioData: (data: any) => void;
 }
 
+const DEFAULT_R1_PRICES: Record<string, [number, number]> = {
+  "RELI-X": [245000, 1000],
+  "INFY-Z": [152000, 1200],
+  "HDFC-W": [168000, 1100],
+  "BZR-V": [32000, 2500],
+  "PULSE": [11500, 3000],
+  "GOLDCORE": [620000, 500],
+  "TATA-Y": [98000, 1500]
+};
+
 export const useMarketStore = create<MarketState>((set) => ({
   connected: false,
   sessionState: "LOCKED",
   currentSession: 1, 
   serverTime: 0,
   globalTick: 0,
-  prices: {},
+  prices: DEFAULT_R1_PRICES,
   priceHistory: {},
   orderBooks: {},
   news: [],
@@ -56,12 +66,14 @@ export const useMarketStore = create<MarketState>((set) => ({
     if (msg.type === "hello") {
       set((state) => {
         const isNewSession = msg.g && msg.g !== state.currentSession;
+        const initialPrices = (msg.prices && Object.keys(msg.prices).length > 0) ? msg.prices : state.prices;
         return { 
           sessionState: msg.state, 
           serverTime: msg.server_time, 
           currentSession: msg.g || 1,
           globalTick: typeof msg.n === 'number' ? msg.n : 0,
-          priceHistory: isNewSession ? {} : state.priceHistory
+          priceHistory: isNewSession ? {} : state.priceHistory,
+          prices: initialPrices
         };
       });
     } else if (msg.type === "session") {

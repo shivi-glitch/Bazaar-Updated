@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { api } from "@/lib/api";
-import { DashboardShell } from "@/components/layout/DashboardShell";
 import { useMarketStore } from "@/store/marketStore";
-import { Lock, Zap } from "lucide-react";
+import { Lock, Zap, BookOpen, Wallet, Gauge, Check } from "lucide-react";
 
 export function StatsTab() {
   const data = useMarketStore((s) => s.portfolioData);
@@ -13,7 +12,8 @@ export function StatsTab() {
   const sessionState = useMarketStore((s) => s.sessionState);
 
   const buyStat = async (statName: string, level: number) => {
-    setLoading(true); setError("");
+    setLoading(true); 
+    setError("");
     try {
       const token = localStorage.getItem("merx_token");
       await api.post("/stats/purchase", { stat: statName, level }, token || "");
@@ -24,24 +24,46 @@ export function StatsTab() {
     }
   };
 
-  if (!data) return <div className="p-6 text-center text-slate-500 font-bold mt-10">Loading Stats...</div>;
+  if (!data) {
+    return (
+      <div className="p-8 sm:p-12 text-center text-tx-muted font-mono text-[13px] mt-10 animate-pulse">
+        Accessing institutional stat shop registry...
+      </div>
+    );
+  }
 
   // Round 1 Lock
   if (!data.r2_unlocked) {
     return (
-        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center mt-20">
-          <div className="w-20 h-20 bg-[#111827] rounded-sm flex items-center justify-center mb-6 border border-white/10 shadow-[inset_0_0_20px_rgba(255,255,255,0.05)]">
-            <Lock className="w-8 h-8 text-slate-500" />
-          </div>
-          <h2 className="text-2xl font-black text-white tracking-tighter uppercase">Shop Locked</h2>
-          <p className="text-slate-400 mt-3 text-sm max-w-sm font-medium">
-            The Stat Shop is restricted during Retail Trading (Round 1). Accumulate capital now and prepare for Institutional Trading (Round 2).
+      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 text-center max-w-lg mx-auto my-auto space-y-4">
+        <div className="w-14 h-14 bg-bg-raised border border-bd-subtle rounded-2xl flex items-center justify-center text-tx-muted shadow-card">
+          <Lock className="w-6 h-6 text-tx-muted" />
+        </div>
+        <div className="space-y-2">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-widest px-2.5 py-0.5 rounded bg-bg-raised border border-bd-subtle text-warn">
+            Round 1 Restricted
+          </span>
+          <h2 className="text-[22px] sm:text-[26px] font-bold text-tx-primary tracking-tight">
+            Stat Shop Opens in Round 2
+          </h2>
+          <p className="text-[13px] sm:text-[14px] text-tx-secondary leading-relaxed max-w-md">
+            The Stat Shop is restricted during Retail Trading (Round 1). Accumulate capital now and prepare to purchase institutional capabilities before Session 7 begins.
           </p>
         </div>
+      </div>
     );
   }
 
   const isSessionActive = ["STARTING", "RUNNING", "PAUSED"].includes(sessionState);
+
+  const getStatIcon = (title: string) => {
+    switch (title.toLowerCase()) {
+      case "research": return <BookOpen className="w-5 h-5 text-accent" />;
+      case "capital": return <Wallet className="w-5 h-5 text-warn" />;
+      case "speed": return <Gauge className="w-5 h-5 text-cyan-400" />;
+      default: return <Zap className="w-5 h-5 text-accent" />;
+    }
+  };
 
   const StatCard = ({ title, currentLvl, costs, max, desc }: any) => {
     const nextLvl = currentLvl + 1;
@@ -49,36 +71,44 @@ export function StatsTab() {
     const cost = canBuy ? costs[nextLvl] : null;
 
     return (
-      <div className="glass-panel p-6 flex flex-col gap-4 relative overflow-hidden group hover:border-white/20 transition-all">
-        {/* Subtle background glow for purchased stats */}
-        {currentLvl > 0 && (
-          <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-500/10 blur-3xl rounded-full pointer-events-none" />
-        )}
-        
-        <div className="flex justify-between items-start relative z-10">
-          <div>
-            <h3 className="text-xl font-black text-white tracking-tighter uppercase">{title}</h3>
-            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 max-w-[200px] leading-relaxed">{desc}</div>
+      <div className="bg-bg-raised/75 hover:bg-bg-raised border border-bd-subtle hover:border-accent-border/60 rounded-xl p-5 sm:p-6 flex flex-col justify-between gap-5 transition-all shadow-card group">
+        <div>
+          <div className="flex justify-between items-start gap-3 mb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-lg bg-bg-base border border-bd-subtle flex items-center justify-center">
+                {getStatIcon(title)}
+              </div>
+              <div>
+                <h3 className="text-[18px] font-bold text-tx-primary tracking-tight">{title}</h3>
+                <span className="text-[10px] font-mono uppercase tracking-wider text-tx-muted">Max Lvl {max}</span>
+              </div>
+            </div>
+
+            <div className="bg-accent-dim text-accent border border-accent-border font-mono font-bold px-2.5 py-1 rounded text-[11px] uppercase tracking-wider">
+              Lvl {currentLvl}
+            </div>
           </div>
-          <div className="bg-[#111827] text-blue-400 font-bold px-3 py-1.5 rounded-sm text-[10px] uppercase tracking-widest border border-blue-500/20 shadow-[0_0_10px_rgba(59,130,246,0.1)]">
-            Lvl {currentLvl}
-          </div>
+
+          <p className="text-[13px] text-tx-secondary leading-relaxed font-medium">
+            {desc}
+          </p>
         </div>
         
-        <div className="relative z-10 mt-auto pt-4 border-t border-white/5">
+        <div className="pt-4 border-t border-bd-hairline mt-auto">
           {canBuy ? (
             <button
               disabled={loading || isSessionActive}
               onClick={() => buyStat(title, nextLvl)}
-              className="w-full py-4 bg-[#111827] hover:bg-white/10 text-white font-black uppercase tracking-widest text-xs rounded-sm border border-white/10 transition-all disabled:opacity-50 flex items-center justify-between px-4"
+              className="w-full py-2.5 sm:py-3 bg-accent text-tx-inverse hover:brightness-110 active:scale-[0.99] font-mono font-bold uppercase tracking-wider text-[11px] sm:text-[12px] rounded-md transition-all disabled:opacity-40 flex items-center justify-between px-3.5 cursor-pointer shadow-[0_0_15px_rgba(0,212,170,0.2)]"
             >
-              <span>Buy Level {nextLvl}</span>
-              <span className="font-mono text-blue-400 drop-shadow-[0_0_5px_rgba(59,130,246,0.5)]">₹{(cost / 100).toLocaleString('en-IN')}</span>
+              <span>Unlock Level {nextLvl}</span>
+              <span className="font-mono font-bold">₹{(cost / 100).toLocaleString('en-IN')}</span>
             </button>
           ) : (
-            <button disabled className="w-full py-4 bg-[#070B14] text-slate-600 font-black uppercase tracking-widest text-xs rounded-sm border border-white/5 flex justify-center">
-              Max Level Reached
-            </button>
+            <div className="w-full py-2.5 bg-bg-base border border-bd-subtle text-tx-muted font-mono font-bold uppercase tracking-wider text-[11px] rounded-md flex items-center justify-center gap-1.5">
+              <Check className="w-3.5 h-3.5 text-gain" />
+              <span>Max Level Unlocked</span>
+            </div>
           )}
         </div>
       </div>
@@ -86,44 +116,63 @@ export function StatsTab() {
   };
 
   return (
-      <div className="p-4 md:p-8 max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-8 glass-panel p-6 border-blue-500/20 bg-blue-500/5 relative overflow-hidden">
-          <div className="absolute right-0 top-0 w-64 h-64 bg-blue-500/10 blur-3xl rounded-full pointer-events-none" />
-          <div className="relative z-10">
-            <h2 className="font-bold text-blue-400 uppercase tracking-widest text-[10px]">Available Cash</h2>
-            <div className="font-mono font-black text-4xl text-white tracking-tighter mt-1 drop-shadow-[0_0_15px_rgba(59,130,246,0.3)]">₹{(data.cash_paise / 100).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</div>
+    <div className="p-4 sm:p-6 md:p-8 max-w-4xl mx-auto space-y-6">
+      
+      {/* Cash Panel */}
+      <div className="bg-bg-raised/80 border border-bd-subtle p-5 sm:p-6 rounded-2xl flex items-center justify-between shadow-card relative overflow-hidden">
+        <div
+          className="absolute -top-16 -right-16 w-60 h-60 bg-accent/10 rounded-full blur-3xl pointer-events-none"
+          aria-hidden="true"
+        />
+
+        <div className="relative z-10">
+          <div className="text-[10px] font-mono font-bold text-tx-muted uppercase tracking-widest">
+            Available Capital for Upgrades
           </div>
-          <Zap className="w-12 h-12 text-blue-500/20 relative z-10" />
+          <div className="font-mono font-bold text-[28px] sm:text-[36px] text-tx-primary tracking-tight mt-0.5">
+            ₹{(data.cash_paise / 100).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+          </div>
         </div>
 
-        {error && <div className="mb-6 text-center text-xs uppercase tracking-widest font-bold text-red-400 bg-red-500/10 border border-red-500/20 py-3 rounded-sm">{error}</div>}
-        {isSessionActive && (
-          <div className="mb-6 text-center text-xs uppercase tracking-widest font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 py-3 rounded-sm">
-            Purchasing is locked while the market is active.
-          </div>
-        )}
-
-        <div className="grid md:grid-cols-2 gap-6">
-          <StatCard 
-            title="Research" 
-            desc="Reduces news delay. L2 unlocks Insider rumors."
-            currentLvl={data.stats.research} max={3} 
-            costs={{1: 20000000, 2: 50000000, 3: 100000000}} 
-          />
-          <StatCard 
-            title="Capital" 
-            desc="L1 unlocks shorting. L2 unlocks 2x leverage."
-            currentLvl={data.stats.capital} max={2} 
-            costs={{1: 30000000, 2: 80000000}} 
-          />
-          <StatCard 
-            title="Speed" 
-            desc="Reduces order execution latency and slippage."
-            currentLvl={data.stats.speed} max={3} 
-            costs={{1: 20000000, 2: 40000000, 3: 80000000}} 
-          />
+        <div className="w-12 h-12 rounded-xl bg-accent-dim border border-accent-border flex items-center justify-center text-accent relative z-10 shrink-0">
+          <Zap className="w-6 h-6" />
         </div>
       </div>
+
+      {error && (
+        <div className="text-center text-[12px] font-mono uppercase tracking-wider font-bold text-loss bg-loss-dim border border-loss-border py-2.5 px-4 rounded-md">
+          {error}
+        </div>
+      )}
+
+      {isSessionActive && (
+        <div className="text-center text-[11px] font-mono uppercase tracking-wider font-bold text-warn bg-warn-dim border border-warn-border py-2.5 px-4 rounded-md">
+          Purchasing is locked during active trading ticks. Upgrades open between sessions.
+        </div>
+      )}
+
+      {/* Upgrades Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+        <StatCard 
+          title="Research" 
+          desc="Slashes news delay from 12s to instant. Level 2 unlocks privileged Insider rumors."
+          currentLvl={data.stats.research} max={3} 
+          costs={{1: 20000000, 2: 50000000, 3: 100000000}} 
+        />
+        <StatCard 
+          title="Capital" 
+          desc="Expands trading capacity. Level 1 unlocks short selling. Level 2 unlocks 2x margin leverage."
+          currentLvl={data.stats.capital} max={2} 
+          costs={{1: 30000000, 2: 80000000}} 
+        />
+        <StatCard 
+          title="Speed" 
+          desc="Sub-millisecond execution priority queue. Eliminates order slippage on rapid momentum spikes."
+          currentLvl={data.stats.speed} max={3} 
+          costs={{1: 20000000, 2: 40000000, 3: 80000000}} 
+        />
+      </div>
+    </div>
   );
 }
 

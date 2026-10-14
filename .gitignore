@@ -10,3 +10,9 @@ __pycache__/
 .env
 .env.local
 .DS_Store
+.claude/
+.grok/
+*.zip
+scratch*
+frontend/Haskoy/
+frontend/scratch_fix_admin.js

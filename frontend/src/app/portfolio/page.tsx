@@ -1,76 +1,150 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { api } from "@/lib/api";
 import { useMarketStore } from "@/store/marketStore";
+import { Briefcase, TrendingUp, TrendingDown, Wallet } from "lucide-react";
 
 export function PortfolioTab() {
   const portfolio = useMarketStore((s) => s.portfolioData);
-  const error = ""; // Removed local error state
 
   const formatMoney = (paise: number) => `₹${(paise / 100).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-  if (error) return <div className="p-6 text-center text-red-500 font-bold">{error}</div>;
-  if (!portfolio) return <div className="p-6 text-center text-slate-500 font-bold mt-10">Loading portfolio...</div>;
+  if (!portfolio) {
+    return (
+      <div className="p-8 sm:p-12 text-center text-tx-muted font-mono text-[13px] mt-10 animate-pulse">
+        Connecting to clearinghouse & computing real-time portfolio...
+      </div>
+    );
+  }
+
+  const positions = portfolio.positions || [];
 
   return (
-      <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-6">
-        
-        {/* Header Panel */}
-        <div className="glass-panel text-white p-8 relative overflow-hidden bg-white/[0.01]">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
-          <h1 className="text-[10px] font-bold text-slate-400 mb-6 uppercase tracking-widest">Net Worth (MTM)</h1>
-          <div className="space-y-6 relative z-10">
-            <div>
-              <div className="text-5xl md:text-6xl font-mono font-black tracking-tighter drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">{formatMoney(portfolio.equity_paise)}</div>
+    <div className="w-full max-w-5xl mx-auto px-3 sm:px-6 md:px-8 py-4 sm:py-6 space-y-5 sm:space-y-6">
+      
+      {/* ─── Fluid Overview Panel: Just Total Size & Available Cash ─── */}
+      <div className="w-full bg-bg-raised/80 border border-bd-subtle rounded-2xl p-5 sm:p-7 md:p-8 relative overflow-hidden shadow-card backdrop-blur-sm">
+        {/* Subtle ambient glow */}
+        <div
+          className="absolute -top-16 -right-16 w-64 h-64 bg-accent/10 rounded-full blur-3xl pointer-events-none"
+          aria-hidden="true"
+        />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 relative z-10">
+          
+          {/* Total Size: Sum of Cash and Portfolio Value */}
+          <div className="space-y-1 sm:space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-md bg-accent-dim border border-accent-border flex items-center justify-center text-accent">
+                <Wallet className="w-3.5 h-3.5" />
+              </div>
+              <span className="text-[10px] sm:text-[11px] font-mono font-bold text-tx-muted uppercase tracking-wider">
+                Total Size (Cash + Portfolio Value)
+              </span>
             </div>
-            <div className="pt-6 border-t border-white/5 flex justify-between items-center">
-              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Available Cash</div>
-              <div className="text-xl font-mono font-black text-emerald-400 drop-shadow-[0_0_10px_rgba(16,185,129,0.3)]">{formatMoney(portfolio.cash_paise)}</div>
+            <div className="text-[clamp(26px,5vw,46px)] font-mono font-bold tracking-tight text-tx-primary leading-tight">
+              {formatMoney(portfolio.equity_paise)}
             </div>
           </div>
+
+          {/* Available Cash */}
+          <div className="space-y-1 sm:space-y-2 md:border-l md:border-bd-hairline md:pl-8">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-md bg-gain-dim border border-gain-border flex items-center justify-center text-gain">
+                <span className="font-mono text-[11px] font-bold">₹</span>
+              </div>
+              <span className="text-[10px] sm:text-[11px] font-mono font-bold text-tx-muted uppercase tracking-wider">
+                Available Cash
+              </span>
+            </div>
+            <div className="text-[clamp(24px,4.5vw,40px)] font-mono font-bold tracking-tight text-accent leading-tight">
+              {formatMoney(portfolio.cash_paise)}
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* ─── Active Positions ─── */}
+      <div className="w-full space-y-3">
+        <div className="flex items-center justify-between px-1">
+          <h3 className="text-[11px] font-mono font-bold text-tx-secondary uppercase tracking-wider flex items-center gap-2">
+            <Briefcase className="w-3.5 h-3.5 text-accent" />
+            <span>Active Trading Desk</span>
+          </h3>
+          <span className="text-[10px] sm:text-[11px] font-mono text-tx-muted">
+            {positions.length} Open Position{positions.length === 1 ? "" : "s"}
+          </span>
         </div>
 
-        {/* Positions List */}
-        <div>
-          <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Active Trading Desk</h3>
-          {portfolio.positions.length === 0 ? (
-            <div className="text-center py-16 text-slate-500 bg-[#070B14] rounded-md border border-dashed border-white/10 uppercase tracking-widest text-[10px] font-bold">
-              No open positions. Head to Explore to start trading.
+        {positions.length === 0 ? (
+          <div className="w-full text-center py-12 sm:py-16 px-4 bg-bg-raised/40 rounded-xl border border-dashed border-bd-subtle text-tx-muted space-y-2">
+            <Briefcase className="w-8 h-8 mx-auto opacity-25" />
+            <div className="text-[12px] font-mono uppercase tracking-wider font-semibold">
+              No open market positions
             </div>
-          ) : (
-            <div className="space-y-3">
-              {portfolio.positions.map((pos: any) => {
-                const isShort = pos.qty < 0;
-                const displayQty = Math.abs(pos.qty);
-                const posType = isShort ? "SHORT" : "LONG";
-                const pl = (pos.current_price_paise - pos.average_cost_paise) * pos.qty;
-                const isProfit = pl >= 0;
+            <p className="text-[12px] text-tx-secondary max-w-sm mx-auto">
+              Select an asset from the Markets tab to enter long or short positions.
+            </p>
+          </div>
+        ) : (
+          <div className="w-full space-y-2.5">
+            {positions.map((pos: any) => {
+              const isShort = pos.qty < 0;
+              const displayQty = Math.abs(pos.qty);
+              const posType = isShort ? "SHORT" : "LONG";
+              const pl = (pos.current_price_paise - pos.average_cost_paise) * pos.qty;
+              const isProfit = pl >= 0;
 
-                return (
-                  <div key={pos.ticker} className="glass-panel p-5 flex justify-between items-center bg-white/[0.01] hover:bg-white/[0.03] hover:border-white/20 transition-all cursor-default">
+              return (
+                <div 
+                  key={pos.ticker} 
+                  className="w-full bg-bg-raised/75 hover:bg-bg-raised border border-bd-subtle hover:border-accent-border/60 rounded-xl p-4 sm:p-5 flex flex-col xs:flex-row xs:items-center justify-between gap-3 sm:gap-4 transition-all shadow-card"
+                >
+                  {/* Position details */}
+                  <div className="flex flex-col min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-bold text-[clamp(17px,2vw,20px)] text-tx-primary tracking-tight font-sans">
+                        {pos.ticker}
+                      </span>
+                      <span className={`text-[9px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${
+                        isShort ? "bg-loss-dim border-loss-border text-loss" : "bg-gain-dim border-gain-border text-gain"
+                      }`}>
+                        {posType}
+                      </span>
+                    </div>
+                    <div className="text-[11px] font-mono text-tx-secondary mt-1 flex items-center gap-1.5 sm:gap-2">
+                      <span><strong className="text-tx-primary">{displayQty}</strong> units</span>
+                      <span className="text-bd-strong">•</span>
+                      <span>Avg: {formatMoney(pos.average_cost_paise)}</span>
+                    </div>
+                  </div>
+
+                  {/* Prices & PnL */}
+                  <div className="flex items-center justify-between xs:justify-end gap-4 sm:gap-6 text-right pt-2 xs:pt-0 border-t xs:border-t-0 border-bd-hairline">
                     <div>
-                      <div className="font-black text-xl text-white tracking-tighter">{pos.ticker}</div>
-                      <div className="text-[10px] font-bold text-slate-400 mt-1.5 flex items-center gap-2 uppercase tracking-widest">
-                        <span className={`px-2 py-0.5 rounded-sm border ${isShort ? 'bg-red-500/10 border-red-500/20 text-red-400' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'}`}>
-                          {posType}
-                        </span>
-                        <span><strong className="text-white">{displayQty}</strong> @ {formatMoney(pos.average_cost_paise)}</span>
+                      <div className="text-[9px] sm:text-[10px] font-mono text-tx-muted uppercase">Mark Price</div>
+                      <div className="font-mono font-bold text-[14px] sm:text-[16px] text-tx-primary">
+                        {formatMoney(pos.current_price_paise)}
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="font-mono font-black text-xl text-white drop-shadow-[0_0_5px_rgba(255,255,255,0.1)]">{formatMoney(pos.current_price_paise)}</div>
-                      <div className={`text-xs font-mono font-bold mt-1 ${isProfit ? 'text-emerald-400' : 'text-red-400'}`}>
-                        {isProfit ? '+' : ''}{formatMoney(pl)}
+
+                    <div>
+                      <div className="text-[9px] sm:text-[10px] font-mono text-tx-muted uppercase">Unrealized PnL</div>
+                      <div className={`font-mono font-bold text-[14px] sm:text-[16px] flex items-center justify-end gap-1 ${
+                        isProfit ? "text-gain" : "text-loss"
+                      }`}>
+                        {isProfit ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
+                        <span>{isProfit ? "+" : ""}{formatMoney(pl)}</span>
                       </div>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
+    </div>
   );
 }
 

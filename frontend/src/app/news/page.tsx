@@ -1,11 +1,9 @@
 "use client";
 
 import { useMarketStore } from "@/store/marketStore";
-import { DashboardShell } from "@/components/layout/DashboardShell";
-import { Newspaper, X } from "lucide-react";
+import { Newspaper, X, Radio } from "lucide-react";
 import { useEffect } from "react";
 
-// (Keep NewsToast exactly as it was)
 export function NewsToast() {
   const latestToast = useMarketStore((s) => s.latestToast);
   const clearToast = useMarketStore((s) => s.clearToast);
@@ -20,16 +18,24 @@ export function NewsToast() {
   if (!latestToast) return null;
 
   return (
-    <div className="fixed top-4 left-1/2 -translate-x-1/2 w-full max-w-md z-[100] glass-panel bg-[#070B14]/95 p-5 animate-in slide-in-from-top-5 duration-300 border border-blue-500/30 shadow-[0_10px_40px_-10px_rgba(59,130,246,0.3)]">
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 via-emerald-400 to-transparent" />
+    <div className="fixed top-4 left-1/2 -translate-x-1/2 w-[92vw] max-w-md z-[100] bg-bg-raised/95 backdrop-blur-md p-4 sm:p-5 rounded-xl border border-accent-border shadow-modal animate-in slide-in-from-top-4 duration-300">
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-accent via-gain to-transparent rounded-t-xl" />
       <div className="flex justify-between items-start mb-2">
-        <span className="flex items-center gap-2 bg-blue-500/10 text-blue-400 text-[10px] font-black px-2 py-0.5 rounded-sm border border-blue-500/20 uppercase tracking-widest">
-          <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-          BREAKING • {latestToast.ticker}
+        <span className="flex items-center gap-2 bg-accent-dim text-accent text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-sm border border-accent-border uppercase tracking-wider">
+          <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+          BREAKING WIRE
         </span>
-        <button onClick={clearToast} className="text-slate-500 hover:text-white transition-colors"><X className="w-4 h-4" /></button>
+        <button 
+          onClick={clearToast} 
+          className="text-tx-muted hover:text-tx-primary transition-colors p-1 cursor-pointer"
+          aria-label="Dismiss alert"
+        >
+          <X className="w-3.5 h-3.5" />
+        </button>
       </div>
-      <p className="text-sm font-medium leading-snug mt-2 text-white">{latestToast.text}</p>
+      <p className="text-[13px] sm:text-[14px] font-medium leading-relaxed text-tx-primary mt-1">
+        {latestToast.text}
+      </p>
     </div>
   );
 }
@@ -39,43 +45,51 @@ export function NewsTab() {
 
   const getSourceBadge = (source: string) => {
     switch(source) {
-      case "NP": return <span className="px-2 py-0.5 rounded-sm text-[10px] font-black tracking-widest uppercase bg-blue-500/10 border border-blue-500/20 text-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.1)]">Newspaper</span>;
-      case "AN": return <span className="px-2 py-0.5 rounded-sm text-[10px] font-black tracking-widest uppercase bg-purple-500/10 border border-purple-500/20 text-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.1)]">Analyst</span>;
-      case "FF": return <span className="px-2 py-0.5 rounded-sm text-[10px] font-black tracking-widest uppercase bg-amber-500/10 border border-amber-500/20 text-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.1)]">Finfluencer</span>;
-      case "IN": return <span className="px-2 py-0.5 rounded-sm text-[10px] font-black tracking-widest uppercase bg-red-500/10 border border-red-500/20 text-red-400 shadow-[0_0_10px_rgba(239,68,68,0.1)]">Insider</span>;
-      default: return <span className="px-2 py-0.5 rounded-sm text-[10px] font-black tracking-widest uppercase bg-[#111827] border border-white/10 text-slate-400">{source}</span>;
+      case "NP":
+        return <span className="px-2.5 py-0.5 rounded-sm text-[10px] font-mono font-bold tracking-wider uppercase bg-accent-dim border border-accent-border text-accent">Newspaper</span>;
+      case "AN":
+        return <span className="px-2.5 py-0.5 rounded-sm text-[10px] font-mono font-bold tracking-wider uppercase bg-cyan-500/10 border border-cyan-500/25 text-cyan-400">Analyst Wire</span>;
+      case "FF":
+        return <span className="px-2.5 py-0.5 rounded-sm text-[10px] font-mono font-bold tracking-wider uppercase bg-warn-dim border border-warn-border text-warn">Finfluencer</span>;
+      case "IN":
+        return <span className="px-2.5 py-0.5 rounded-sm text-[10px] font-mono font-bold tracking-wider uppercase bg-loss-dim border border-loss-border text-loss">Insider Rumor</span>;
+      default:
+        return <span className="px-2.5 py-0.5 rounded-sm text-[10px] font-mono font-bold tracking-wider uppercase bg-bg-base border border-bd-subtle text-tx-secondary">{source}</span>;
     }
   };
 
   return (
-      <div className="p-4 md:p-8 max-w-3xl mx-auto space-y-4">
-        {news.length === 0 ? (
-          <div className="flex flex-col justify-center items-center h-64 text-slate-500 uppercase tracking-widest text-[10px] font-bold border border-dashed border-white/10 rounded-sm bg-[#070B14]">
-            <Newspaper className="w-8 h-8 mb-3 opacity-20" />
-            Awaiting breaking market alerts...
-          </div>
-        ) : (
-          <div className="relative before:absolute before:inset-0 before:ml-4 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-px before:bg-gradient-to-b before:from-transparent before:via-white/10 before:to-transparent space-y-6">
-            {news.map((item) => (
-              <div key={item.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full border border-white/10 bg-[#0B1120] text-slate-500 group-[.is-active]:text-emerald-400 group-[.is-active]:border-emerald-500/30 group-[.is-active]:bg-emerald-500/10 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 transition-colors">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                </div>
-                
-                <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2rem)] glass-panel p-5 bg-white/[0.01] hover:bg-white/[0.03] hover:border-white/20 transition-all flex flex-col gap-3">
-                  <div className="flex justify-between items-center border-b border-white/5 pb-3">
-                    {getSourceBadge(item.source)}
-                    <span className="text-[10px] font-bold text-white bg-[#111827] border border-white/10 px-2 py-0.5 rounded-sm tracking-widest uppercase">
-                      {item.ticker}
-                    </span>
-                  </div>
-                  <p className="text-sm font-medium text-slate-200 leading-relaxed">{item.text}</p>
-                </div>
+    <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 md:px-8 py-4 sm:py-6 space-y-4 sm:space-y-5">
+      
+      {news.length === 0 ? (
+        <div className="flex flex-col justify-center items-center h-64 text-tx-muted uppercase tracking-wider text-[11px] font-mono border border-dashed border-bd-subtle rounded-xl bg-bg-raised/40 p-6 text-center space-y-2">
+          <Newspaper className="w-8 h-8 opacity-25 mb-1" />
+          <div className="font-bold text-tx-secondary">Awaiting breaking news wire...</div>
+          <p className="text-[12px] text-tx-muted normal-case max-w-xs">
+            Market catalysts and news headlines will populate here in real-time as events unfold.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3 sm:space-y-3.5">
+          {news.map((item) => (
+            <div 
+              key={item.id} 
+              className="bg-bg-raised/75 hover:bg-bg-raised border border-bd-subtle hover:border-accent-border/60 rounded-xl p-4 sm:p-5 transition-all shadow-card flex flex-col gap-2.5"
+            >
+              {/* Only the source badge */}
+              <div className="flex items-center">
+                {getSourceBadge(item.source)}
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+              
+              {/* Only the news text */}
+              <p className="text-[13px] sm:text-[15px] font-medium text-tx-primary leading-relaxed font-sans">
+                {item.text}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 

@@ -1,77 +1,108 @@
-import { useScroll, useTransform, motion } from "framer-motion";
+"use client";
+
+import { useScroll, useTransform, motion } from "motion/react";
 import { useRef } from "react";
 import { StoryChart } from "./StoryChart";
+
+const rounds = [
+  {
+    label: "Round 1 · Retail",
+    labelColor: "text-tx-secondary",
+    labelBg: "bg-bg-raised border-bd-subtle",
+    title: "Baseline Markets",
+    body: "Start with ₹10,00,000. Navigate standard technical overlays — SMA 9, SMA 20, RSI. Build wealth in a steady, predictable retail environment before the real game begins.",
+  },
+  {
+    label: "Round 2 · Institutional",
+    labelColor: "text-accent",
+    labelBg: "bg-accent-dim border-accent-border",
+    title: "The AI Order Flow",
+    body: "Scale to ₹1,00,00,000. The market now reacts to you. Institutional order-flow, bid/ask volume walls, and aggressive AI bots enter the arena.",
+  },
+];
 
 export function PinnedStory() {
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start start", "end end"]
+    offset: ["start start", "end end"],
   });
 
   const sectionProgress = useTransform(scrollYProgress, [0, 0.5, 1], [0, 1, 2]);
-  const opacity1 = useTransform(scrollYProgress, [0, 0.2, 0.4, 0.5], [1, 1, 0, 0]);
-  const opacity2 = useTransform(scrollYProgress, [0.4, 0.6, 0.8, 1], [0, 1, 1, 1]);
+  const opacity1 = useTransform(scrollYProgress, [0, 0.2, 0.45, 0.55], [1, 1, 0, 0]);
+  const opacity2 = useTransform(scrollYProgress, [0.45, 0.6, 0.8, 1], [0, 1, 1, 1]);
+  const opacities = [opacity1, opacity2];
 
   return (
-    <div ref={containerRef} id="explore" className="relative h-[300svh] bg-[#070B14]">
-      {/* Sticky Container */}
-      <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden">
-        {/* Background Grid */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px]" />
-        
-        <div className="max-w-7xl mx-auto w-full px-6 flex flex-col lg:flex-row items-center gap-12 z-10">
-          
-          {/* Text Content */}
-          <div className="flex-1 w-full relative h-[40vh] lg:h-auto min-h-[300px]">
-            {/* Round 1 */}
-            <motion.div style={{ opacity: opacity1 }} className="absolute inset-0 flex flex-col justify-center">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-sm bg-white/5 border border-white/10 text-slate-300 text-[10px] uppercase tracking-widest font-bold mb-4 w-fit">
-                Round 1: Retail
-              </div>
-              <h2 className="text-4xl lg:text-5xl font-black tracking-tighter mb-4 text-white">Baseline Markets</h2>
-              <p className="text-slate-400 font-medium mb-6 max-w-md">
-                Start with ₹10,00,000. Navigate standard technical overlays like SMA 9, SMA 20, and RSI. Build your wealth in a steady, predictable retail environment before the real game begins.
-              </p>
-              <div className="flex gap-4">
-                <div className="bg-[#111827] border border-white/5 p-4 rounded-sm flex-1">
-                  <div className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-1">Capital</div>
-                  <div className="font-mono tabular-nums text-white text-xl font-bold">₹10,00,000</div>
-                </div>
-                <div className="bg-[#111827] border border-white/5 p-4 rounded-sm flex-1">
-                  <div className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-1">Pace</div>
-                  <div className="font-mono tabular-nums text-emerald-400 text-xl font-bold">Steady</div>
-                </div>
-              </div>
-            </motion.div>
+    <div ref={containerRef} id="explore" className="relative h-[280svh] bg-bg-void">
+      <div className="sticky top-0 h-[100dvh] w-full flex items-center justify-center overflow-hidden">
 
-            {/* Round 2 */}
-            <motion.div style={{ opacity: opacity2 }} className="absolute inset-0 flex flex-col justify-center pointer-events-none">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-sm bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] uppercase tracking-widest font-bold mb-4 w-fit">
-                Round 2: Institutional
-              </div>
-              <h2 className="text-4xl lg:text-5xl font-black tracking-tighter mb-4 text-white">The AI Order Flow</h2>
-              <p className="text-slate-400 font-medium mb-6 max-w-md">
-                Scale up to ₹1,00,00,000. The market now reacts to you. Experience institutional order-flow behavior, bid/ask volume walls, and green pulse nodes as you trade against aggressive AI bots.
-              </p>
-              <div className="flex gap-4 pointer-events-auto">
-                <div className="bg-[#111827] border border-white/5 p-4 rounded-sm flex-1">
-                  <div className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-1">Capital</div>
-                  <div className="font-mono tabular-nums text-white text-xl font-bold">₹1,00,00,000</div>
+        {/* Subtle dot grid */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: "radial-gradient(circle, #222222 1px, transparent 1px)",
+            backgroundSize: "32px 32px",
+            opacity: 0.6,
+          }}
+          aria-hidden="true"
+        />
+        {/* Bottom fade */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-bg-void to-transparent pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto w-full px-6 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 z-10 items-center">
+
+          {/* Text panel */}
+          <div className="relative min-h-[260px] lg:min-h-[340px]">
+            {rounds.map((round, idx) => (
+              <motion.div
+                key={idx}
+                style={{ opacity: opacities[idx] }}
+                className="absolute inset-0 flex flex-col justify-center"
+              >
+                {/* Round label */}
+                <div
+                  className={`inline-flex items-center gap-2 px-3 py-1 rounded-sm border text-[11px] font-mono uppercase tracking-[0.1em] font-bold mb-5 w-fit ${round.labelBg} ${round.labelColor}`}
+                >
+                  {round.label}
                 </div>
-                <div className="bg-[#111827] border border-white/5 p-4 rounded-sm flex-1">
-                  <div className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-1">Pace</div>
-                  <div className="font-mono tabular-nums text-amber-400 text-xl font-bold">Volatile</div>
-                </div>
-              </div>
-            </motion.div>
+
+                {/* Heading */}
+                <h2
+                  className="font-sans font-bold tracking-[-0.03em] leading-[1.0] text-tx-primary text-balance mb-5"
+                  style={{ fontSize: "var(--text-display-md)" }}
+                >
+                  {round.title}
+                </h2>
+
+                {/* Body */}
+                <p
+                  className="text-tx-secondary leading-[1.65] max-w-lg"
+                  style={{ fontSize: "var(--text-body-lg)" }}
+                >
+                  {round.body}
+                </p>
+              </motion.div>
+            ))}
           </div>
 
-          {/* Chart Graphic */}
-          <div className="flex-1 w-full h-[40vh] lg:h-[60vh] bg-[#111827] border border-white/5 rounded-sm relative overflow-hidden shadow-2xl">
+          {/* Chart */}
+          <div className="w-full h-[42vh] lg:h-[56vh] bg-bg-raised border border-bd-subtle rounded-lg overflow-hidden shadow-card">
             <StoryChart progress={sectionProgress} />
           </div>
 
+        </div>
+
+        {/* Round progress dots */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2" aria-hidden="true">
+          <motion.div
+            style={{ opacity: useTransform(scrollYProgress, [0, 0.5], [1, 0.3]) }}
+            className="w-2 h-2 rounded-full bg-accent"
+          />
+          <motion.div
+            style={{ opacity: useTransform(scrollYProgress, [0.4, 0.8], [0.3, 1]) }}
+            className="w-2 h-2 rounded-full bg-accent"
+          />
         </div>
       </div>
     </div>

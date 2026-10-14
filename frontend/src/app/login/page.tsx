@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
-import { Lock, User, ArrowLeft } from "lucide-react";
+import { Lock, User, ArrowLeft, ArrowRight, Sun, Moon } from "lucide-react";
 import Link from "next/link";
+import { useTheme } from "@/components/ThemeProvider";
 
 export default function LoginPage() {
   const [teamId, setTeamId] = useState("");
@@ -12,10 +13,12 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { resolvedTheme, setTheme } = useTheme();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(""); setLoading(true);
+    setError("");
+    setLoading(true);
 
     try {
       const formattedId = teamId.trim().toLowerCase();
@@ -23,56 +26,133 @@ export default function LoginPage() {
       localStorage.setItem("merx_token", res.token);
       router.push("/market");
     } catch (err: any) {
-      setError(err.message || "Login failed");
+      setError(err.message || "Authentication failed. Check your Team ID and PIN.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#070B14] flex flex-col justify-center items-center p-4 relative overflow-hidden font-sans">
-      
-      {/* Background Mesh */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120vw] h-[80vh] bg-[radial-gradient(ellipse_80%_80%_at_50%_0%,rgba(59,130,246,0.15),transparent)] pointer-events-none z-0" />
-      <div className="absolute top-0 left-0 w-full h-full bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none z-0 opacity-20" />
+    <div className="min-h-[100dvh] bg-bg-void text-tx-primary flex flex-col justify-center items-center p-4 sm:p-6 relative overflow-hidden font-sans selection:bg-accent-dim selection:text-accent">
 
-      <div className="w-full max-w-md glass-panel p-8 relative overflow-hidden z-10 bg-white/[0.01]">
-        <Link href="/" className="absolute top-6 left-6 text-slate-500 hover:text-white transition-colors">
-          <ArrowLeft className="w-5 h-5" />
+      {/* Ambient background glows */}
+      <div
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[450px] pointer-events-none rounded-full"
+        style={{
+          background: "radial-gradient(ellipse at 50% 0%, var(--color-accent-glow) 0%, transparent 65%)",
+          filter: "blur(80px)",
+        }}
+        aria-hidden="true"
+      />
+
+      {/* Subtle Dot Grid */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-40"
+        style={{
+          backgroundImage: "radial-gradient(circle, var(--color-bd-subtle) 1px, transparent 1px)",
+          backgroundSize: "28px 28px",
+        }}
+        aria-hidden="true"
+      />
+
+      {/* Top right Theme toggle */}
+      <div className="absolute top-5 right-5 sm:top-6 sm:right-6 z-20">
+        <button
+          onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+          className="p-2.5 rounded-md bg-bg-raised/70 border border-bd-subtle hover:border-bd-strong text-tx-secondary hover:text-tx-primary transition-colors backdrop-blur-sm"
+          aria-label="Toggle theme"
+        >
+          {resolvedTheme === "dark" ? <Sun className="w-4 h-4 text-warn" /> : <Moon className="w-4 h-4 text-accent" />}
+        </button>
+      </div>
+
+      {/* Login Card */}
+      <div className="w-full max-w-[420px] bg-bg-raised/80 border border-bd-subtle p-7 sm:p-9 rounded-2xl shadow-card relative z-10 backdrop-blur-md">
+
+        {/* Back Link */}
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-tx-secondary hover:text-tx-primary transition-colors text-[12px] font-mono mb-6 group"
+        >
+          <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+          <span>Back to Home</span>
         </Link>
-        
-        <div className="text-center mb-10 mt-6">
-          <h1 className="text-4xl font-black text-white tracking-tighter">MERX</h1>
-          <p className="text-blue-400 mt-2 font-bold text-[10px] uppercase tracking-widest bg-blue-500/10 border border-blue-500/20 inline-block px-3 py-1 rounded-sm">Participant Terminal</p>
+
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center gap-1.5 text-[24px] sm:text-[28px] font-bold tracking-[-0.03em] text-tx-primary">
+            <span>EIC</span>
+            <span className="text-accent font-mono font-bold text-[18px] sm:text-[20px]">X</span>
+            <span>Bazaar</span>
+          </div>
+          <div className="mt-2.5">
+            <span className="inline-flex items-center gap-1.5 text-accent bg-accent-dim border border-accent-border font-mono text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.1em] px-2.5 py-1 rounded-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+              Participant Terminal
+            </span>
+          </div>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-6">
-          {error && <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-3 rounded-sm text-[10px] font-bold text-center uppercase tracking-widest">{error}</div>}
-
-          <div className="space-y-4">
-            <div className="relative">
-              <User className="absolute left-4 top-3.5 h-4 w-4 text-slate-500" />
-              <input
-                type="text" placeholder="TEAM ID (e.g., T001)" value={teamId}
-                onChange={(e) => setTeamId(e.target.value)} required
-                className="w-full pl-12 pr-4 py-3 bg-[#111827] border border-white/10 rounded-sm focus:border-blue-500/50 outline-none transition-colors font-mono font-bold text-white placeholder-slate-600 uppercase tracking-widest text-xs"
-              />
+        {/* Form */}
+        <form onSubmit={handleLogin} className="space-y-4">
+          {error && (
+            <div className="bg-loss-dim border border-loss-border text-loss px-3.5 py-2.5 rounded-md text-[11px] font-mono font-bold text-center leading-relaxed">
+              {error}
             </div>
-            <div className="relative">
-              <Lock className="absolute left-4 top-3.5 h-4 w-4 text-slate-500" />
-              <input
-                type="password" placeholder="PIN" value={pin}
-                onChange={(e) => setPin(e.target.value)} required
-                className="w-full pl-12 pr-4 py-3 bg-[#111827] border border-white/10 rounded-sm focus:border-blue-500/50 outline-none transition-colors font-mono font-bold text-white placeholder-slate-600 tracking-widest text-xl"
-              />
+          )}
+
+          <div className="space-y-3">
+            {/* Team ID */}
+            <div>
+              <label className="block text-[10px] font-mono uppercase tracking-widest text-tx-muted mb-1.5 font-bold">
+                Team Name
+              </label>
+              <div className="relative">
+                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-tx-muted pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="e.g. Team Big Bull"
+                  value={teamId}
+                  onChange={(e) => setTeamId(e.target.value)}
+                  required
+                  autoCapitalize="characters"
+                  className="w-full pl-10 pr-4 py-2.5 bg-bg-base border border-bd-subtle rounded-md focus:border-accent text-tx-primary font-mono text-[13px] placeholder:text-tx-muted uppercase tracking-widest outline-none transition-colors"
+                />
+              </div>
+            </div>
+
+            {/* PIN */}
+            <div>
+              <label className="block text-[10px] font-mono uppercase tracking-widest text-tx-muted mb-1.5 font-bold">
+                PIN
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-tx-muted pointer-events-none" />
+                <input
+                  type="password"
+                  placeholder="Harshad Mehta"
+                  value={pin}
+                  onChange={(e) => setPin(e.target.value)}
+                  required
+                  className="w-full pl-10 pr-4 py-2.5 bg-bg-base border border-bd-subtle rounded-md focus:border-accent text-tx-primary font-mono text-[15px] placeholder:text-tx-muted tracking-widest outline-none transition-colors"
+                />
+              </div>
             </div>
           </div>
 
           <button
-            type="submit" disabled={loading}
-            className="w-full py-4 bg-blue-600 text-white font-black uppercase tracking-widest text-xs rounded-sm hover:bg-blue-500 active:scale-[0.98] transition-all disabled:opacity-50 shadow-[0_0_20px_rgba(59,130,246,0.3)]"
+            type="submit"
+            disabled={loading}
+            className="w-full mt-2 py-3 bg-accent text-tx-inverse font-mono font-bold uppercase tracking-wider text-[12px] sm:text-[13px] rounded-md hover:brightness-110 active:scale-[0.99] transition-all disabled:opacity-50 shadow-[0_0_24px_rgba(0,212,170,0.25)] flex items-center justify-center gap-2 cursor-pointer"
           >
-            {loading ? "Authenticating..." : "Connect to Engine"}
+            {loading ? (
+              <span>Authenticating...</span>
+            ) : (
+              <>
+                <span>Connect</span>
+                <ArrowRight className="w-4 h-4" />
+              </>
+            )}
           </button>
         </form>
       </div>

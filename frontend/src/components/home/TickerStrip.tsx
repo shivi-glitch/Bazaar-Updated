@@ -1,21 +1,50 @@
-import { motion } from "framer-motion";
+"use client";
 
 export function TickerStrip() {
-  const dummyTickers = ["RELI-X +2.4%", "INFY-Z -1.2%", "HDFC-W +0.8%", "TATA-Y +4.1%", "GOLDCORE +0.2%", "PULSE -5.5%", "BZR-V +8.9%"];
-  
+  const tickers = [
+    { symbol: "RELI-X", change: "+2.4%" },
+    { symbol: "INFY-Z", change: "-1.2%" },
+    { symbol: "HDFC-W", change: "+0.8%" },
+    { symbol: "TATA-Y", change: "+4.1%" },
+    { symbol: "GOLDCORE", change: "+0.2%" },
+    { symbol: "PULSE",   change: "-5.5%" },
+    { symbol: "BZR-V",   change: "+8.9%" },
+    { symbol: "ZENITH",  change: "-2.1%" },
+    { symbol: "APEX-M",  change: "+1.7%" },
+  ];
+
+  const items = [...tickers, ...tickers, ...tickers, ...tickers];
+
   return (
-    <div className="relative z-10 w-full overflow-hidden border-y border-white/5 bg-[#0B1120]/50 backdrop-blur-sm py-2">
-      {/* Left and Right Fade Masks */}
-      <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#070B14] to-transparent z-20 pointer-events-none" />
-      <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#070B14] to-transparent z-20 pointer-events-none" />
-      
-      <div className="flex w-[200%] animate-marquee whitespace-nowrap">
-        {[...dummyTickers, ...dummyTickers, ...dummyTickers, ...dummyTickers].map((ticker, i) => {
-          const isUp = ticker.includes('+');
+    <div
+      className="relative z-10 w-full overflow-hidden border-y border-bd-subtle bg-bg-base py-2.5"
+      aria-label="Live simulated market prices"
+    >
+      <div className="sr-only">Live simulated market prices</div>
+
+      {/* Fade masks — use bg-bg-void to match page bg */}
+      <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-bg-void to-transparent z-20 pointer-events-none" />
+      <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-bg-void to-transparent z-20 pointer-events-none" />
+
+      <div
+        className="flex whitespace-nowrap animate-marquee"
+        aria-hidden="true"
+        style={{ width: "200%" }}
+      >
+        {items.map((t, i) => {
+          const isUp = t.change.startsWith("+");
           return (
-            <div key={i} className="flex-none w-48 flex items-center gap-2 px-4">
-              <span className="font-bold text-slate-400 text-sm tracking-tight">{ticker.split(' ')[0]}</span>
-              <span className={`font-mono tabular-nums text-xs font-bold ${isUp ? 'text-emerald-400' : 'text-red-400'}`}>{ticker.split(' ')[1]}</span>
+            <div
+              key={i}
+              className="flex-none flex items-center gap-2 px-5"
+            >
+              <span className="font-mono text-[12px] font-semibold text-tx-secondary tracking-wide">
+                {t.symbol}
+              </span>
+              <span className={`font-mono text-[12px] font-bold tabular-nums ${isUp ? "text-gain" : "text-loss"}`}>
+                {isUp ? "▲" : "▼"} {t.change}
+              </span>
+              <span className="text-bd-strong text-[10px] ml-1">·</span>
             </div>
           );
         })}

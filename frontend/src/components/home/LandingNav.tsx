@@ -1,26 +1,84 @@
-import { motion, useScroll, useSpring } from "framer-motion";
+"use client";
+
 import Link from "next/link";
+import { Button } from "../ui/Button";
+import { useTheme } from "../ThemeProvider";
+import { Sun, Moon } from "lucide-react";
 
 export function LandingNav() {
-  const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
+  const { resolvedTheme, setTheme } = useTheme();
+
+  const scrollTo = (id: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   return (
-    <>
-      <nav className="fixed top-0 w-full border-b border-white/5 border-bd-subtle bg-[#070B14]/70 backdrop-blur-xl z-50">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="text-xl font-black tracking-tighter text-white">MERX</div>
-          <div className="flex items-center gap-6">
-            <Link href="/login" className="bg-[#111827] border border-white/5 text-white px-5 py-2 rounded-sm text-xs uppercase tracking-widest font-bold hover:bg-[#161D2E] hover:border-white/10 transition-colors">
-              Participant Login
-            </Link>
-          </div>
+    <nav className="fixed top-0 w-full z-50 border-b border-bd-subtle bg-bg-void/85 backdrop-blur-xl transition-colors">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+        {/* Left — wordmark + badge */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <Link
+            href="/"
+            className="text-[18px] sm:text-[21px] font-bold tracking-[-0.03em] text-tx-primary leading-none flex items-center gap-1.5"
+          >
+            <span>EIC</span>
+            <span className="text-accent font-mono font-bold text-[14px] sm:text-[16px]">X</span>
+            <span>Bazaar</span>
+          </Link>
+          <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded-sm bg-accent-dim border border-accent-border text-[9px] sm:text-[11px] font-mono font-bold uppercase tracking-[0.08em] text-accent">
+            University Edition
+          </span>
         </div>
-      </nav>
-      <motion.div 
-        className="fixed top-16 left-0 right-0 h-[2px] bg-blue-500 origin-left z-50"
-        style={{ scaleX }}
-      />
-    </>
+
+        {/* Right — all navigation items visible at all times */}
+        <div className="flex items-center gap-2 sm:gap-4 md:gap-6 shrink-0">
+          <a
+            href="#explore"
+            onClick={scrollTo("explore")}
+            className="hidden sm:inline-block text-[12px] sm:text-[13px] font-medium text-tx-secondary hover:text-tx-primary transition-colors duration-150"
+          >
+            How it works
+          </a>
+          <a
+            href="#upgrades"
+            onClick={scrollTo("upgrades")}
+            className="hidden sm:inline-block text-[12px] sm:text-[13px] font-medium text-tx-secondary hover:text-tx-primary transition-colors duration-150"
+          >
+            Stat Shop
+          </a>
+          <a
+            href="#competition"
+            onClick={scrollTo("competition")}
+            className="hidden sm:inline-block text-[12px] sm:text-[13px] font-medium text-tx-secondary hover:text-tx-primary transition-colors duration-150"
+          >
+            Leaderboard
+          </a>
+
+          {/* Theme Mode Toggle Button */}
+          <button
+            onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+            className="p-2 rounded-md bg-bg-raised hover:bg-bg-overlay border border-bd-subtle text-tx-secondary hover:text-tx-primary transition-colors cursor-pointer"
+            aria-label="Toggle theme mode"
+            title={resolvedTheme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          >
+            {resolvedTheme === "dark" ? <Sun className="w-4 h-4 text-warn" /> : <Moon className="w-4 h-4 text-accent" />}
+          </button>
+
+          <Link href="/login" tabIndex={-1}>
+            <Button
+              variant="secondary"
+              size="md"
+              className="text-[12px] sm:text-[13px] px-3 sm:px-4 py-1.5 h-auto font-medium"
+            >
+              Login
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </nav>
   );
 }

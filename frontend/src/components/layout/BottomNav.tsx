@@ -1,6 +1,6 @@
 "use client";
 
-import { LineChart, Briefcase, Newspaper, Zap, Lock } from "lucide-react";
+import { LineChart, Briefcase, Newspaper, Zap } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import clsx from "clsx";
 
@@ -16,18 +16,18 @@ export function BottomNav() {
   ];
 
   return (
-    <div className="absolute bottom-0 w-full bg-white border-t border-slate-200 flex justify-around items-center h-16 pb-safe z-50">
+    <div className="absolute bottom-0 w-full bg-bg-raised border-t border-bd-subtle flex justify-around items-center h-16 pb-safe z-50">
       {navItems.map((item) => (
         <button 
           key={item.name}
           onClick={() => router.push(item.path)}
           className={clsx(
-            "flex flex-col items-center flex-1 py-2", 
-            pathname === item.path ? "text-meridian-brand" : "text-meridian-muted"
+            "flex flex-col items-center flex-1 py-2 font-mono transition-colors", 
+            pathname === item.path ? "text-accent" : "text-tx-muted hover:text-tx-primary"
           )}
         >
-          <item.icon className="w-5 h-5 mb-1" />
-          <span className="text-[10px] font-bold">{item.name}</span>
+          <item.icon className="w-4 h-4 mb-1" />
+          <span className="text-[10px] font-bold uppercase tracking-wider">{item.name}</span>
         </button>
       ))}
     </div>

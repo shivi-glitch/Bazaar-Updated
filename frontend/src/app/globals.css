@@ -2,49 +2,229 @@
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-meridian-dark: #0B1120;
-  --color-meridian-darker: #070B14;
-  --color-meridian-brand: #3b82f6;
-  --color-meridian-glow: #60a5fa;
-  --color-meridian-up: #10b981;
-  --color-meridian-down: #ef4444;
-  --color-meridian-muted: #64748b;
-  
-  --font-sans: "Inter", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+  /* ── BACKGROUNDS ─────────────────────────────────── */
+  --color-bg-void:       var(--theme-bg-void, #0A0A0A);
+  --color-bg-base:       var(--theme-bg-base, #111111);
+  --color-bg-raised:     var(--theme-bg-raised, #1A1A1A);
+  --color-bg-overlay:    var(--theme-bg-overlay, #242424);
+
+  /* ── BORDERS ─────────────────────────────────────── */
+  --color-bd-hairline:   var(--theme-bd-hairline, #1C1C1C);
+  --color-bd-subtle:     var(--theme-bd-subtle, #222222);
+  --color-bd-strong:     var(--theme-bd-strong, #333333);
+
+  /* ── TEXT ────────────────────────────────────────── */
+  --color-tx-primary:    var(--theme-tx-primary, #F5F5F5);
+  --color-tx-secondary:  var(--theme-tx-secondary, #888888);
+  --color-tx-muted:      var(--theme-tx-muted, #555555);
+  --color-tx-inverse:    var(--theme-tx-inverse, #0A0A0A);
+
+  /* ── ACCENT: Electric Teal ───────────────────────── */
+  --color-accent:        var(--theme-accent, #00D4AA);
+  --color-accent-dim:    var(--theme-accent-dim, rgba(0,212,170,0.10));
+  --color-accent-border: var(--theme-accent-border, rgba(0,212,170,0.25));
+  --color-accent-glow:   var(--theme-accent-glow, rgba(0,212,170,0.15));
+
+  /* ── SEMANTIC: GAINS / LOSSES ────────────────────── */
+  --color-gain:          var(--theme-gain, #22D37A);
+  --color-gain-dim:      var(--theme-gain-dim, rgba(34,211,122,0.10));
+  --color-gain-border:   var(--theme-gain-border, rgba(34,211,122,0.20));
+  --color-loss:          var(--theme-loss, #F75050);
+  --color-loss-dim:      var(--theme-loss-dim, rgba(247,80,80,0.10));
+  --color-loss-border:   var(--theme-loss-border, rgba(247,80,80,0.20));
+
+  /* ── SEMANTIC: STATUS ────────────────────────────── */
+  --color-warn:          var(--theme-warn, #F5A623);
+  --color-warn-dim:      var(--theme-warn-dim, rgba(245,166,35,0.10));
+  --color-warn-border:   var(--theme-warn-border, rgba(245,166,35,0.25));
+
+  /* ── ELEVATION ───────────────────────────────────── */
+  --shadow-card:  0 4px 24px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.04) inset;
+  --shadow-modal: 0 24px 80px rgba(0,0,0,0.85);
+
+  /* ── SPACING ─────────────────────────────────────── */
+  --space-1: 4px;   --space-2: 8px;   --space-3: 12px;  --space-4: 16px;
+  --space-5: 20px;  --space-6: 24px;  --space-8: 32px;  --space-10: 40px;
+  --space-12: 48px; --space-16: 64px; --space-20: 80px; --space-24: 96px;
+
+  /* ── RADIUS ──────────────────────────────────────── */
+  --radius-xs: 3px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  /* ── Z-INDEX ─────────────────────────────────────── */
+  --z-base:    0;
+  --z-raised:  10;
+  --z-overlay: 20;
+  --z-modal:   30;
+  --z-toast:   40;
+  --z-tooltip: 50;
+
+  /* ── TYPE SCALE (fluid clamp tokens) ────────────── */
+  --text-display-xl: clamp(64px, 10vw, 112px);
+  --text-display-lg: clamp(48px, 7vw, 80px);
+  --text-display-md: clamp(36px, 5vw, 56px);
+  --text-display-sm: clamp(28px, 3.5vw, 40px);
+  --text-body-lg:    clamp(16px, 1.5vw, 19px);
+  --text-body-md:    clamp(14px, 1.2vw, 16px);
+  --text-label:      12px;
+
+  /* ── FONTS ───────────────────────────────────────── */
+  --font-sans: "Geist", "Haskoy", system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
+}
+
+:root, .dark {
+  --theme-bg-void:       #0A0A0A;
+  --theme-bg-base:       #111111;
+  --theme-bg-raised:     #1A1A1A;
+  --theme-bg-overlay:    #242424;
+
+  --theme-bd-hairline:   #1C1C1C;
+  --theme-bd-subtle:     #222222;
+  --theme-bd-strong:     #333333;
+
+  --theme-tx-primary:    #F5F5F5;
+  --theme-tx-secondary:  #888888;
+  --theme-tx-muted:      #555555;
+  --theme-tx-inverse:    #0A0A0A;
+
+  --theme-accent:        #00D4AA;
+  --theme-accent-dim:    rgba(0, 212, 170, 0.10);
+  --theme-accent-border: rgba(0, 212, 170, 0.25);
+  --theme-accent-glow:   rgba(0, 212, 170, 0.15);
+
+  --theme-gain:          #22D37A;
+  --theme-gain-dim:      rgba(34, 211, 122, 0.10);
+  --theme-gain-border:   rgba(34, 211, 122, 0.20);
+
+  --theme-loss:          #F75050;
+  --theme-loss-dim:      rgba(247, 80, 80, 0.10);
+  --theme-loss-border:   rgba(247, 80, 80, 0.20);
+
+  --theme-warn:          #F5A623;
+  --theme-warn-dim:      rgba(245, 166, 35, 0.10);
+  --theme-warn-border:   rgba(245, 166, 35, 0.25);
+}
+
+html:not(.dark) {
+  --theme-bg-void:       #F7F8FA;
+  --theme-bg-base:       #FFFFFF;
+  --theme-bg-raised:     #EFF2F5;
+  --theme-bg-overlay:    #E2E8F0;
+
+  --theme-bd-hairline:   #E5E7EB;
+  --theme-bd-subtle:     #D1D5DB;
+  --theme-bd-strong:     #9CA3AF;
+
+  --theme-tx-primary:    #0F172A;
+  --theme-tx-secondary:  #475569;
+  --theme-tx-muted:      #64748B;
+  --theme-tx-inverse:    #FFFFFF;
+
+  --theme-accent:        #009A7B;
+  --theme-accent-dim:    rgba(0, 154, 123, 0.12);
+  --theme-accent-border: rgba(0, 154, 123, 0.30);
+  --theme-accent-glow:   rgba(0, 154, 123, 0.18);
+
+  --theme-gain:          #16A34A;
+  --theme-gain-dim:      rgba(22, 163, 74, 0.12);
+  --theme-gain-border:   rgba(22, 163, 74, 0.25);
+
+  --theme-loss:          #DC2626;
+  --theme-loss-dim:      rgba(220, 38, 38, 0.12);
+  --theme-loss-border:   rgba(220, 38, 38, 0.25);
+
+  --theme-warn:          #D97706;
+  --theme-warn-dim:      rgba(217, 119, 6, 0.12);
+  --theme-warn-border:   rgba(217, 119, 6, 0.25);
 }
 
 @layer base {
+  @font-face {
+    font-family: "Geist";
+    src: url("/fonts/geist-font/Geist/webfonts/Geist[wght].woff2") format("woff2 supports variations"),
+         url("/fonts/geist-font/Geist/webfonts/Geist[wght].woff2") format("woff2");
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: "Geist Mono";
+    src: url("/fonts/geist-font/GeistMono/webfonts/GeistMono[wght].woff2") format("woff2 supports variations"),
+         url("/fonts/geist-font/GeistMono/webfonts/GeistMono[wght].woff2") format("woff2");
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: "Haskoy";
+    src: url("/fonts/Haskoy-variable.woff2") format("woff2 supports variations"),
+         url("/fonts/Haskoy-variable.woff2") format("woff2");
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
+
   body {
-    @apply bg-slate-50 text-slate-900 dark:bg-[#070B14] dark:text-slate-50 antialiased transition-colors duration-300;
+    @apply bg-bg-void text-tx-primary antialiased;
+    font-family: var(--font-sans);
     overflow-x: hidden;
+    transition: background-color 150ms ease, color 150ms ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
 @layer utilities {
   .touch-target {
-    @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
+    @apply min-h-[40px] min-w-[40px] flex items-center justify-center;
   }
   .animate-marquee {
     animation: marquee 30s linear infinite;
   }
-
-  /* Liquid Glass Web Approximation */
+  
   .glass-panel {
-    @apply relative isolate overflow-hidden rounded-2xl border border-white/5 bg-[#0B1120]/60 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.4)];
+    @apply relative isolate overflow-hidden rounded-md border border-bd-subtle bg-bg-raised/70 backdrop-blur-md shadow-card;
   }
-  .glass-panel::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    border-radius: inherit;
-    background: radial-gradient(circle at 20% 0%, rgb(255 255 255 / 0.05), transparent 40%);
-    pointer-events: none;
+
+  /* Skeleton shimmer */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      rgba(255,255,255,0.03) 0%,
+      rgba(255,255,255,0.07) 40%,
+      rgba(255,255,255,0.03) 80%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.6s ease infinite;
+    border-radius: var(--radius-sm);
   }
+
+  .price-cell {
+    transition: color 80ms ease;
+  }
+  .price-cell.tick-up   { color: var(--color-gain); }
+  .price-cell.tick-down { color: var(--color-loss); }
 }
 
 @keyframes marquee {
   0% { transform: translateX(0%); }
   100% { transform: translateX(-50%); }
+}
+
+@keyframes skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }

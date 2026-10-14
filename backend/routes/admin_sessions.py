@@ -179,6 +179,10 @@ from backend.core.security import hash_pin
 class TeamActionReq(BaseModel):
     team_id: str
 
+class SetTeamPinReq(BaseModel):
+    team_id: str
+    pin: str
+
 @router.get("/teams", dependencies=[Depends(verify_admin)])
 async def get_all_teams(db: AsyncSession = Depends(get_db)):
     """Returns all teams with their real PINs and Cash Balances."""
@@ -225,6 +229,17 @@ async def reset_team_pin(req: TeamActionReq, db: AsyncSession = Depends(get_db))
     await db.execute(update(Team).where(Team.id == req.team_id).values(pin=new_pin, pin_hash=pin_h))
     await db.commit()
     return {"status": "SUCCESS", "new_pin": new_pin}
+
+@router.post("/teams/set-pin", dependencies=[Depends(verify_admin)])
+async def set_team_pin(req: SetTeamPinReq, db: AsyncSession = Depends(get_db)):
+    """Admin sets a custom PIN for a team."""
+    clean_pin = str(req.pin).strip()
+    if not clean_pin:
+        raise HTTPException(status_code=400, detail="PIN cannot be empty")
+    pin_h = hash_pin(clean_pin)
+    await db.execute(update(Team).where(Team.id == req.team_id).values(pin=clean_pin, pin_hash=pin_h))
+    await db.commit()
+    return {"status": "SUCCESS", "new_pin": clean_pin}
 
 @router.post("/teams/remove", dependencies=[Depends(verify_admin)])
 async def remove_team(req: TeamActionReq, db: AsyncSession = Depends(get_db)):
