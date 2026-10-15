@@ -74,3 +74,14 @@ class StatPurchase(Base):
     level = Column(Integer, nullable=False)
     cost_paise = Column(BigInteger, nullable=False)
     at_state = Column(String, nullable=False)
+
+class EquitySnapshot(Base):
+    __tablename__ = "equity_snapshots"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    team_id = Column(String, nullable=False, index=True)
+    round_num = Column(Integer, default=2)
+    session_g = Column(Integer, nullable=False)
+    tick_n = Column(Integer, default=0)
+    label = Column(String, nullable=True)
+    equity_paise = Column(BigInteger, nullable=False)
+    created_at = Column(BigInteger, nullable=False)

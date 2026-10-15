@@ -33,6 +33,10 @@ class R2InstrumentState:
         self.dev_s = 0.0
         self.history_F = [float(initial_price)] * 120
 
+    @property
+    def current_price(self) -> float:
+        return self.P
+
     def tick(self, F_current: float, A_net_notional: float, active_teams: int = 300, mood: str = "calm") -> float:
         self.history_F.append(F_current)
         params = MOODS[mood]

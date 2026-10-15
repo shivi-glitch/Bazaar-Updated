@@ -61,5 +61,68 @@
     "s_i": 1.6,
     "d_i_pct": 0.25,
     "open_price_paise": 85000
+  },
+  {
+    "ticker": "NIMBUS",
+    "name": "Nimbus Cloud Systems",
+    "sector": "IT",
+    "live_from": "R1S2",
+    "s_i": 0.8,
+    "d_i_pct": 0.3,
+    "open_price_paise": 41000
+  },
+  {
+    "ticker": "STAPLE",
+    "name": "Staple & Co. Provisions",
+    "sector": "Consumables",
+    "live_from": "R1S3",
+    "s_i": 0.7,
+    "d_i_pct": 0.5,
+    "open_price_paise": 118000
+  },
+  {
+    "ticker": "VOLTAGE",
+    "name": "Voltage Grid Holdings",
+    "sector": "Energy",
+    "live_from": "R1S4",
+    "s_i": 0.8,
+    "d_i_pct": 0.3,
+    "open_price_paise": 31000
+  },
+  {
+    "ticker": "CRANE",
+    "name": "Crane & Sons Construction",
+    "sector": "Infrastructure",
+    "live_from": "R1S5",
+    "s_i": 0.8,
+    "d_i_pct": 0.35,
+    "open_price_paise": 52000
+  },
+  {
+    "ticker": "APEX",
+    "name": "Apex Capital Bank",
+    "sector": "Banking",
+    "live_from": "R2S2",
+    "s_i": 1.0,
+    "d_i_pct": 0.3,
+    "open_price_paise": 74000
+  },
+  {
+    "ticker": "LEDGER",
+    "name": "Ledger Data Systems",
+    "sector": "IT",
+    "live_from": "R2S3",
+    "s_i": 0.8,
+    "d_i_pct": 0.4,
+    "open_price_paise": 190000
+  },
+  {
+    "ticker": "FORGE",
+    "name": "Forge Industrial Holdings",
+    "sector": "Infrastructure",
+    "live_from": "R2S4",
+    "s_i": 0.9,
+    "d_i_pct": 0.35,
+    "open_price_paise": 126000
   }
 ]

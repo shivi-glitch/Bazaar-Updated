@@ -160,10 +160,32 @@ class MarketEngine:
         else:
             if not self.r2_states:
                 base_prices = {"RELI-X": 2450.0, "TATA-Y": 880.0, "INFY-Z": 1520.0, "HDFC-W": 1640.0, "BZR-V": 640.0, "GOLDCORE": 6200.0, "PULSE": 850.0, "NIMBUS": 410.0, "STAPLE": 1180.0, "VOLTAGE": 310.0, "CRANE": 520.0}
-                for t, p in base_prices.items():
+                for t, def_p in base_prices.items():
+                    # Inherit prior session close if available, else fallback to baseline
+                    p = (self.current_prices[t][0] / 100.0) if t in self.current_prices else def_p
                     self.r2_states[t] = R2InstrumentState(t, p)
                     self.r2_f_values[t] = p
                     self.flow_buffer[t] = 0.0
+
+            # Unlock new R2 instruments on their respective sessions
+            if g >= 8 and "APEX" not in self.r2_states:
+                self.r2_states["APEX"] = R2InstrumentState("APEX", 740.0)
+                self.r2_f_values["APEX"] = 740.0
+                self.flow_buffer["APEX"] = 0.0
+                self.current_prices["APEX"] = [74000, 1000]
+
+            if g >= 9 and "LEDGER" not in self.r2_states:
+                self.r2_states["LEDGER"] = R2InstrumentState("LEDGER", 1900.0)
+                self.r2_f_values["LEDGER"] = 1900.0
+                self.flow_buffer["LEDGER"] = 0.0
+                self.current_prices["LEDGER"] = [190000, 1000]
+
+            if g >= 10 and "FORGE" not in self.r2_states:
+                self.r2_states["FORGE"] = R2InstrumentState("FORGE", 1260.0)
+                self.r2_f_values["FORGE"] = 1260.0
+                self.flow_buffer["FORGE"] = 0.0
+                self.current_prices["FORGE"] = [126000, 1000]
+
             if not self.current_prices or any(t not in self.current_prices for t in self.r2_states):
                 self.current_prices = {
                     t: [int(s.current_price * 100), random.randint(200, 800)]
@@ -199,6 +221,43 @@ class MarketEngine:
         await self.broadcast_state(g, "RUNNING")
         return {"status": "RUNNING"}
 
+    async def _record_round2_snapshots(self, g: int):
+        try:
+            from backend.models import TeamLedger, Position, EquitySnapshot
+            from backend.core.scoring import calculate_equity_paise
+            async with AsyncSessionLocal() as db:
+                teams_res = await db.execute(select(Team))
+                teams = teams_res.scalars().all()
+                ledgers_res = await db.execute(select(TeamLedger))
+                ledgers = {l.team_id: l for l in ledgers_res.scalars().all()}
+                pos_res = await db.execute(select(Position))
+                positions = pos_res.scalars().all()
+                team_positions = {}
+                for p in positions:
+                    team_positions.setdefault(p.team_id, []).append(p)
+                live_prices = {t: d[0] for t, d in self.current_prices.items()}
+                now_ts = int(time.time())
+                for t in teams:
+                    if t.eliminated:
+                        eq = 0
+                    else:
+                        cash = ledgers[t.id].cash_paise if t.id in ledgers else 1000000000
+                        pos_list = team_positions.get(t.id, [])
+                        eq = calculate_equity_paise(cash, pos_list, live_prices)
+                    snap = EquitySnapshot(
+                        team_id=t.id,
+                        round_num=2,
+                        session_g=g,
+                        tick_n=self.n,
+                        label=f"S{g}",
+                        equity_paise=eq,
+                        created_at=now_ts
+                    )
+                    db.add(snap)
+                await db.commit()
+        except Exception as e:
+            print(f"Error recording equity snapshots for session {g}: {e}")
+
     async def end_session(self, g: int):
         self.session_states[g] = "FINISHED"
         await self._update_db_state(g, "FINISHED")
@@ -206,6 +265,8 @@ class MarketEngine:
             self.session_states[g + 1] = "READY"
             await self._update_db_state(g + 1, "READY")
         await self.broadcast_state(g, "FINISHED")
+        if g >= 7:
+            asyncio.create_task(self._record_round2_snapshots(g))
         return {"status": "FINISHED"}
 
     async def unlock_round2(self):
@@ -335,16 +396,27 @@ class MarketEngine:
                     await self.ws_manager.dispatch_targeted_news(news_payload)
                 
                 # Instead of instantly changing the price, queue a smooth shock
-                if item["ticker"] in self.current_prices and item["impact"] != 0:
+                if item["impact"] != 0:
                     duration_ticks = random.randint(2, 8)
                     impact_per_tick = item["impact"] / duration_ticks
                     
-                    self.active_shocks.append({
-                        "ticker": item["ticker"],
-                        "impact_per_tick": impact_per_tick,
-                        "ticks_remaining": duration_ticks,
-                        "volume_boost": 3.5
-                    })
+                    if item["ticker"] == "GLOBAL":
+                        # Broad macroeconomic shock applies across active non-safe-haven instruments
+                        for t in list(self.current_prices.keys()):
+                            if t != "GOLDCORE":
+                                self.active_shocks.append({
+                                    "ticker": t,
+                                    "impact_per_tick": impact_per_tick,
+                                    "ticks_remaining": duration_ticks,
+                                    "volume_boost": 3.0
+                                })
+                    elif item["ticker"] in self.current_prices:
+                        self.active_shocks.append({
+                            "ticker": item["ticker"],
+                            "impact_per_tick": impact_per_tick,
+                            "ticks_remaining": duration_ticks,
+                            "volume_boost": 3.5
+                        })
 
     def apply_active_shocks(self):
         """Runs every single tick to smoothly apply fractional price changes."""
@@ -360,6 +432,9 @@ class MarketEngine:
                     new_vol = int(vol * shock["volume_boost"])
                     
                     self.current_prices[ticker] = [max(100, new_paise), new_vol]
+                    if ticker in self.r2_states:
+                        self.r2_states[ticker].P = new_paise / 100.0
+                        self.r2_f_values[ticker] = new_paise / 100.0
                 
                 shock["ticks_remaining"] -= 1
                 if shock["ticks_remaining"] > 0:
@@ -390,10 +465,22 @@ class MarketEngine:
                 else:
                     if not self.r2_states:
                         base_prices = {"RELI-X": 2450.0, "TATA-Y": 880.0, "INFY-Z": 1520.0, "HDFC-W": 1640.0, "BZR-V": 640.0, "GOLDCORE": 6200.0, "PULSE": 850.0, "NIMBUS": 410.0, "STAPLE": 1180.0, "VOLTAGE": 310.0, "CRANE": 520.0}
-                        for t, p in base_prices.items():
+                        for t, def_p in base_prices.items():
+                            p = (self.current_prices[t][0] / 100.0) if t in self.current_prices else def_p
                             self.r2_states[t] = R2InstrumentState(t, p)
                             self.r2_f_values[t] = p
                             self.flow_buffer[t] = 0.0
+
+                    # Dynamic market mood based on session
+                    current_mood = "calm"
+                    if self.current_g == 7:
+                        current_mood = "tense"
+                    elif self.current_g in [8, 9]:
+                        current_mood = "panic"
+                    elif self.current_g == 10:
+                        current_mood = "recovery"
+                    elif self.current_g == 11:
+                        current_mood = "calm"
                             
                     for ticker, state in self.r2_states.items():
                         # Micro Brownian motion so the market breathes organically
@@ -407,7 +494,7 @@ class MarketEngine:
                             F_current=self.r2_f_values[ticker],
                             A_net_notional=net_flow,
                             active_teams=300, 
-                            mood="calm"
+                            mood=current_mood
                         )
                         self.current_prices[ticker] = [int(new_p * 100), random.randint(200, 800)]
                 

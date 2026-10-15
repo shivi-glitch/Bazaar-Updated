@@ -59,7 +59,11 @@ export default function MarketSPA() {
                   <span className="truncate">
                     {sessionState === "STARTING" ? `Session ${currentSession} Starting now · Initializing live market order books...` :
                      sessionState === "PAUSED" ? `Session ${currentSession} is Paused by Admin · Order entry is temporarily locked.` :
-                     sessionState === "FINISHED" ? `Session ${currentSession} Finished · Awaiting next session.` :
+                     sessionState === "FINISHED" ? (
+                       currentSession === 11 
+                         ? "Round 2 Final Session Concluded · Simulation Finished."
+                         : `Session ${currentSession} Finished · Awaiting next session.`
+                     ) :
                      `Session ${currentSession} Standby · Trading engine is waiting for Admin to start the session.`}
                   </span>
                 </div>

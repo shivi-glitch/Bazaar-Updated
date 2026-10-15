@@ -5,7 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import update, delete, select
 
 from backend.database import AsyncSessionLocal
-from backend.models import Team, TeamLedger, Position, Order, StatPurchase
+from backend.models import Team, TeamLedger, Position, Order, StatPurchase, EquitySnapshot
+from backend.core.scoring import calculate_equity_paise
 from backend.core.engine import engine_app
 from backend.core.news_ledger import SCRIPTED_NEWS_DATABASE
 
@@ -102,6 +103,75 @@ async def get_sessions():
 @router.get("/news/scripted", dependencies=[Depends(verify_admin)])
 async def get_scripted_news_endpoint():
     return {"scripted_news": SCRIPTED_NEWS_DATABASE}
+
+@router.get("/round2/graph-data", dependencies=[Depends(verify_admin)])
+async def get_round2_graph_data(db: AsyncSession = Depends(get_db)):
+    teams_res = await db.execute(select(Team))
+    teams = teams_res.scalars().all()
+    
+    ledgers_res = await db.execute(select(TeamLedger))
+    ledgers = {l.team_id: l for l in ledgers_res.scalars().all()}
+    
+    positions_res = await db.execute(select(Position))
+    positions = positions_res.scalars().all()
+    
+    team_positions = {}
+    for pos in positions:
+        team_positions.setdefault(pos.team_id, []).append(pos)
+        
+    live_prices = {ticker: data[0] for ticker, data in engine_app.current_prices.items()}
+    start_capital = 1000000000 # 1 Crore reset for Round 2
+    
+    leaderboard = []
+    for team in teams:
+        ledger = ledgers.get(team.id)
+        cash = ledger.cash_paise if ledger else start_capital
+        pos_list = team_positions.get(team.id, [])
+        equity = calculate_equity_paise(cash, pos_list, live_prices)
+        if team.eliminated or equity <= 0:
+            equity = 0
+        leaderboard.append({
+            "team_id": team.id,
+            "name": team.name,
+            "equity_paise": equity,
+            "eliminated": team.eliminated
+        })
+        
+    leaderboard.sort(key=lambda x: x["equity_paise"], reverse=True)
+    
+    # Query snapshots if recorded
+    snapshots_res = await db.execute(
+        select(EquitySnapshot)
+        .where(EquitySnapshot.round_num == 2)
+        .order_by(EquitySnapshot.session_g.asc(), EquitySnapshot.created_at.asc())
+    )
+    raw_snapshots = snapshots_res.scalars().all()
+    
+    # Group snapshots by session
+    session_snapshots: dict = {}
+    for s in raw_snapshots:
+        session_snapshots.setdefault(s.session_g, []).append({
+            "team_id": s.team_id,
+            "equity_paise": s.equity_paise,
+            "tick": s.tick_n
+        })
+    
+    sessions_meta = [
+        {"g": 7, "label": "R2S1 · War Shock", "theme": "Commodity inflation spike · Retail capital retreats"},
+        {"g": 8, "label": "R2S2 · Rate Hike", "theme": "Emergency central bank hike · Banking margins strained"},
+        {"g": 9, "label": "R2S3 · Banking Crisis", "theme": "Interbank liquidity contagion · Panic market selloff"},
+        {"g": 10, "label": "R2S4 · State Bailout", "theme": "Emergency state intervention · Targeted sector short squeeze"},
+        {"g": 11, "label": "R2S5 · Final Settle", "theme": "Institutional order reconciliation · Terminal resolution"}
+    ]
+    
+    return {
+        "sessions": sessions_meta,
+        "current_g": engine_app.current_g,
+        "is_finished": engine_app.session_states.get(11) == "FINISHED",
+        "top_teams": leaderboard[:8],
+        "live_prices": live_prices,
+        "session_snapshots": session_snapshots
+    }
 
 @router.post("/reset", dependencies=[Depends(verify_admin)])
 @router.post("/sessions/reset", dependencies=[Depends(verify_admin)])

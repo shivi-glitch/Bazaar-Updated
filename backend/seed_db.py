@@ -2,10 +2,11 @@ import asyncio
 import json
 import os
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-from dotenv import load_dotenv
+import sys
+sys.path.insert(0, os.path.dirname(__file__))
+
 from models import Instrument, SessionBlock, Team, TeamLedger, Base
 from core.security import hash_pin
-
 from database import AsyncSessionLocal, engine
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'data')
@@ -29,7 +30,8 @@ async def seed():
         # 2. Seed Session Blocks (g1 to g11)
         for g in range(1, 12):
             round_num = 1 if g <= 6 else 2
-            block = SessionBlock(g=g, round_num=round_num, state="LOCKED")
+            state = "READY" if g == 1 else "LOCKED"
+            block = SessionBlock(g=g, round_num=round_num, state=state)
             await session.merge(block)
             
         # 3. Seed Default Test Teams (T001 - T010)

@@ -128,6 +128,8 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     };
   }, [pathname, setConnected, updateFromMessage]);
 
+  const soundPlayedRef = useRef(false);
+
   useEffect(() => {
     if (pathname === "/" || pathname === "/login" || pathname === "/admin") return; 
     
@@ -137,9 +139,21 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // NEW: Endgame Routing Logic
-    if (currentSession === 11 && sessionState === "FINISHED" && pathname !== "/podium") {
-      router.push("/podium");
+    // When Session 11 finishes: automatically trigger sound.mp3 and route to /podium
+    if (currentSession === 11 && sessionState === "FINISHED") {
+      if (!soundPlayedRef.current) {
+        soundPlayedRef.current = true;
+        try {
+          const audio = new Audio("/sound.mp3");
+          audio.play().catch((err) => {
+            console.log("Auto-audio play prevented by browser policy:", err);
+          });
+        } catch (e) {}
+      }
+
+      if (pathname !== "/podium") {
+        router.push("/podium");
+      }
     }
   }, [pathname, router, currentSession, sessionState]);
 
