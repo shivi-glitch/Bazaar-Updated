@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useMarketStore } from "@/store/marketStore";
 import { useRouter, usePathname } from "next/navigation";
+import { api } from "@/lib/api";
 
 export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const updateFromMessage = useMarketStore((s) => s.updateFromMessage);
@@ -91,6 +92,18 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
 
     // Run connection attempt
     connect();
+
+    // Fetch initial historical price series from backend
+    const fetchHistory = async () => {
+      try {
+        const token = localStorage.getItem("merx_token") || undefined;
+        const res = await api.get("/prices/history", token);
+        if (isSubscribed && res && res.history) {
+          updateFromMessage({ type: "price_history", history: res.history });
+        }
+      } catch (err) {}
+    };
+    fetchHistory();
 
     // Ping interval to keep connection alive through NAT / idle timeouts
     pingIntervalRef.current = setInterval(() => {

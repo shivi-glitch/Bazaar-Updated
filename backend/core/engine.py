@@ -192,6 +192,12 @@ class MarketEngine:
                     for t, s in self.r2_states.items()
                 }
 
+        # Record initial session baseline prices into price_table
+        if g not in self.price_table:
+            self.price_table[g] = {}
+        if 0 not in self.price_table[g]:
+            self.price_table[g][0] = {t: [d[0], d[1]] for t, d in self.current_prices.items()}
+
         await self._update_db_state(g, "STARTING")
         await self.broadcast_state(g, "STARTING")
         self._start_task = asyncio.create_task(self._complete_starting_sync(g))
@@ -308,6 +314,14 @@ class MarketEngine:
         self.active_shocks.clear()
         self._load_and_verify_data()
         await self.broadcast_state(1, "READY")
+        if self.ws_manager:
+            await self.ws_manager.broadcast({
+                "type": "reset",
+                "g": 1,
+                "n": 0,
+                "state": "READY",
+                "prices": self.get_live_or_initial_prices()
+            })
         return {"status": "RESET"}
 
     async def jump_to(self, target_g: int):
@@ -339,6 +353,35 @@ class MarketEngine:
         
         await self.broadcast_state(target_g, "READY")
         return {"status": "JUMPED", "g": target_g}
+
+    def get_price_history(self, up_to_g: Optional[int] = None, up_to_n: Optional[int] = None) -> Dict[str, list]:
+        """
+        Returns continuous historical price points for all instruments across sessions:
+        { ticker: [{"time": (g - 1) * 201 + min(200, n), "value": price_paise, "volume": volume}, ...] }
+        """
+        target_g = up_to_g if up_to_g is not None else self.current_g
+        target_n = up_to_n if up_to_n is not None else self.n
+        history: Dict[str, list] = {}
+
+        for g in sorted(self.price_table.keys()):
+            if g > target_g:
+                break
+            g_data = self.price_table[g]
+            for n in sorted(g_data.keys()):
+                if n > 200:
+                    continue
+                if g == target_g and n > target_n:
+                    break
+                continuous_t = (g - 1) * 201 + n
+                for ticker, p_data in g_data[n].items():
+                    if ticker not in history:
+                        history[ticker] = []
+                    history[ticker].append({
+                        "time": continuous_t,
+                        "value": p_data[0],
+                        "volume": p_data[1]
+                    })
+        return history
 
     async def inject_live_news(self, news_item: dict):
         """Allows Admins to fire custom, unscripted news on the fly."""
@@ -534,6 +577,13 @@ class MarketEngine:
                     
                     # Update the engine's state (preserve shock volume if it's currently spiking)
                     self.current_prices[ticker] = [current_paise, volume]
+
+                    # Record into price_table for continuous historical chart continuity
+                    if self.current_g not in self.price_table:
+                        self.price_table[self.current_g] = {}
+                    if self.n not in self.price_table[self.current_g]:
+                        self.price_table[self.current_g][self.n] = {}
+                    self.price_table[self.current_g][self.n][ticker] = [current_paise, volume]
                     
                     # Determine if news bots need to react
                     active_impact = 0.0

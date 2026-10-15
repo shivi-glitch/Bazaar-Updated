@@ -136,6 +136,14 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(None)):
                 "prices": initial_prices
             }))
         
+        # Send full continuous price history across sessions run so far
+        price_history = engine_app.get_price_history()
+        if price_history:
+            await manager.safe_send(websocket, json.dumps({
+                "type": "price_history",
+                "history": price_history
+            }))
+
         # Send all previous news across sessions & rounds
         if engine_app.news_ledger:
             news_items = [

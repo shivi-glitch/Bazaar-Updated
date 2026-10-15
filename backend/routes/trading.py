@@ -285,3 +285,8 @@ async def get_news_ledger(authorization: str = Header(None), db: AsyncSession = 
             "timestamp": item.get("timestamp", 0)
         })
     return {"news": filtered}
+
+@router.get("/prices/history")
+async def get_price_history():
+    """Returns continuous historical price series across all completed and current sessions."""
+    return {"history": engine_app.get_price_history()}

@@ -18,10 +18,10 @@ export const api = {
     return res.json();
   },
 
-  async get(endpoint: string, token: string) {
-    const res = await fetch(`${API_BASE}${endpoint}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+  async get(endpoint: string, token?: string) {
+    const headers: HeadersInit = {};
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+    const res = await fetch(`${API_BASE}${endpoint}`, { headers });
     if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
     return res.json();
   },

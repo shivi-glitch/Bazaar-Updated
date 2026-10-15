@@ -36,6 +36,8 @@ interface MarketState {
   updateFromMessage: (msg: any) => void;
   setPortfolioData: (data: any) => void;
   updateSessionFromPoll: (sessionData: { state: string; g: number; n?: number; is_frozen?: boolean }) => void;
+  setPriceHistory: (history: Record<string, HistoryPoint[]>) => void;
+  clearPriceHistory: () => void;
 }
 
 const DEFAULT_R1_PRICES: Record<string, [number, number]> = {
@@ -63,10 +65,10 @@ export const useMarketStore = create<MarketState>((set) => ({
   setConnected: (status) => set({ connected: status }),
   clearToast: () => set({ latestToast: null }),
   setPortfolioData: (data) => set({ portfolioData: data }),
+  setPriceHistory: (history) => set({ priceHistory: history }),
+  clearPriceHistory: () => set({ priceHistory: {} }),
   updateSessionFromPoll: (sessionData) => {
     set((state) => {
-      const isNewSession = sessionData.g !== undefined && sessionData.g !== state.currentSession;
-      const isRestart = sessionData.state === 'STARTING' || sessionData.state === 'READY';
       if (
         state.sessionState !== sessionData.state ||
         (sessionData.g !== undefined && state.currentSession !== sessionData.g)
@@ -74,8 +76,8 @@ export const useMarketStore = create<MarketState>((set) => ({
         return {
           sessionState: sessionData.state,
           currentSession: sessionData.g !== undefined ? sessionData.g : state.currentSession,
-          globalTick: typeof sessionData.n === 'number' ? sessionData.n : (isRestart ? 0 : state.globalTick),
-          priceHistory: (isNewSession || isRestart) ? {} : state.priceHistory
+          globalTick: typeof sessionData.n === 'number' ? sessionData.n : state.globalTick,
+          priceHistory: state.priceHistory
         };
       }
       return state;
@@ -84,62 +86,79 @@ export const useMarketStore = create<MarketState>((set) => ({
   updateFromMessage: (msg) => {
     if (msg.type === "hello") {
       set((state) => {
-        const isNewSession = msg.g && msg.g !== state.currentSession;
         const initialPrices = (msg.prices && Object.keys(msg.prices).length > 0) ? msg.prices : state.prices;
         return { 
           sessionState: msg.state, 
           serverTime: msg.server_time, 
-          currentSession: msg.g || 1,
-          globalTick: typeof msg.n === 'number' ? msg.n : 0,
-          priceHistory: isNewSession ? {} : state.priceHistory,
+          currentSession: msg.g || state.currentSession,
+          globalTick: typeof msg.n === 'number' ? msg.n : state.globalTick,
+          priceHistory: state.priceHistory,
           prices: initialPrices
         };
       });
     } else if (msg.type === "session") {
       set((state) => {
-        const isNewSession = msg.g !== undefined && msg.g !== state.currentSession;
-        const isRestart = msg.state === 'STARTING' || msg.state === 'READY';
         const updatedPrices = (msg.prices && Object.keys(msg.prices).length > 0)
           ? { ...state.prices, ...msg.prices }
           : state.prices;
         return { 
           sessionState: msg.state, 
           currentSession: msg.g !== undefined ? msg.g : state.currentSession,
-          globalTick: typeof msg.n === 'number' ? msg.n : (isRestart ? 0 : state.globalTick),
-          priceHistory: (isNewSession || isRestart) ? {} : state.priceHistory,
+          globalTick: typeof msg.n === 'number' ? msg.n : state.globalTick,
+          priceHistory: state.priceHistory,
           prices: updatedPrices
         };
       });
+    } else if (msg.type === "reset") {
+      set(() => ({
+        sessionState: msg.state || "READY",
+        currentSession: 1,
+        globalTick: 0,
+        priceHistory: {},
+        prices: msg.prices || DEFAULT_R1_PRICES,
+        orderBooks: {}
+      }));
+    } else if (msg.type === "price_history" && msg.history) {
+      set((state) => {
+        const mergedHistory: Record<string, HistoryPoint[]> = { ...state.priceHistory };
+        Object.entries(msg.history as Record<string, HistoryPoint[]>).forEach(([ticker, points]) => {
+          if (!Array.isArray(points)) return;
+          const existing = mergedHistory[ticker] || [];
+          const pointMap = new Map<number, HistoryPoint>();
+          existing.forEach(p => pointMap.set(p.time, p));
+          points.forEach(p => pointMap.set(p.time, p));
+          const sorted = Array.from(pointMap.values()).sort((a, b) => a.time - b.time);
+          mergedHistory[ticker] = sorted.slice(-5000);
+        });
+        return { priceHistory: mergedHistory };
+      });
     } else if (msg.type === "tick") {
       set((state) => {
-        const isNewSession = msg.g !== undefined && msg.g !== state.currentSession;
-        const nextTick = typeof msg.n === 'number' ? msg.n : (state.globalTick + 1);
-        const newHistory = isNewSession ? {} : { ...state.priceHistory };
-        const newBooks = isNewSession ? {} : { ...state.orderBooks };
+        const g = msg.g || state.currentSession || 1;
+        const n = typeof msg.n === 'number' ? msg.n : state.globalTick;
+        const continuousTime = (g - 1) * 201 + Math.min(200, n);
+        const newHistory = { ...state.priceHistory };
+        const newBooks = { ...state.orderBooks };
         
         // msg.prices format: { "RELI-X": [price_paise, volume, bids, asks], ... }
         Object.entries(msg.prices as Record<string, any[]>).forEach(([ticker, data]) => {
-          let currentArr = isNewSession ? [] : (state.priceHistory[ticker] || []);
+          let currentArr = state.priceHistory[ticker] ? [...state.priceHistory[ticker]] : [];
           
-          // If time jumped backwards (e.g. session restarted or switched), purge previous session history
           if (currentArr.length > 0) {
             const lastTime = currentArr[currentArr.length - 1].time;
-            if (nextTick < lastTime) {
-              currentArr = [];
-            } else if (nextTick === lastTime) {
-              // Ignore duplicate ticks to prevent resetting the history
+            if (continuousTime <= lastTime) {
               return;
             }
           }
 
-          const updatedArr = [...currentArr, { 
-            time: nextTick, 
+          currentArr.push({ 
+            time: continuousTime, 
             value: data[0],
             volume: data[1]
-          }];
+          });
           
-          if (updatedArr.length > 300) updatedArr.shift(); 
-          newHistory[ticker] = updatedArr;
+          if (currentArr.length > 5000) currentArr.shift(); 
+          newHistory[ticker] = currentArr;
           
           // Capture the bot-generated bids and asks
           if (data[2] && data[3]) {
@@ -151,8 +170,8 @@ export const useMarketStore = create<MarketState>((set) => ({
           prices: { ...state.prices, ...msg.prices }, 
           priceHistory: newHistory,
           orderBooks: newBooks,
-          globalTick: nextTick,
-          currentSession: msg.g !== undefined ? msg.g : state.currentSession
+          globalTick: n,
+          currentSession: g
         };
       });
     } else if (msg.type === "news") {
