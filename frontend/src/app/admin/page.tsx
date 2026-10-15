@@ -18,6 +18,8 @@ export default function AdminDashboard() {
 
   const [sysState, setSysState] = useState<any>(null);
   const [leaderboard, setLeaderboard] = useState<any>(null);
+  const [cumulativeLeaderboard, setCumulativeLeaderboard] = useState<any>(null);
+  const [leaderboardView, setLeaderboardView] = useState<"ROUND" | "CUMULATIVE">("ROUND");
   const [teams, setTeams] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"SESSION" | "TEAMS" | "ASSETS" | "NEWS" | "LEADERBOARD" | "DANGER">("SESSION");
@@ -65,7 +67,7 @@ export default function AdminDashboard() {
     setIsAuthenticated(false);
   };
 
-  // Dedicated Leaderboard fetcher
+  // Dedicated Leaderboard fetcher (Primary Round Leaderboard)
   const fetchLeaderboard = useCallback(async () => {
     if (!getAdminToken()) return;
     try {
@@ -74,6 +76,18 @@ export default function AdminDashboard() {
       const now = new Date();
       setLastLbSync(now.toLocaleTimeString());
       setLbSecondsRemaining(10);
+    } catch {
+      // background fetch fail
+    }
+  }, []);
+
+  // Cumulative Leaderboard fetcher (Updates after both rounds finish)
+  const fetchCumulativeLeaderboard = useCallback(async (force = false) => {
+    if (!getAdminToken()) return;
+    try {
+      const url = force ? "/admin/leaderboard/cumulative?force=true" : "/admin/leaderboard/cumulative";
+      const res = await api.get(url, getAdminToken());
+      setCumulativeLeaderboard(res);
     } catch {
       // background fetch fail
     }
@@ -96,8 +110,8 @@ export default function AdminDashboard() {
 
   // Combined fetch
   const fetchAllData = useCallback(async () => {
-    await Promise.all([fetchSysData(), fetchLeaderboard()]);
-  }, [fetchSysData, fetchLeaderboard]);
+    await Promise.all([fetchSysData(), fetchLeaderboard(), fetchCumulativeLeaderboard()]);
+  }, [fetchSysData, fetchLeaderboard, fetchCumulativeLeaderboard]);
 
   // Initial load & Polling loops
   useEffect(() => {
@@ -291,7 +305,7 @@ export default function AdminDashboard() {
                 <Activity className="w-4 h-4 text-accent" />
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-lg font-black tracking-tight text-tx-primary">MERX</span>
+                <span className="text-lg font-black tracking-tight"><span className="text-gain">MER</span><span className="text-loss">X</span></span>
                 <span className="bg-accent-dim text-accent text-[10px] font-mono px-2 py-0.5 rounded uppercase tracking-widest border border-accent-border font-bold">
                   ADMIN
                 </span>
@@ -1201,121 +1215,352 @@ export default function AdminDashboard() {
         })()}
 
         {/* ══════════════════════════════════════════════════════
-            TAB 5: LEADERBOARD (10s AUTO-REFRESH & EIC X BAZAAR)
+            TAB 5: DUAL LEADERBOARD (ROUND & CUMULATIVE MULTI-ROUND)
            ══════════════════════════════════════════════════════ */}
         {activeTab === "LEADERBOARD" && (
           <div className="space-y-6">
+            
+            {/* Top Header & Telemetry */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                {/* REQUIRED HEADING: EIC X Bazaar Leaderboard */}
                 <h1 className="text-xl sm:text-2xl font-bold text-tx-primary tracking-tight">
-                  EIC X Bazaar Leaderboard
+                  EIC X Bazaar Tournament Leaderboards
                 </h1>
                 <p className="text-tx-secondary text-sm mt-0.5">
-                  Real-time participant portfolio equity and rankings. Automatically updates after every session and refreshes every 10 seconds.
+                  Round-specific active rankings and overall multi-round tournament standings.
                 </p>
               </div>
 
-              {/* 10s auto-refresh indicator */}
-              <div className="flex items-center gap-2.5 self-start sm:self-auto font-mono text-xs">
-                <div className="px-3.5 py-2 rounded-lg border border-bd-subtle bg-bg-base flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-gain animate-pulse" />
-                  <span className="text-tx-secondary">Refresh in:</span>
-                  <span className="font-bold text-accent">{lbSecondsRemaining}s</span>
-                  {lastLbSync && (
-                    <>
-                      <span className="text-tx-muted">•</span>
-                      <span className="text-tx-muted">Synced: {lastLbSync}</span>
-                    </>
-                  )}
-                </div>
+              {/* View Selector & Telemetry Controls */}
+              <div className="flex flex-wrap items-center gap-2.5">
+                {/* 10s auto-refresh indicator (for active round) */}
+                {leaderboardView === "ROUND" && (
+                  <div className="px-3.5 py-1.5 rounded-lg border border-bd-subtle bg-bg-base flex items-center gap-2 text-xs font-mono">
+                    <span className="w-2 h-2 rounded-full bg-gain animate-pulse" />
+                    <span className="text-tx-secondary">Sync in:</span>
+                    <span className="font-bold text-accent">{lbSecondsRemaining}s</span>
+                    {lastLbSync && (
+                      <>
+                        <span className="text-tx-muted">•</span>
+                        <span className="text-tx-muted">Synced: {lastLbSync}</span>
+                      </>
+                    )}
+                  </div>
+                )}
+
                 <button
-                  onClick={fetchLeaderboard}
-                  className="p-2 rounded-lg border border-bd-subtle bg-bg-raised hover:bg-bg-overlay text-tx-secondary hover:text-tx-primary transition-colors"
-                  title="Force refresh leaderboard now"
+                  onClick={() => {
+                    if (leaderboardView === "ROUND") {
+                      fetchLeaderboard();
+                    } else {
+                      fetchCumulativeLeaderboard(true);
+                    }
+                  }}
+                  className="p-2 rounded-lg border border-bd-subtle bg-bg-raised hover:bg-bg-overlay text-tx-secondary hover:text-tx-primary transition-colors flex items-center gap-1.5 text-xs font-mono font-bold"
+                  title="Force refresh standings now"
                 >
-                  <RefreshCw className="w-4 h-4" />
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Refresh</span>
                 </button>
               </div>
             </div>
 
-            <div className="glass-panel overflow-hidden border border-bd-subtle">
-              <div className="w-full overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead className="text-xs font-mono font-bold text-tx-secondary bg-bg-base uppercase tracking-wider border-b border-bd-subtle">
-                    <tr>
-                      <th className="px-6 py-4 w-28">Rank</th>
-                      <th className="px-6 py-4">Participant Team</th>
-                      <th className="px-6 py-4 text-center">Return %</th>
-                      <th className="px-6 py-4 text-center">Status</th>
-                      <th className="px-6 py-4 text-right">Total Equity</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-bd-hairline">
-                    {!leaderboard?.rows || leaderboard.rows.length === 0 ? (
-                      <tr>
-                        <td colSpan={5} className="text-center py-12 text-tx-muted font-sans text-sm">
-                          No leaderboard standings available yet.
-                        </td>
-                      </tr>
-                    ) : (
-                      leaderboard.rows.map((row: any) => {
-                        const rankColor =
-                          row.rank === 1 ? "text-accent font-bold" :
-                            row.rank === 2 ? "text-tx-primary font-bold" :
-                              row.rank === 3 ? "text-warn font-bold" :
-                                "text-tx-muted";
+            {/* ── Tab Switcher: Primary Round vs Cumulative ── */}
+            <div className="flex items-center gap-2 bg-bg-base p-1 rounded-xl border border-bd-subtle w-fit">
+              <button
+                onClick={() => setLeaderboardView("ROUND")}
+                className={clsx(
+                  "px-4 py-2 rounded-lg text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer",
+                  leaderboardView === "ROUND"
+                    ? "bg-accent text-tx-inverse shadow-sm"
+                    : "text-tx-secondary hover:text-tx-primary hover:bg-bg-raised"
+                )}
+              >
+                <Trophy className="w-3.5 h-3.5" />
+                <span>Round Leaderboard (Active Round)</span>
+                <span className={clsx(
+                  "text-[10px] px-1.5 py-0.2 rounded font-mono",
+                  leaderboardView === "ROUND" ? "bg-black/20 text-tx-inverse" : "bg-bg-raised text-tx-muted"
+                )}>
+                  {leaderboard?.round === 2 ? "R2" : "R1"}
+                </span>
+              </button>
 
-                        const isEliminated = row.status === "ELIM" || row.eliminated;
+              <button
+                onClick={() => {
+                  setLeaderboardView("CUMULATIVE");
+                  fetchCumulativeLeaderboard();
+                }}
+                className={clsx(
+                  "px-4 py-2 rounded-lg text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer",
+                  leaderboardView === "CUMULATIVE"
+                    ? "bg-accent text-tx-inverse shadow-sm"
+                    : "text-tx-secondary hover:text-tx-primary hover:bg-bg-raised"
+                )}
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>Overall Cumulative Leaderboard</span>
+                {cumulativeLeaderboard?.is_final ? (
+                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-gain-dim text-gain font-mono font-bold border border-gain-border">
+                    Finalized
+                  </span>
+                ) : (
+                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-warn-dim text-warn font-mono font-bold border border-warn-border">
+                    Locks Post-R2
+                  </span>
+                )}
+              </button>
+            </div>
 
-                        return (
-                          <tr key={row.team_id} className="hover:bg-bg-overlay/40 transition-colors">
-                            <td className="px-6 py-4 font-mono font-bold whitespace-nowrap">
-                              <span className={clsx("text-base", rankColor)}>
-                                #{row.rank}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 font-mono font-bold text-tx-primary whitespace-nowrap text-base">
-                              <div className="flex items-center gap-2">
-                                <span>{row.team_id}</span>
-                                {row.rank === 1 && (
-                                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-accent-dim text-accent border border-accent-border uppercase">
-                                    Leader
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 font-mono text-center whitespace-nowrap">
-                              {row.return_pct !== undefined ? (
-                                <span className={clsx("text-sm font-bold", row.return_pct >= 0 ? "text-gain" : "text-loss")}>
-                                  {row.return_pct >= 0 ? `+${row.return_pct.toFixed(2)}%` : `${row.return_pct.toFixed(2)}%`}
-                                </span>
-                              ) : (
-                                <span className="text-tx-muted text-sm">0.00%</span>
-                              )}
-                            </td>
-                            <td className="px-6 py-4 text-center whitespace-nowrap">
-                              {isEliminated ? (
-                                <span className="text-xs font-mono font-bold text-loss bg-loss-dim px-2.5 py-1 rounded-md border border-loss-border">
-                                  LIQUIDATED
-                                </span>
-                              ) : (
-                                <span className="text-xs font-mono font-bold text-gain bg-gain-dim px-2.5 py-1 rounded-md border border-gain-border">
-                                  ACTIVE
-                                </span>
-                              )}
-                            </td>
-                            <td className="px-6 py-4 font-mono font-bold text-right text-gain text-base whitespace-nowrap">
-                              ₹{(row.equity_paise / 100).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+            {/* ── View 1: Active Round Leaderboard ── */}
+            {leaderboardView === "ROUND" && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between px-1">
+                  <div className="text-xs font-mono font-bold text-tx-secondary uppercase tracking-wider">
+                    {leaderboard?.round_name || "Active Round"} · Live MTM Standings
+                  </div>
+                  <div className="text-xs font-mono text-tx-muted">
+                    Auto-updates every 10 seconds
+                  </div>
+                </div>
+
+                <div className="glass-panel overflow-hidden border border-bd-subtle">
+                  <div className="w-full overflow-x-auto">
+                    <table className="w-full text-left text-sm">
+                      <thead className="text-xs font-mono font-bold text-tx-secondary bg-bg-base uppercase tracking-wider border-b border-bd-subtle">
+                        <tr>
+                          <th className="px-6 py-4 w-28">Rank</th>
+                          <th className="px-6 py-4">Participant Team</th>
+                          <th className="px-6 py-4 text-center">Round Return %</th>
+                          <th className="px-6 py-4 text-center">Status</th>
+                          <th className="px-6 py-4 text-right">Round Equity</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-bd-hairline">
+                        {!leaderboard?.rows || leaderboard.rows.length === 0 ? (
+                          <tr>
+                            <td colSpan={5} className="text-center py-12 text-tx-muted font-sans text-sm">
+                              No leaderboard standings available for this round yet.
                             </td>
                           </tr>
-                        );
-                      })
-                    )}
-                  </tbody>
-                </table>
+                        ) : (
+                          leaderboard.rows.map((row: any) => {
+                            const rankColor =
+                              row.rank === 1 ? "text-accent font-bold" :
+                                row.rank === 2 ? "text-tx-primary font-bold" :
+                                  row.rank === 3 ? "text-warn font-bold" :
+                                    "text-tx-muted";
+
+                            const isEliminated = row.status === "ELIM" || row.eliminated;
+
+                            return (
+                              <tr key={row.team_id} className="hover:bg-bg-overlay/40 transition-colors">
+                                <td className="px-6 py-4 font-mono font-bold whitespace-nowrap">
+                                  <span className={clsx("text-base", rankColor)}>
+                                    #{row.rank}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 font-mono font-bold text-tx-primary whitespace-nowrap text-base">
+                                  <div className="flex items-center gap-2">
+                                    <span>{row.team_id}</span>
+                                    {row.rank === 1 && (
+                                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-accent-dim text-accent border border-accent-border uppercase">
+                                        Round Leader
+                                      </span>
+                                    )}
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 font-mono text-center whitespace-nowrap">
+                                  {row.return_pct !== undefined ? (
+                                    <span className={clsx("text-sm font-bold", row.return_pct >= 0 ? "text-gain" : "text-loss")}>
+                                      {row.return_pct >= 0 ? `+${row.return_pct.toFixed(2)}%` : `${row.return_pct.toFixed(2)}%`}
+                                    </span>
+                                  ) : (
+                                    <span className="text-tx-muted text-sm">0.00%</span>
+                                  )}
+                                </td>
+                                <td className="px-6 py-4 text-center whitespace-nowrap">
+                                  {isEliminated ? (
+                                    <span className="text-xs font-mono font-bold text-loss bg-loss-dim px-2.5 py-1 rounded-md border border-loss-border">
+                                      LIQUIDATED
+                                    </span>
+                                  ) : (
+                                    <span className="text-xs font-mono font-bold text-gain bg-gain-dim px-2.5 py-1 rounded-md border border-gain-border">
+                                      ACTIVE
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="px-6 py-4 font-mono font-bold text-right text-gain text-base whitespace-nowrap">
+                                  ₹{(row.equity_paise / 100).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                                </td>
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* ── View 2: Cumulative Multi-Round Leaderboard ── */}
+            {leaderboardView === "CUMULATIVE" && (
+              <div className="space-y-4">
+                
+                {/* Status banner when both rounds have not finished */}
+                {!cumulativeLeaderboard?.is_final ? (
+                  <div className="glass-panel p-6 border border-bd-subtle bg-bg-raised/70 rounded-xl space-y-4">
+                    <div className="flex items-start gap-3.5">
+                      <div className="w-10 h-10 rounded-xl bg-warn-dim border border-warn-border flex items-center justify-center text-warn shrink-0 mt-0.5">
+                        <Lock className="w-5 h-5" />
+                      </div>
+                      <div className="space-y-1">
+                        <h3 className="text-base font-bold text-tx-primary tracking-tight">
+                          Cumulative Tournament Leaderboard Locked
+                        </h3>
+                        <p className="text-sm text-tx-secondary leading-relaxed max-w-2xl">
+                          The cumulative multi-round leaderboard combines portfolio performances from Round 1 (Retail Momentum) and Round 2 (Institutional Desk).
+                          As designed, cumulative standings only finalize and lock after Session 11 completes.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Progress Trackers */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                      <div className="bg-bg-base border border-bd-subtle p-3.5 rounded-lg flex items-center justify-between">
+                        <div>
+                          <div className="text-xs font-mono font-bold text-tx-primary">Round 1 (Sessions 1 – 6)</div>
+                          <div className="text-[11px] text-tx-muted mt-0.5">Retail trading & liquidation rules</div>
+                        </div>
+                        <span className={clsx(
+                          "text-xs font-mono font-bold px-2.5 py-1 rounded border",
+                          cumulativeLeaderboard?.round_1_complete
+                            ? "bg-gain-dim text-gain border-gain-border"
+                            : "bg-warn-dim text-warn border-warn-border"
+                        )}>
+                          {cumulativeLeaderboard?.round_1_complete ? "Complete" : "In Progress"}
+                        </span>
+                      </div>
+
+                      <div className="bg-bg-base border border-bd-subtle p-3.5 rounded-lg flex items-center justify-between">
+                        <div>
+                          <div className="text-xs font-mono font-bold text-tx-primary">Round 2 (Sessions 7 – 11)</div>
+                          <div className="text-[11px] text-tx-muted mt-0.5">Institutional execution & Stat Shop</div>
+                        </div>
+                        <span className={clsx(
+                          "text-xs font-mono font-bold px-2.5 py-1 rounded border",
+                          cumulativeLeaderboard?.round_2_complete
+                            ? "bg-gain-dim text-gain border-gain-border"
+                            : "bg-bg-raised text-tx-muted border-bd-subtle"
+                        )}>
+                          {cumulativeLeaderboard?.round_2_complete ? "Finished" : "Active / Pending"}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 flex items-center gap-3">
+                      <button
+                        onClick={() => fetchCumulativeLeaderboard(true)}
+                        className="px-3.5 py-2 bg-bg-base hover:bg-bg-overlay border border-bd-subtle hover:border-accent-border rounded-md text-xs font-mono font-bold text-tx-secondary hover:text-tx-primary transition-all cursor-pointer"
+                      >
+                        Preview Live Multi-Round Estimates
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between px-1">
+                    <div className="text-xs font-mono font-bold text-gain flex items-center gap-2 uppercase tracking-wider">
+                      <span className="w-2 h-2 rounded-full bg-gain animate-pulse" />
+                      Final Tournament Standings Locked (Round 1 + Round 2 Cumulative)
+                    </div>
+                  </div>
+                )}
+
+                {/* Cumulative Table (Renders preview or final standings) */}
+                {cumulativeLeaderboard?.rows && cumulativeLeaderboard.rows.length > 0 && (
+                  <div className="glass-panel overflow-hidden border border-bd-subtle">
+                    <div className="w-full overflow-x-auto">
+                      <table className="w-full text-left text-sm">
+                        <thead className="text-xs font-mono font-bold text-tx-secondary bg-bg-base uppercase tracking-wider border-b border-bd-subtle">
+                          <tr>
+                            <th className="px-6 py-4 w-28">Overall Rank</th>
+                            <th className="px-6 py-4">Participant Team</th>
+                            <th className="px-6 py-4 text-center">R1 Return %</th>
+                            <th className="px-6 py-4 text-center">R2 Return %</th>
+                            <th className="px-6 py-4 text-center">Cumulative Return %</th>
+                            <th className="px-6 py-4 text-right">Net Tournament P&L</th>
+                            <th className="px-6 py-4 text-center">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-bd-hairline">
+                          {cumulativeLeaderboard.rows.map((row: any) => {
+                            const isFirst = row.rank === 1;
+                            const isSecond = row.rank === 2;
+                            const isThird = row.rank === 3;
+                            const rankColor = isFirst ? "text-accent font-bold" : isSecond ? "text-tx-primary font-bold" : isThird ? "text-warn font-bold" : "text-tx-muted";
+                            const isElim = row.status === "ELIM";
+
+                            return (
+                              <tr key={row.team_id} className={clsx("hover:bg-bg-overlay/40 transition-colors", isFirst && "bg-accent-dim/10")}>
+                                <td className="px-6 py-4 font-mono font-bold whitespace-nowrap">
+                                  <span className={clsx("text-base", rankColor)}>
+                                    #{row.rank}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 font-mono font-bold text-tx-primary whitespace-nowrap text-base">
+                                  <div className="flex items-center gap-2">
+                                    <span>{row.team_id}</span>
+                                    {isFirst && (
+                                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-accent-dim text-accent border border-accent-border uppercase shadow-xs">
+                                        Tournament Champion
+                                      </span>
+                                    )}
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 font-mono text-center whitespace-nowrap text-sm">
+                                  <span className={row.r1_return_pct >= 0 ? "text-gain" : "text-loss"}>
+                                    {row.r1_return_pct >= 0 ? `+${row.r1_return_pct.toFixed(2)}%` : `${row.r1_return_pct.toFixed(2)}%`}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 font-mono text-center whitespace-nowrap text-sm">
+                                  <span className={row.r2_return_pct >= 0 ? "text-gain" : "text-loss"}>
+                                    {row.r2_return_pct >= 0 ? `+${row.r2_return_pct.toFixed(2)}%` : `${row.r2_return_pct.toFixed(2)}%`}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 font-mono text-center whitespace-nowrap">
+                                  <span className={clsx("text-sm sm:text-base font-bold", row.cumulative_return_pct >= 0 ? "text-gain font-bold" : "text-loss font-bold")}>
+                                    {row.cumulative_return_pct >= 0 ? `+${row.cumulative_return_pct.toFixed(2)}%` : `${row.cumulative_return_pct.toFixed(2)}%`}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 font-mono font-bold text-right whitespace-nowrap text-sm sm:text-base">
+                                  <span className={row.cumulative_pnl_paise >= 0 ? "text-gain" : "text-loss"}>
+                                    {row.cumulative_pnl_paise >= 0 ? "+" : ""}
+                                    ₹{(row.cumulative_pnl_paise / 100).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 text-center whitespace-nowrap">
+                                  {isElim ? (
+                                    <span className="text-xs font-mono font-bold text-loss bg-loss-dim px-2.5 py-1 rounded-md border border-loss-border">
+                                      LIQUIDATED
+                                    </span>
+                                  ) : (
+                                    <span className="text-xs font-mono font-bold text-gain bg-gain-dim px-2.5 py-1 rounded-md border border-gain-border">
+                                      ACTIVE
+                                    </span>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
           </div>
         )}
 

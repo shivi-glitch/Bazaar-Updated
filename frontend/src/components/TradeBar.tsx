@@ -18,21 +18,34 @@ export function TradeBar({ ticker, currentPricePaise }: TradeBarProps) {
   const [error, setError] = useState("");
   const [flash, setFlash] = useState<"buy" | "sell" | null>(null);
 
+  const portfolioData = useMarketStore((s) => s.portfolioData);
+  const setPortfolioData = useMarketStore((s) => s.setPortfolioData);
+
+  const refreshPosition = async () => {
+    try {
+      const token = localStorage.getItem("merx_token");
+      if (!token) return;
+      const data = await api.get("/portfolio", token);
+      setPortfolioData(data);
+      const pos = data.positions?.find((p: any) => p.ticker === ticker);
+      setCurrentPos(pos ? pos.qty : 0);
+    } catch (err) {}
+  };
+
   useEffect(() => {
-    const fetchPosition = async () => {
-      try {
-        const token = localStorage.getItem("merx_token");
-        const data = await api.get("/portfolio", token || "");
-        const pos = data.positions.find((p: any) => p.ticker === ticker);
-        if (pos) setCurrentPos(pos.qty);
-      } catch (err) {}
-    };
-    fetchPosition();
+    refreshPosition();
   }, [ticker]);
 
+  useEffect(() => {
+    if (portfolioData?.positions) {
+      const pos = portfolioData.positions.find((p: any) => p.ticker === ticker);
+      setCurrentPos(pos ? pos.qty : 0);
+    } else if (portfolioData && !portfolioData.positions?.length) {
+      setCurrentPos(0);
+    }
+  }, [portfolioData, ticker]);
+
   const numericQty = typeof qty === "number" ? qty : parseInt(qty) || 0;
-  const currentPrice = currentPricePaise / 100;
-  const notional = numericQty * currentPrice;
 
   let leftLabel = "SELL";
   let rightLabel = "BUY";
@@ -60,6 +73,9 @@ export function TradeBar({ ticker, currentPricePaise }: TradeBarProps) {
       await api.post("/orders", {
         client_key: crypto.randomUUID(), ticker, side, qty: numericQty, type: "MARKET"
       }, token || undefined);
+      
+      // Auto-update position immediately without requiring page refresh
+      await refreshPosition();
     } catch (err: any) {
       setError(err.message || "Trade failed");
     } finally {
@@ -85,22 +101,28 @@ export function TradeBar({ ticker, currentPricePaise }: TradeBarProps) {
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-[80px] flex items-center justify-between gap-4 relative z-10">
         
-        {/* Ticker & Price */}
-        <div className="flex flex-col min-w-0 shrink">
-          <div className="flex items-center gap-2 truncate">
-            <span className="text-[14px] sm:text-[16px] font-bold text-tx-primary truncate">{ticker}</span>
-            {currentPos !== 0 && (
-              <span className={clsx(
-                "hidden sm:inline text-[10px] uppercase font-bold tracking-[0.06em] px-1.5 py-0.5 rounded-xs border",
-                currentPos > 0 ? "text-gain bg-gain-dim border-gain-border" : "text-loss bg-loss-dim border-loss-border"
-              )}>
-                {Math.abs(currentPos)} {currentPos > 0 ? "LONG" : "SHORT"}
+        {/* Position Display Only (Ticker name and price removed per spec) */}
+        <div className="flex flex-col justify-center min-w-0 shrink">
+          <div className="text-[10px] font-mono font-bold text-tx-muted uppercase tracking-wider mb-0.5">
+            Position
+          </div>
+          <div>
+            {currentPos > 0 ? (
+              <span className="font-mono font-bold text-[13px] sm:text-[15px] text-gain bg-gain-dim border border-gain-border px-2.5 py-1 rounded-md inline-flex items-center gap-1.5 shadow-xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-gain animate-pulse" />
+                LONG: {currentPos}
+              </span>
+            ) : currentPos < 0 ? (
+              <span className="font-mono font-bold text-[13px] sm:text-[15px] text-loss bg-loss-dim border border-loss-border px-2.5 py-1 rounded-md inline-flex items-center gap-1.5 shadow-xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-loss animate-pulse" />
+                SHORT: {Math.abs(currentPos)}
+              </span>
+            ) : (
+              <span className="font-mono font-bold text-[12px] sm:text-[13px] text-tx-secondary bg-bg-void border border-bd-subtle px-2.5 py-1 rounded-md inline-block">
+                FLAT: 0
               </span>
             )}
           </div>
-          <span className="text-[14px] sm:text-[18px] font-mono font-bold text-tx-secondary tabular-nums">
-            ₹{currentPrice.toFixed(2)}
-          </span>
         </div>
 
         {/* Quantity Controls */}

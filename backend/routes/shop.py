@@ -11,11 +11,11 @@ from backend.core.engine import engine_app
 
 router = APIRouter(prefix="/stats", tags=["shop"])
 
-# Stat Costs in integer paise (₹1 = 100 paise) - Master Plan 2.0 (30-38% Capital Ratio)
+# Stat Costs in integer paise (₹1 = 100 paise) - Recalibrated: Max tier is 10-13% of 1 Crore (₹10L-₹13L)
 STAT_COSTS = {
-    "Research": {1: 8000000, 2: 18000000, 3: 35000000},     # ₹8L, ₹18L, ₹35L
-    "Capital": {1: 12000000, 2: 28000000},                   # ₹12L, ₹28L
-    "Speed": {1: 6000000, 2: 14000000, 3: 25000000}         # ₹6L, ₹14L, ₹25L
+    "Research": {1: 35000000, 2: 75000000, 3: 130000000},     # ₹3.5L, ₹7.5L, ₹13.0L (13% of 1 Cr)
+    "Capital": {1: 50000000, 2: 110000000},                   # ₹5.0L, ₹11.0L (11% of 1 Cr)
+    "Speed": {1: 30000000, 2: 60000000, 3: 105000000}         # ₹3.0L, ₹6.0L, ₹10.5L (10.5% of 1 Cr)
 }
 
 class ShopRequest(BaseModel):

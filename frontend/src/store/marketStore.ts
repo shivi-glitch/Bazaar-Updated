@@ -161,6 +161,13 @@ export const useMarketStore = create<MarketState>((set) => ({
         if (state.news.some(n => n.id === newItem.id)) return state;
         return { news: [newItem, ...state.news], latestToast: newItem };
       });
+    } else if (msg.type === "news_history" && Array.isArray(msg.news)) {
+      set((state) => {
+        const existingIds = new Set(state.news.map(n => n.id));
+        const newItems = msg.news.filter((n: any) => !existingIds.has(n.id));
+        // Keep existing news, prepend newer items or maintain chronological order
+        return { news: [...state.news, ...newItems] };
+      });
     }
   },
 }));

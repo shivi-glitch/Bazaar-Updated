@@ -3,6 +3,8 @@
 import { useMarketStore } from "@/store/marketStore";
 import { Newspaper, X, Radio } from "lucide-react";
 import { useEffect } from "react";
+import clsx from "clsx";
+import { api } from "@/lib/api";
 
 export function NewsToast() {
   const latestToast = useMarketStore((s) => s.latestToast);
@@ -43,24 +45,76 @@ export function NewsToast() {
 export function NewsTab() {
   const news = useMarketStore((s) => s.news);
 
+  // Load all previous rounds' and sessions' news on mount
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const token = localStorage.getItem("merx_token");
+        const res = await api.get("/news", token || "");
+        if (res?.news && Array.isArray(res.news)) {
+          const currentStore = useMarketStore.getState();
+          const existingIds = new Set(currentStore.news.map((n) => n.id));
+          const newItems = res.news.filter((n: any) => !existingIds.has(n.id));
+          if (newItems.length > 0) {
+            useMarketStore.setState({ news: [...newItems, ...currentStore.news] });
+          }
+        }
+      } catch (err) {}
+    };
+    fetchHistory();
+  }, []);
+
   const getSourceBadge = (source: string) => {
     switch(source) {
       case "NP":
-        return <span className="px-2.5 py-0.5 rounded-sm text-[10px] font-mono font-bold tracking-wider uppercase bg-accent-dim border border-accent-border text-accent">Newspaper</span>;
+        return <span className="px-2 py-0.5 rounded-sm text-[10px] font-mono font-bold tracking-wider uppercase bg-accent-dim border border-accent-border text-accent">Newspaper</span>;
       case "AN":
-        return <span className="px-2.5 py-0.5 rounded-sm text-[10px] font-mono font-bold tracking-wider uppercase bg-cyan-500/10 border border-cyan-500/25 text-cyan-400">Analyst Wire</span>;
+        return <span className="px-2 py-0.5 rounded-sm text-[10px] font-mono font-bold tracking-wider uppercase bg-cyan-500/10 border border-cyan-500/25 text-cyan-400">Analyst Wire</span>;
       case "FF":
-        return <span className="px-2.5 py-0.5 rounded-sm text-[10px] font-mono font-bold tracking-wider uppercase bg-warn-dim border border-warn-border text-warn">Finfluencer</span>;
+        return <span className="px-2 py-0.5 rounded-sm text-[10px] font-mono font-bold tracking-wider uppercase bg-warn-dim border border-warn-border text-warn">Finfluencer</span>;
       case "IN":
-        return <span className="px-2.5 py-0.5 rounded-sm text-[10px] font-mono font-bold tracking-wider uppercase bg-loss-dim border border-loss-border text-loss">Insider Rumor</span>;
+        return <span className="px-2 py-0.5 rounded-sm text-[10px] font-mono font-bold tracking-wider uppercase bg-loss-dim border border-loss-border text-loss">Insider Rumor</span>;
       default:
-        return <span className="px-2.5 py-0.5 rounded-sm text-[10px] font-mono font-bold tracking-wider uppercase bg-bg-base border border-bd-subtle text-tx-secondary">{source}</span>;
+        return <span className="px-2 py-0.5 rounded-sm text-[10px] font-mono font-bold tracking-wider uppercase bg-bg-base border border-bd-subtle text-tx-secondary">{source}</span>;
     }
   };
 
+  const parseSessionInfo = (id: string) => {
+    if (!id || typeof id !== "string") return null;
+    const parts = id.split("-");
+    if (parts.length >= 2) {
+      const g = parseInt(parts[0], 10);
+      const tick = parseInt(parts[1], 10);
+      if (!isNaN(g)) {
+        const isR2 = g >= 7;
+        return {
+          roundText: isR2 ? `R2 · S${g - 6}` : `R1 · S${g}`,
+          tickText: isNaN(tick) ? "" : `T+${tick}`
+        };
+      }
+    }
+    return null;
+  };
+
   return (
-    <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 md:px-8 py-4 sm:py-6 space-y-4 sm:space-y-5">
+    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 md:px-8 py-6 space-y-6">
       
+      {/* Header bar with summary */}
+      <div className="flex items-center justify-between border-b border-bd-subtle pb-4">
+        <div>
+          <h2 className="text-[18px] sm:text-[20px] font-bold text-tx-primary tracking-tight">
+            Market Intelligence Wire
+          </h2>
+          <p className="text-[12px] sm:text-[13px] text-tx-secondary mt-0.5">
+            Real-time multi-round intelligence feed · Older catalysts cascade downward
+          </p>
+        </div>
+        <div className="flex items-center gap-2 font-mono text-[11px] text-tx-muted bg-bg-raised px-3 py-1.5 rounded-md border border-bd-subtle">
+          <span className="w-2 h-2 rounded-full bg-gain animate-pulse" />
+          <span>{news.length} Catalysts Logged</span>
+        </div>
+      </div>
+
       {news.length === 0 ? (
         <div className="flex flex-col justify-center items-center h-64 text-tx-muted uppercase tracking-wider text-[11px] font-mono border border-dashed border-bd-subtle rounded-xl bg-bg-raised/40 p-6 text-center space-y-2">
           <Newspaper className="w-8 h-8 opacity-25 mb-1" />
@@ -70,23 +124,73 @@ export function NewsTab() {
           </p>
         </div>
       ) : (
-        <div className="space-y-3 sm:space-y-3.5">
-          {news.map((item) => (
-            <div 
-              key={item.id} 
-              className="bg-bg-raised/75 hover:bg-bg-raised border border-bd-subtle hover:border-accent-border/60 rounded-xl p-4 sm:p-5 transition-all shadow-card flex flex-col gap-2.5"
-            >
-              {/* Only the source badge */}
-              <div className="flex items-center">
-                {getSourceBadge(item.source)}
-              </div>
-              
-              {/* Only the news text */}
-              <p className="text-[13px] sm:text-[15px] font-medium text-tx-primary leading-relaxed font-sans">
-                {item.text}
-              </p>
-            </div>
-          ))}
+        /* Alternating Timeline with Center Dividing Line */
+        <div className="relative py-4">
+          
+          {/* Vertical center divider line (centered on sm+, left-aligned on mobile) */}
+          <div 
+            className="absolute top-0 bottom-0 left-4 sm:left-1/2 -translate-x-1/2 w-[2px] bg-gradient-to-b from-accent/60 via-bd-subtle to-transparent" 
+            aria-hidden="true"
+          />
+
+          <div className="space-y-6 sm:space-y-8">
+            {news.map((item, index) => {
+              const isEven = index % 2 === 0;
+              const sessionInfo = parseSessionInfo(item.id);
+
+              return (
+                <div 
+                  key={item.id || index}
+                  className={clsx(
+                    "relative flex flex-col sm:flex-row items-center w-full",
+                    isEven ? "sm:justify-start" : "sm:justify-end"
+                  )}
+                >
+                  {/* Timeline Node on the center line */}
+                  <div 
+                    className="absolute left-4 sm:left-1/2 -translate-x-1/2 top-4 w-4 h-4 rounded-full bg-bg-base border-2 border-accent flex items-center justify-center z-10 shadow-[0_0_8px_rgba(0,212,170,0.4)]"
+                    aria-hidden="true"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                  </div>
+
+                  {/* News Card: Left for Even, Right for Odd on sm+; Indented right on mobile */}
+                  <div 
+                    className={clsx(
+                      "w-full sm:w-[calc(50%-28px)] pl-10 sm:pl-0 transition-all",
+                      isEven ? "sm:pr-4" : "sm:pl-4"
+                    )}
+                  >
+                    <div className="bg-bg-raised/85 hover:bg-bg-raised border border-bd-subtle hover:border-accent-border/60 rounded-xl p-4 sm:p-5 transition-all shadow-card flex flex-col gap-3 group">
+                      
+                      {/* Meta header: Session + Source + Ticker */}
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {getSourceBadge(item.source)}
+                          {item.ticker && (
+                            <span className="px-2 py-0.5 rounded-sm text-[10px] font-mono font-bold uppercase bg-bg-base border border-bd-subtle text-tx-primary">
+                              {item.ticker}
+                            </span>
+                          )}
+                        </div>
+
+                        {sessionInfo && (
+                          <span className="text-[10px] font-mono font-bold text-tx-muted uppercase tracking-wider bg-bg-base px-2 py-0.5 rounded border border-bd-hairline">
+                            {sessionInfo.roundText} {sessionInfo.tickText && `· ${sessionInfo.tickText}`}
+                          </span>
+                        )}
+                      </div>
+                      
+                      {/* Headline body */}
+                      <p className="text-[13px] sm:text-[14px] font-medium text-tx-primary leading-relaxed font-sans">
+                        {item.text}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>
@@ -94,3 +198,4 @@ export function NewsTab() {
 }
 
 export default NewsTab;
+

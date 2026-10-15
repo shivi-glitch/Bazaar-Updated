@@ -14,58 +14,52 @@ import { TradeBar } from "@/components/TradeBar";
 export interface AssetFundamental {
   name: string;
   sector: string;
-  archetype: "Mean-Reverting" | "Trending" | "High-Beta Volatile" | "Safe Haven";
+  archetype: "Mean-Reverting" | "Trending" | "High-Beta Volatile" | "Safe Haven" | "Macro Benchmark";
   dossier: string;
   deskNote: string;
   metrics: {
     beta: string;
-    freeFloat: string;
-    instHolding: string;
-    supportRange: string;
-    peRatio: string;
-    divYield: string;
-    pbRatio: string;
     marketCap: string;
+    peRatio: string;
+    freeFloat: string;
+    supportRange: string;
+    instHolding: string;
   };
 }
 
 export const ASSET_META: Record<string, AssetFundamental> = {
   "RELI-X": {
     name: "Reliant Energy Corp",
-    sector: "Infrastructure & Energy",
+    sector: "Energy & Infrastructure",
     archetype: "Mean-Reverting",
     dossier:
-      "A sovereign-backed industrial conglomerate anchored to long-term national power concessions. While headline contract wins generate immediate retail euphoria, massive domestic pension funds operate institutional liquidity grids, consistently unloading inventory during overbought rallies and absorbing liquidity during sharp panics.",
+      "Meridian's state-linked energy giant and sovereign infrastructure anchor. Backed by long-term power concessions and sovereign guarantees, it is the cornerstone holding of domestic pension funds. While expansion contracts cause short rallies, institutional supply walls routinely absorb euphoria and pull price back to historical fair value.",
     deskNote:
-      "Heavy institutional absorption prevents sustained breakouts. Fade impulsive swings outside the 20-tick envelope; take profit as price gravitates toward VWAP/SMA 20.",
+      "Heavy institutional absorption profile. Fade impulsive extensions outside the 20-tick band; accumulate when price dips below equilibrium support and take profit as it mean-reverts toward VWAP.",
     metrics: {
-      beta: "0.68",
+      beta: "0.72",
+      marketCap: "₹3,20,000 Cr",
+      peRatio: "15.0x",
       freeFloat: "18% (Constrained)",
+      supportRange: "₹2,350 – ₹2,560",
       instHolding: "72.4%",
-      supportRange: "₹380 – ₹450",
-      peRatio: "14.2",
-      divYield: "4.8%",
-      pbRatio: "1.15",
-      marketCap: "₹30,000 Cr",
     },
   },
   "INFY-Z": {
     name: "Infinity Systems",
-    sector: "Enterprise Cloud & IT",
+    sector: "IT & Enterprise Cloud",
     archetype: "Trending",
     dossier:
-      "A multi-national enterprise technology exporter with multi-year dollar-denominated contracts. Foreign institutional investors (FIIs) execute multi-day programmatic accumulation blocks. Order books do not snap back; price impulses build persistent directional momentum as trailing stops follow trend channels.",
+      "A software exporter and technology pioneer riding persistent multi-year enterprise digital transformation cycles. Foreign institutional investors (FIIs) accumulate in large programmatic blocks, generating strong directional momentum that sustains across consecutive trading sessions.",
     deskNote:
-      "High autocorrelation profile. Fading momentum here is costly. Respect SMA 9 / SMA 20 golden crosses and trail positions until trend slope flattens.",
+      "High directional autocorrelation. Counter-trend trading here leads to severe drawdown. Respect fast SMA 9 / SMA 20 momentum crosses and ride multi-tick breakout runs.",
     metrics: {
-      beta: "1.05",
+      beta: "1.15",
+      marketCap: "₹2,10,000 Cr",
+      peRatio: "30.0x",
       freeFloat: "64% (Liquid)",
+      supportRange: "₹1,480 – ₹1,680",
       instHolding: "58.1%",
-      supportRange: "₹190 – ₹240",
-      peRatio: "22.5",
-      divYield: "1.2%",
-      pbRatio: "4.80",
-      marketCap: "₹20,000 Cr",
     },
   },
   "HDFC-W": {
@@ -73,18 +67,16 @@ export const ASSET_META: Record<string, AssetFundamental> = {
     sector: "Commercial Banking & Credit",
     archetype: "Trending",
     dossier:
-      "The benchmark liquidity pipeline for domestic corporate credit. Highly sensitive to central bank reserve mandates and interbank spreads. When policy headlines break, liquidity reprices in distinct multi-session directional waves rather than random intraday noise.",
+      "The primary credit bellwether of the economy whose expansive loan portfolio fueled the multi-year domestic lending cycle. Extremely sensitive to interest rate policy shifts and macro liquidity headlines, repricing in pronounced multi-session trend waves rather than choppy intraday noise.",
     deskNote:
-      "Directional macro bellwether. Catalysts trigger multi-session drift. Do not counter-trend trade breaking regulatory alerts.",
+      "Macro trend transmitter. Catalysts provoke persistent directional waves. Monitor regulatory disclosures and gross NPA shifts closely before positioning against trend impulses.",
     metrics: {
-      beta: "1.18",
+      beta: "1.25",
+      marketCap: "₹2,40,000 Cr",
+      peRatio: "18.0x",
       freeFloat: "82% (High Float)",
+      supportRange: "₹1,450 – ₹1,800",
       instHolding: "68.9%",
-      supportRange: "₹490 – ₹580",
-      peRatio: "18.1",
-      divYield: "1.6%",
-      pbRatio: "2.40",
-      marketCap: "₹25,000 Cr",
     },
   },
   "BZR-V": {
@@ -92,37 +84,16 @@ export const ASSET_META: Record<string, AssetFundamental> = {
     sector: "Digital Media & Consumer Tech",
     archetype: "High-Beta Volatile",
     dossier:
-      "A fast-growing consumer internet platform led by an erratic, vocal founder. With aggressive retail speculation, elevated short interest, and thin market-maker depth, any unexpected rumor triggers violent short squeezes or liquidation cascades.",
+      "A fast-scaling digital media and consumer marketplace platform with elevated retail enthusiasm and vocal leadership. Operates with tight market-maker depth, making it prone to sudden liquidity gaps and violent price swings upon unexpected rumors or earnings surprises.",
     deskNote:
-      "Asymmetric risk engine. Highly vulnerable to margin liquidations and rumor spikes. Scalp with tight risk or use news speed upgrades to front-run headline order flow.",
+      "High-beta asymmetric risk engine. Vulnerable to fast margin liquidations and rumor spikes. Scalp with tight risk or exploit fast news speed upgrades to front-run headline order flow.",
     metrics: {
-      beta: "2.45",
+      beta: "1.95",
+      marketCap: "₹30,000 Cr",
+      peRatio: "42.0x",
       freeFloat: "28% (Tight Float)",
-      instHolding: "14.2% (Retail Float)",
-      supportRange: "₹90 – ₹180",
-      peRatio: "45.0",
-      divYield: "0.0%",
-      pbRatio: "8.90",
-      marketCap: "₹1,500 Cr",
-    },
-  },
-  "PULSE": {
-    name: "Pulsechain Token",
-    sector: "Digital Assets & DeFi",
-    archetype: "High-Beta Volatile",
-    dossier:
-      "A decentralized synthetic liquidity token without physical collateral or sovereign oversight. Price is driven entirely by algorithmic liquidity pools, retail leverage ratios, and cross-market speculative risk sentiment. Technical support levels fail instantly during automated unwind events.",
-    deskNote:
-      "Zero structural support floor. Moves strictly with market-wide liquidity appetite and leverage flushes. Avoid holding overnight if margin rates spike.",
-    metrics: {
-      beta: "3.20",
-      freeFloat: "95% (Fully Circulating)",
-      instHolding: "4.8%",
-      supportRange: "₹60 – ₹120",
-      peRatio: "N/A",
-      divYield: "N/A",
-      pbRatio: "N/A",
-      marketCap: "₹1,000 Cr",
+      supportRange: "₹550 – ₹680",
+      instHolding: "14.2%",
     },
   },
   "GOLDCORE": {
@@ -130,107 +101,188 @@ export const ASSET_META: Record<string, AssetFundamental> = {
     sector: "Physical Commodities & Safe Haven",
     archetype: "Safe Haven",
     dossier:
-      "An allocated physical bullion depository trust designed for capital preservation. Trades with ultra-low volatility and compressed bid-ask spreads during baseline sessions. Acts as the primary flight-to-safety liquidity sink when equities, media names, or banking stocks experience systemic stress.",
+      "An allocated physical bullion depository trust designed for baseline capital preservation. Exhibits minimal day-to-day volatility during baseline market conditions, but serves as the emergency safe haven whenever broad equity or banking stress arises.",
     deskNote:
-      "Negative beta asset. Dormant during retail bull runs, but surges when macro shocks or activist short attacks hit the broader board.",
+      "Negative beta asset with positive macro drift. Dormant during retail speculative runs, but delivers sharp defensive upside when panic headlines shock risk assets.",
     metrics: {
-      beta: "-0.42",
-      freeFloat: "45%",
+      beta: "-0.35",
+      marketCap: "N/A (Bullion Reserve)",
+      peRatio: "N/A",
+      freeFloat: "45% (Reserve Stored)",
+      supportRange: "₹6,180 – ₹6,800",
       instHolding: "81.0%",
-      supportRange: "₹310 – ₹330",
-      peRatio: "12.0",
-      divYield: "0.5%",
-      pbRatio: "1.00",
-      marketCap: "₹40,000 Cr",
+    },
+  },
+  "PULSE": {
+    name: "Pulsechain Token",
+    sector: "Digital Assets & DeFi",
+    archetype: "High-Beta Volatile",
+    dossier:
+      "A speculative decentralized liquidity token trading purely on community sentiment, retail leverage, and algorithmic pool rebalancing. Lacks physical collateral or institutional floor support, producing explosive rallies and precipitous sell-offs.",
+    deskNote:
+      "Zero structural valuation floor. Highly reactive to broad market liquidity sentiment. Avoid holding long positions when market-wide momentum indicators roll over.",
+    metrics: {
+      beta: "2.80",
+      marketCap: "N/A (Synthetic Asset)",
+      peRatio: "N/A",
+      freeFloat: "95% (Circulating)",
+      supportRange: "₹830 – ₹1,020",
+      instHolding: "4.8%",
     },
   },
   "TATA-Y": {
     name: "Tyrell Autoworks",
-    sector: "Heavy Industrial & Mobility",
+    sector: "Heavy Infrastructure & Mobility",
     archetype: "Mean-Reverting",
     dossier:
-      "An infrastructure heavy-machinery manufacturer exposed to raw input commodity cycles. Earnings volatility creates wide price swings, but domestic industrial consortiums enforce a hard valuation corridor around production replacement costs.",
+      "A mid-cap industrial mobility manufacturer that consistently returns to its historical production cost baseline. While raw material cost pressures create periodic earnings dips, strong industrial consortium buying forms a predictable valuation floor.",
     deskNote:
-      "Cyclical bound. Sells off heavily on raw material cost reports, providing repeatable accumulation entries near historical cycle floors.",
+      "Reliable cyclical corridor asset. Sells off on commodity headline spikes, providing high-probability entry points near established cyclical support levels.",
     metrics: {
       beta: "0.85",
-      freeFloat: "35%",
+      marketCap: "₹60,000 Cr",
+      peRatio: "17.0x",
+      freeFloat: "35% (Industrial Float)",
+      supportRange: "₹815 – ₹890",
       instHolding: "61.3%",
-      supportRange: "₹75 – ₹105",
-      peRatio: "16.4",
-      divYield: "3.2%",
-      pbRatio: "1.65",
-      marketCap: "₹8,800 Cr",
     },
   },
   "NIMBUS": {
     name: "Nimbus Cloud Datacenters",
-    sector: "AI & Server Infrastructure",
+    sector: "IT & Server Infrastructure",
     archetype: "Trending",
-    dossier: "Hyperscale compute real estate provider powering machine learning clusters. Sustained high institutional cap-ex cycle creates continuous trend extensions.",
-    deskNote: "Momentum driver. Follow directional news breaks and volume expansion blocks.",
+    dossier:
+      "A high-growth cloud compute and AI server infrastructure provider. Competing aggressively with legacy IT leaders, continuous corporate cap-ex commitments drive prolonged directional trend expansions.",
+    deskNote:
+      "Growth momentum engine. Follow directional breakout alerts and volume expansion; avoid counter-trend shorting during active trend phases.",
     metrics: {
-      beta: "1.40",
-      freeFloat: "50%",
+      beta: "1.45",
+      marketCap: "₹22,000 Cr",
+      peRatio: "38.0x",
+      freeFloat: "50% (Liquid)",
+      supportRange: "₹345 – ₹455",
       instHolding: "65.0%",
-      supportRange: "₹380 – ₹440",
-      peRatio: "32.0",
-      divYield: "0.4%",
-      pbRatio: "6.20",
-      marketCap: "₹18,000 Cr",
     },
   },
   "STAPLE": {
-    name: "Staple Agro Foods",
-    sector: "FMCG & Agritech",
+    name: "Staple & Co. Provisions",
+    sector: "Consumer Staples & FMCG",
     archetype: "Safe Haven",
-    dossier: "Essential consumer staples producer with non-elastic consumer demand across economic cycles.",
-    deskNote: "Low-beta defensive pivot. Use for capital parking during high-volatility macro dislocations.",
+    dossier:
+      "Everyday household goods and essential consumer consumables producer. Characterized by predictable revenue and steady profit margins regardless of macroeconomic cycles.",
+    deskNote:
+      "Low-beta defensive sanctuary. Uncorrelated with speculative retail hype; ideal for capital preservation during high-volatility sessions.",
     metrics: {
-      beta: "0.35",
-      freeFloat: "40%",
+      beta: "0.32",
+      marketCap: "₹45,000 Cr",
+      peRatio: "26.0x",
+      freeFloat: "40% (Institutional)",
+      supportRange: "₹1,180 – ₹1,215",
       instHolding: "70.5%",
-      supportRange: "₹1,120 – ₹1,240",
-      peRatio: "24.5",
-      divYield: "2.1%",
-      pbRatio: "3.80",
-      marketCap: "₹35,000 Cr",
     },
   },
   "VOLTAGE": {
     name: "Voltage Power Matrix",
-    sector: "Renewable Energy & Battery Storage",
+    sector: "Energy & Battery Storage",
     archetype: "High-Beta Volatile",
-    dossier: "High-growth grid storage provider. Sensitive to raw lithium pricing and sovereign renewable subsidies.",
-    deskNote: "High intraday beta. Scalp key momentum breakouts with strict stop losses.",
+    dossier:
+      "A small-cap electrical grid operator and battery storage manufacturer highly geared to national power tariffs and lithium supply costs. Highly sensitive to energy subsidy announcements.",
+    deskNote:
+      "High intraday elasticity. Prone to wide percentage moves on sector policy bulletins. Execute disciplined entries with defined risk boundaries.",
     metrics: {
-      beta: "2.10",
-      freeFloat: "48%",
+      beta: "1.85",
+      marketCap: "₹18,000 Cr",
+      peRatio: "12.0x",
+      freeFloat: "48% (Tradeable)",
+      supportRange: "₹260 – ₹310",
       instHolding: "34.0%",
-      supportRange: "₹280 – ₹340",
-      peRatio: "55.0",
-      divYield: "0.0%",
-      pbRatio: "7.10",
-      marketCap: "₹6,500 Cr",
     },
   },
   "CRANE": {
     name: "Crane Maritime Logistics",
-    sector: "Global Shipping & Freight",
+    sector: "Infrastructure & Freight",
     archetype: "Mean-Reverting",
-    dossier: "Deepwater container carrier fleet tied to Baltic freight index swings and spot container tariffs.",
-    deskNote: "Range-bound cyclical. Buy oversold support tests and unload near resistance bands.",
+    dossier:
+      "Deepwater container carrier fleet and port logistics operator whose revenues mirror Baltic freight tariffs and national trade volumes. Swings predictably between supply gluts and shipping demand surges.",
+    deskNote:
+      "Corridor-bound cyclical name. Accumulate near lower channel bounds and offload inventory near channel tops.",
     metrics: {
-      beta: "0.92",
-      freeFloat: "55%",
+      beta: "0.90",
+      marketCap: "₹26,000 Cr",
+      peRatio: "20.0x",
+      freeFloat: "55% (Commercial)",
+      supportRange: "₹475 – ₹560",
       instHolding: "52.0%",
-      supportRange: "₹480 – ₹560",
-      peRatio: "8.5",
-      divYield: "5.5%",
-      pbRatio: "0.95",
-      marketCap: "₹12,000 Cr",
     },
-  }
+  },
+  "APEX": {
+    name: "Apex Capital Bank",
+    sector: "Commercial Banking & Credit",
+    archetype: "High-Beta Volatile",
+    dossier:
+      "A fast-growing regional lender that expanded aggressively during the credit boom. Underneath its optimistic headline returns lies elevated balance sheet leverage and mounting credit exposure.",
+    deskNote:
+      "High-volatility risk play. Watch credit quality and NPA disclosures carefully. Rallies can be shorted aggressively upon regulatory scrutiny.",
+    metrics: {
+      beta: "2.10",
+      marketCap: "₹28,000 Cr",
+      peRatio: "12.0x",
+      freeFloat: "42% (Leveraged)",
+      supportRange: "₹530 – ₹740",
+      instHolding: "44.0%",
+    },
+  },
+  "LEDGER": {
+    name: "Ledger Data Systems",
+    sector: "IT & Enterprise Data",
+    archetype: "Mean-Reverting",
+    dossier:
+      "A mature, cash-rich enterprise database and financial software vendor with sticky multi-year government and banking contracts. Trades within well-defined valuation bands.",
+    deskNote:
+      "Mean-reverting quality holding. Sells off rarely and rebounds swiftly toward fundamental value corridor.",
+    metrics: {
+      beta: "0.80",
+      marketCap: "₹40,000 Cr",
+      peRatio: "22.0x",
+      freeFloat: "46% (Stable)",
+      supportRange: "₹1,900 – ₹2,030",
+      instHolding: "67.0%",
+    },
+  },
+  "FORGE": {
+    name: "Forge Industrial Holdings",
+    sector: "Heavy Infrastructure & Engineering",
+    archetype: "Trending",
+    dossier:
+      "An industrial engineering contractor strategically positioned for sovereign infrastructure and defense procurement allocations. Strong order backlog powers persistent upward momentum.",
+    deskNote:
+      "Late-round trending momentum leader. Catalyzed by capital expansion tenders; ride breakout channels.",
+    metrics: {
+      beta: "1.30",
+      marketCap: "₹38,000 Cr",
+      peRatio: "17.0x",
+      freeFloat: "38% (High Demand)",
+      supportRange: "₹1,260 – ₹1,480",
+      instHolding: "62.0%",
+    },
+  },
+  "MERX50": {
+    name: "MERX 50 Index",
+    sector: "Composite Macro Benchmark",
+    archetype: "Macro Benchmark",
+    dossier:
+      "The comprehensive benchmark index aggregating the top corporate equities across Energy, Banking, Technology, and Infrastructure. Reflects the aggregate economic pulse and system liquidity.",
+    deskNote:
+      "Broad market gauge. Use as systemic risk benchmark; index shifts dictate macro direction for individual equities.",
+    metrics: {
+      beta: "1.00",
+      marketCap: "₹10,49,000 Cr",
+      peRatio: "24.2x",
+      freeFloat: "58% (Broad Index)",
+      supportRange: "₹855 – ₹1,020",
+      instHolding: "65.0%",
+    },
+  },
 };
 
 const EMPTY_HISTORY: { time: number; value: number }[] = [];
@@ -310,10 +362,6 @@ export function AssetDetailTab({ ticker, onBack }: { ticker: string, onBack: () 
           </div>
           <div className="text-left sm:text-right">
             <div className="text-[28px] sm:text-[34px] font-mono font-bold text-tx-primary tracking-tight">₹{currentPrice.toFixed(2)}</div>
-            <div className="text-[11px] font-mono font-bold text-gain mt-0.5 flex items-center sm:justify-end gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-gain animate-pulse" />
-              <span>LIVE STOCHASTIC TICK</span>
-            </div>
           </div>
         </div>
 
@@ -389,49 +437,43 @@ export function AssetDetailTab({ ticker, onBack }: { ticker: string, onBack: () 
 
             <div>
               <div className="text-[11px] font-bold text-tx-muted uppercase tracking-[0.06em] mb-3">
-                Key Financial & Microstructure Indicators
+                Key Fundamental & Valuation Metrics
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="bg-bg-void border border-bd-subtle p-3 rounded-md">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div className="bg-bg-void border border-bd-subtle p-3.5 rounded-md hover:border-accent-border/40 transition-colors">
                   <div className="text-[10px] font-bold text-tx-muted uppercase tracking-[0.06em]">Market Beta</div>
-                  <div className="text-[14px] font-mono font-bold text-tx-primary mt-1">{meta.metrics?.beta || "-"}</div>
-                  <div className="text-[10px] text-tx-muted mt-0.5">Sensitivity to index</div>
+                  <div className="text-[16px] font-mono font-bold text-accent mt-1">{meta.metrics?.beta || "-"}</div>
+                  <div className="text-[10px] text-tx-muted mt-0.5">Sensitivity to MERX50</div>
                 </div>
-                <div className="bg-bg-void border border-bd-subtle p-3 rounded-md">
-                  <div className="text-[10px] font-bold text-tx-muted uppercase tracking-[0.06em]">Inst. Holding</div>
-                  <div className="text-[14px] font-mono font-bold text-tx-primary mt-1">{meta.metrics?.instHolding || "-"}</div>
-                  <div className="text-[10px] text-tx-muted mt-0.5">Order absorption depth</div>
+
+                <div className="bg-bg-void border border-bd-subtle p-3.5 rounded-md hover:border-accent-border/40 transition-colors">
+                  <div className="text-[10px] font-bold text-tx-muted uppercase tracking-[0.06em]">Market Cap</div>
+                  <div className="text-[16px] font-mono font-bold text-tx-primary mt-1">{meta.metrics?.marketCap || "-"}</div>
+                  <div className="text-[10px] text-tx-muted mt-0.5">Total market valuation</div>
                 </div>
-                <div className="bg-bg-void border border-bd-subtle p-3 rounded-md">
-                  <div className="text-[10px] font-bold text-tx-muted uppercase tracking-[0.06em]">Active Float</div>
-                  <div className="text-[14px] font-mono font-bold text-tx-primary mt-1">{meta.metrics?.freeFloat || "-"}</div>
-                  <div className="text-[10px] text-tx-muted mt-0.5">Squeeze vulnerability</div>
+
+                <div className="bg-bg-void border border-bd-subtle p-3.5 rounded-md hover:border-accent-border/40 transition-colors">
+                  <div className="text-[10px] font-bold text-tx-muted uppercase tracking-[0.06em]">P/E Ratio</div>
+                  <div className="text-[16px] font-mono font-bold text-tx-primary mt-1">{meta.metrics?.peRatio || "-"}</div>
+                  <div className="text-[10px] text-tx-muted mt-0.5">Valuation multiple</div>
                 </div>
-                <div className="bg-bg-void border border-bd-subtle p-3 rounded-md">
+
+                <div className="bg-bg-void border border-bd-subtle p-3.5 rounded-md hover:border-accent-border/40 transition-colors">
                   <div className="text-[10px] font-bold text-tx-muted uppercase tracking-[0.06em]">Equilibrium Band</div>
-                  <div className="text-[14px] font-mono font-bold text-gain mt-1">{meta.metrics?.supportRange || "-"}</div>
+                  <div className="text-[15px] font-mono font-bold text-gain mt-1">{meta.metrics?.supportRange || "-"}</div>
                   <div className="text-[10px] text-tx-muted mt-0.5">Historical trading corridor</div>
                 </div>
 
-                <div className="bg-bg-void/50 border border-bd-hairline p-3 rounded-md opacity-80">
-                  <div className="text-[10px] font-bold text-tx-muted uppercase tracking-[0.06em]">P/E Ratio (LTM)</div>
-                  <div className="text-[14px] font-mono font-bold text-tx-secondary mt-1">{meta.metrics?.peRatio || "-"}</div>
-                  <div className="text-[10px] text-tx-muted mt-0.5">Earnings multiple</div>
+                <div className="bg-bg-void border border-bd-subtle p-3.5 rounded-md hover:border-accent-border/40 transition-colors">
+                  <div className="text-[10px] font-bold text-tx-muted uppercase tracking-[0.06em]">Active Float</div>
+                  <div className="text-[15px] font-mono font-bold text-tx-secondary mt-1">{meta.metrics?.freeFloat || "-"}</div>
+                  <div className="text-[10px] text-tx-muted mt-0.5">Tradeable market liquidity</div>
                 </div>
-                <div className="bg-bg-void/50 border border-bd-hairline p-3 rounded-md opacity-80">
-                  <div className="text-[10px] font-bold text-tx-muted uppercase tracking-[0.06em]">Dividend Yield</div>
-                  <div className="text-[14px] font-mono font-bold text-tx-secondary mt-1">{meta.metrics?.divYield || "-"}</div>
-                  <div className="text-[10px] text-tx-muted mt-0.5">Annualized yield</div>
-                </div>
-                <div className="bg-bg-void/50 border border-bd-hairline p-3 rounded-md opacity-80">
-                  <div className="text-[10px] font-bold text-tx-muted uppercase tracking-[0.06em]">Price / Book</div>
-                  <div className="text-[14px] font-mono font-bold text-tx-secondary mt-1">{meta.metrics?.pbRatio || "-"}</div>
-                  <div className="text-[10px] text-tx-muted mt-0.5">Book value multiple</div>
-                </div>
-                <div className="bg-bg-void/50 border border-bd-hairline p-3 rounded-md opacity-80">
-                  <div className="text-[10px] font-bold text-tx-muted uppercase tracking-[0.06em]">Market Cap</div>
-                  <div className="text-[14px] font-mono font-bold text-tx-secondary mt-1">{meta.metrics?.marketCap || "-"}</div>
-                  <div className="text-[10px] text-tx-muted mt-0.5">Total valuation</div>
+
+                <div className="bg-bg-void border border-bd-subtle p-3.5 rounded-md hover:border-accent-border/40 transition-colors">
+                  <div className="text-[10px] font-bold text-tx-muted uppercase tracking-[0.06em]">Inst. Holding</div>
+                  <div className="text-[15px] font-mono font-bold text-tx-secondary mt-1">{meta.metrics?.instHolding || "-"}</div>
+                  <div className="text-[10px] text-tx-muted mt-0.5">Order absorption depth</div>
                 </div>
               </div>
             </div>

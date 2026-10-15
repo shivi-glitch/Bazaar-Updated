@@ -255,3 +255,33 @@ async def get_final_leaderboard(team: Team = Depends(get_current_team), db: Asyn
         "top_10": results[:10],
         "my_result": user_result
     }
+
+@router.get("/news")
+async def get_news_ledger(authorization: str = Header(None), db: AsyncSession = Depends(get_db)):
+    """Returns all news published across all sessions and rounds so far."""
+    team_research_level = 0
+    if authorization:
+        try:
+            token = authorization.replace("Bearer ", "")
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            team_id = payload.get("sub")
+            if team_id:
+                res = await db.execute(select(Team).where(func.lower(Team.id) == str(team_id).strip().lower()))
+                team = res.scalar_one_or_none()
+                if team:
+                    team_research_level = team.research_level
+        except Exception:
+            pass
+
+    filtered = []
+    for item in engine_app.news_ledger:
+        if item.get("source") == "IN" and team_research_level < 2:
+            continue
+        filtered.append({
+            "id": item.get("id"),
+            "source": item.get("source", "NP"),
+            "ticker": item.get("ticker", "GLOBAL"),
+            "text": item.get("text", ""),
+            "timestamp": item.get("timestamp", 0)
+        })
+    return {"news": filtered}

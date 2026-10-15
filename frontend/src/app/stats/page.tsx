@@ -155,21 +155,21 @@ export function StatsTab() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
         <StatCard 
           title="Research" 
-          desc="Slashes news delay from 12s to instant. Level 2 unlocks privileged Insider rumors."
+          desc="Slashes news delay from 15s to 3s. Level 2 unlocks privileged Insider rumors."
           currentLvl={data.stats.research} max={3} 
-          costs={{1: 8000000, 2: 18000000, 3: 35000000}} 
+          costs={{1: 35000000, 2: 75000000, 3: 130000000}} 
         />
         <StatCard 
           title="Capital" 
-          desc="Expands trading capacity. Level 1 unlocks short selling. Level 2 unlocks 2x margin leverage."
+          desc="Expands trading capacity. Level 1 unlocks short selling. Level 2 unlocks margin leverage."
           currentLvl={data.stats.capital} max={2} 
-          costs={{1: 12000000, 2: 28000000}} 
+          costs={{1: 50000000, 2: 110000000}} 
         />
         <StatCard 
           title="Speed" 
           desc="Sub-millisecond execution priority queue. Eliminates order slippage on rapid momentum spikes."
           currentLvl={data.stats.speed} max={3} 
-          costs={{1: 6000000, 2: 14000000, 3: 25000000}} 
+          costs={{1: 30000000, 2: 60000000, 3: 105000000}} 
         />
       </div>
     </div>

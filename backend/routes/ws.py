@@ -135,6 +135,26 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(None)):
                 "n": engine_app.n,
                 "prices": initial_prices
             }))
+        
+        # Send all previous news across sessions & rounds
+        if engine_app.news_ledger:
+            news_items = [
+                {
+                    "id": item.get("id"),
+                    "source": item.get("source", "NP"),
+                    "ticker": item.get("ticker", "GLOBAL"),
+                    "text": item.get("text", ""),
+                    "timestamp": item.get("timestamp", 0)
+                }
+                for item in engine_app.news_ledger
+                if not (item.get("source") == "IN" and research_level < 2)
+            ]
+            if news_items:
+                await manager.safe_send(websocket, json.dumps({
+                    "type": "news_history",
+                    "news": news_items
+                }))
+
         while True:
             raw_text = await websocket.receive_text()
             try:

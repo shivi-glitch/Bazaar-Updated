@@ -105,9 +105,9 @@ export function DashboardShell({
         <div className="flex items-center gap-2 sm:gap-3.5 min-w-0">
           <Link 
             href="/" 
-            className="font-bold text-[18px] sm:text-[20px] tracking-[-0.04em] text-tx-primary shrink-0 hover:text-accent transition-colors"
+            className="font-black text-[18px] sm:text-[20px] tracking-[-0.03em] shrink-0 hover:brightness-110 transition-all flex items-center"
           >
-            MERX
+            <span className="text-gain">MER</span><span className="text-loss">X</span>
           </Link>
 
           <span className="text-bd-strong hidden sm:inline">|</span>
@@ -142,10 +142,10 @@ export function DashboardShell({
               <span>{sessionState}</span>
             </span>
 
-            {/* Clock */}
-            <span className="text-[10px] sm:text-[11px] font-mono font-bold text-tx-secondary bg-bg-raised px-2 py-0.5 rounded border border-bd-subtle flex items-center gap-1 shrink-0">
-              <Clock className="w-3 h-3 text-tx-muted" />
-              <span>{formattedTime}</span>
+            {/* Clock (Pure White per specification) */}
+            <span className="text-[10px] sm:text-[11px] font-mono font-bold text-white bg-bg-raised px-2 py-0.5 rounded border border-bd-subtle flex items-center gap-1.5 shrink-0 shadow-xs">
+              <Clock className="w-3 h-3 text-white" />
+              <span className="text-white font-mono font-bold tracking-wider">{formattedTime}</span>
             </span>
           </div>
         </div>

@@ -1,12 +1,13 @@
 import os
+import time
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import update, delete, select
 
 from backend.database import AsyncSessionLocal
-from backend.models import Team, TeamLedger, Position, Order, StatPurchase, EquitySnapshot
-from backend.core.scoring import calculate_equity_paise
+from backend.models import Team, TeamLedger, Position, Order, StatPurchase, EquitySnapshot, LeaderboardSnapshot
+from backend.core.scoring import calculate_equity_paise, calculate_return_pct
 from backend.core.engine import engine_app
 from backend.core.news_ledger import SCRIPTED_NEWS_DATABASE
 
@@ -59,13 +60,53 @@ async def unlock_round2_route(db: AsyncSession = Depends(get_db)):
         # Engine rule: Can only unlock if R1S6 is FINISHED
         res = await engine_app.unlock_round2()
         
-        # 1. Wipe all current positions
+        # 1. Snapshot Round 1 Final Standings before state wipe
+        teams_res = await db.execute(select(Team))
+        teams = teams_res.scalars().all()
+        ledgers_res = await db.execute(select(TeamLedger))
+        ledgers = {l.team_id: l.cash_paise for l in ledgers_res.scalars().all()}
+        pos_res = await db.execute(select(Position))
+        positions = pos_res.scalars().all()
+        team_pos = {}
+        for p in positions:
+            team_pos.setdefault(p.team_id, []).append(p)
+        live_prices = {t: d[0] for t, d in engine_app.current_prices.items()}
+
+        r1_rows = []
+        for t in teams:
+            cash = ledgers.get(t.id, 100000000)
+            p_list = team_pos.get(t.id, [])
+            equity = calculate_equity_paise(cash, p_list, live_prices)
+            ret_pct = calculate_return_pct(equity, 100000000)
+            if t.eliminated or equity <= 0:
+                equity = 0
+                ret_pct = -100.0
+            r1_rows.append({
+                "team_id": t.id,
+                "name": t.name,
+                "equity_paise": equity,
+                "return_pct": round(ret_pct, 4),
+                "status": "ELIM" if t.eliminated or equity <= 0 else "ACTIVE"
+            })
+        r1_rows.sort(key=lambda x: x["equity_paise"], reverse=True)
+        for i, row in enumerate(r1_rows):
+            row["rank"] = i + 1
+
+        r1_snapshot = LeaderboardSnapshot(
+            round_num=1,
+            kind="final",
+            taken_at=int(time.time()),
+            rows=r1_rows
+        )
+        db.add(r1_snapshot)
+
+        # 2. Wipe all current positions
         await db.execute(delete(Position))
         
-        # 2. Reset every ledger to exactly 1 Crore INR (1,000,000,000 paise)
+        # 3. Reset every ledger to exactly 1 Crore INR (1,000,000,000 paise)
         await db.execute(update(TeamLedger).values(cash_paise=1000000000))
         
-        # 3. Reset team stats and clear eliminations
+        # 4. Reset team stats and clear eliminations
         await db.execute(
             update(Team).values(
                 research_level=0, 
