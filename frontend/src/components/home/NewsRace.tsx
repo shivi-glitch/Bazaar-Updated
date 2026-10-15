@@ -118,13 +118,12 @@ export function NewsRace() {
               {["TIER I", "TIER II", "TIER III"].map((tier, i) => (
                 <div
                   key={tier}
-                  className={`bg-bg-void/80 border rounded-lg py-2 text-center font-mono ${
-                    i === 0
+                  className={`bg-bg-void/80 border rounded-lg py-2 text-center font-mono ${i === 0
                       ? "border-warn-border/40 text-warn"
                       : i === 1
-                      ? "border-bd-subtle text-tx-secondary"
-                      : "border-bd-hairline text-tx-muted opacity-60"
-                  }`}
+                        ? "border-bd-subtle text-tx-secondary"
+                        : "border-bd-hairline text-tx-muted opacity-60"
+                    }`}
                 >
                   <div className="text-[10px] uppercase font-bold">{tier}</div>
                 </div>
@@ -196,7 +195,7 @@ export function NewsRace() {
                 Depth Analytics
               </h3>
               <p className="text-tx-secondary text-[14px] sm:text-[15px] leading-relaxed max-w-xl mb-6">
-                Unlock advanced order flow visibility and market microstructure telemetry in advanced rounds.
+                Unlock advanced order flow visibility and market microstructure telemetry in further rounds.
               </p>
             </div>
 

@@ -44,6 +44,9 @@ export function DashboardShell({
       try {
         const res = await api.get("/portfolio", token || "");
         setPortfolioData(res);
+        if (res.session) {
+          useMarketStore.getState().updateSessionFromPoll(res.session);
+        }
       } catch (err) {}
     };
 
@@ -62,6 +65,9 @@ export function DashboardShell({
 
   const handleLogout = () => {
     localStorage.removeItem("merx_token");
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("merx_auth_change"));
+    }
     router.push("/");
   };
   
@@ -118,8 +124,21 @@ export function DashboardShell({
             </span>
 
             {/* State indicator */}
-            <span className="text-[10px] font-mono font-bold text-gain bg-gain-dim px-2 py-0.5 rounded border border-gain-border hidden sm:flex items-center gap-1.5 shrink-0">
-              <span className={clsx("w-1.5 h-1.5 rounded-full", connected ? 'bg-gain animate-pulse' : 'bg-loss')} />
+            <span className={clsx(
+              "text-[10px] font-mono font-bold px-2 py-0.5 rounded border flex items-center gap-1.5 shrink-0",
+              sessionState === "RUNNING" ? "text-gain bg-gain-dim border-gain-border" :
+              sessionState === "STARTING" ? "text-accent bg-accent-dim border-accent-border animate-pulse" :
+              sessionState === "PAUSED" ? "text-warn bg-warn-dim border-warn-border" :
+              sessionState === "FINISHED" ? "text-tx-muted bg-bg-raised border-bd-subtle" :
+              "text-tx-secondary bg-bg-raised border-bd-subtle"
+            )}>
+              <span className={clsx(
+                "w-1.5 h-1.5 rounded-full",
+                !connected ? 'bg-loss' :
+                sessionState === 'RUNNING' ? 'bg-gain animate-pulse' :
+                sessionState === 'STARTING' ? 'bg-accent animate-ping' :
+                sessionState === 'PAUSED' ? 'bg-warn' : 'bg-tx-muted'
+              )} />
               <span>{sessionState}</span>
             </span>
 

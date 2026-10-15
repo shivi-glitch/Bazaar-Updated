@@ -137,13 +137,39 @@ class MarketEngine:
 
     async def broadcast_state(self, g: int, state: str):
         if self.ws_manager:
-            await self.ws_manager.broadcast({"type": "session", "g": g, "n": self.n, "state": state})
+            prices = self.get_live_or_initial_prices()
+            await self.ws_manager.broadcast({
+                "type": "session",
+                "g": g,
+                "n": self.n,
+                "state": state,
+                "prices": prices
+            })
 
     async def start_session(self, g: int):
         if self.is_frozen: raise ValueError("market_frozen")
         self.current_g = g
         self.n = 0
         self.session_states[g] = "STARTING"
+        
+        # Immediately prepare baseline prices for this session
+        if g < 7:
+            g_data = self.price_table.get(g, {})
+            if 0 in g_data:
+                self.current_prices = dict(g_data[0])
+        else:
+            if not self.r2_states:
+                base_prices = {"RELI-X": 2450.0, "TATA-Y": 880.0, "INFY-Z": 1520.0, "HDFC-W": 1640.0, "BZR-V": 640.0, "GOLDCORE": 6200.0, "PULSE": 850.0, "NIMBUS": 410.0, "STAPLE": 1180.0, "VOLTAGE": 310.0, "CRANE": 520.0}
+                for t, p in base_prices.items():
+                    self.r2_states[t] = R2InstrumentState(t, p)
+                    self.r2_f_values[t] = p
+                    self.flow_buffer[t] = 0.0
+            if not self.current_prices or any(t not in self.current_prices for t in self.r2_states):
+                self.current_prices = {
+                    t: [int(s.current_price * 100), random.randint(200, 800)]
+                    for t, s in self.r2_states.items()
+                }
+
         await self._update_db_state(g, "STARTING")
         await self.broadcast_state(g, "STARTING")
         self._start_task = asyncio.create_task(self._complete_starting_sync(g))
@@ -186,6 +212,7 @@ class MarketEngine:
         self.r2_unlocked = True
         self.session_states[7] = "READY"
         await self._update_db_state(7, "READY")
+        await self.broadcast_state(7, "READY")
         return {"status": "ROUND_2_UNLOCKED"}
 
     async def freeze(self):
@@ -197,6 +224,7 @@ class MarketEngine:
 
     async def unfreeze(self):
         self.is_frozen = False
+        await self.broadcast_state(self.current_g, self.get_current_session_state())
         return {"status": "UNFROZEN"}
 
     async def reset_event(self):

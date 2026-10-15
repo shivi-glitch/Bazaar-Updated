@@ -14,46 +14,54 @@ router = APIRouter(tags=["websocket"])
 class ConnectionManager:
     def __init__(self):
         self.active_connections = {}  # { websocket: {"team_id": str, "research_level": int} }
+        self._locks = {}  # { websocket: asyncio.Lock }
 
     async def connect(self, websocket: WebSocket, team_id: str, research_level: int):
         await websocket.accept()
         self.active_connections[websocket] = {"team_id": team_id, "research_level": research_level}
+        self._locks[websocket] = asyncio.Lock()
 
     def disconnect(self, websocket: WebSocket):
         if websocket in self.active_connections:
             del self.active_connections[websocket]
+        if websocket in self._locks:
+            del self._locks[websocket]
 
     def get_online_team_ids(self) -> set:
         return {data.get("team_id") for data in self.active_connections.values() if data.get("team_id")}
 
+    async def safe_send(self, ws: WebSocket, text: str):
+        lock = self._locks.get(ws)
+        if not lock:
+            return
+        try:
+            async with lock:
+                await asyncio.wait_for(ws.send_text(text), timeout=3.0)
+        except Exception:
+            self.disconnect(ws)
+            try:
+                await ws.close(code=1011)
+            except Exception:
+                pass
+
     async def broadcast(self, message: dict):
         text = json.dumps(message)
-        
-        async def safe_send(ws):
-            try:
-                await asyncio.wait_for(ws.send_text(text), timeout=0.2)
-            except Exception:
-                self.disconnect(ws)
-
-        await asyncio.gather(*(safe_send(ws) for ws in list(self.active_connections.keys())))
+        ws_list = list(self.active_connections.keys())
+        if not ws_list:
+            return
+        await asyncio.gather(*(self.safe_send(ws, text) for ws in ws_list), return_exceptions=True)
 
     async def broadcast_to_specific_teams(self, team_ids: list, message: dict):
         text = json.dumps(message)
         target_ids = {str(t).lower() for t in team_ids}
         
-        async def safe_send(ws):
-            try:
-                await asyncio.wait_for(ws.send_text(text), timeout=0.2)
-            except Exception:
-                self.disconnect(ws)
-
         tasks = [
-            safe_send(ws) 
+            self.safe_send(ws, text) 
             for ws, data in list(self.active_connections.items())
             if str(data.get("team_id", "")).lower() in target_ids
         ]
         if tasks:
-            await asyncio.gather(*tasks)
+            await asyncio.gather(*tasks, return_exceptions=True)
 
     async def dispatch_targeted_news(self, news_item: dict):
         """Routes news asynchronously based on Research Level delays."""
@@ -61,10 +69,7 @@ class ConnectionManager:
         
         async def send_with_delay(ws: WebSocket, delay_sec: int, msg: str):
             await asyncio.sleep(delay_sec)
-            try:
-                await ws.send_text(msg)
-            except Exception:
-                self.disconnect(ws)
+            await self.safe_send(ws, msg)
 
         msg_text = json.dumps({
             "type": "news",
@@ -115,22 +120,28 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(None)):
     
     try:
         initial_prices = engine_app.get_live_or_initial_prices()
-        await websocket.send_json({
+        await manager.safe_send(websocket, json.dumps({
             "type": "hello",
             "server_time": time.time(),
             "state": engine_app.get_current_session_state(),
             "g": engine_app.current_g,
             "n": engine_app.n,
             "prices": initial_prices
-        })
+        }))
         if initial_prices:
-            await websocket.send_json({
+            await manager.safe_send(websocket, json.dumps({
                 "type": "tick",
                 "g": engine_app.current_g,
                 "n": engine_app.n,
                 "prices": initial_prices
-            })
+            }))
         while True:
-            await websocket.receive_text()
+            raw_text = await websocket.receive_text()
+            try:
+                msg = json.loads(raw_text)
+                if msg.get("type") == "ping":
+                    await manager.safe_send(websocket, json.dumps({"type": "pong", "time": time.time()}))
+            except Exception:
+                pass
     except (WebSocketDisconnect, Exception):
         manager.disconnect(websocket)

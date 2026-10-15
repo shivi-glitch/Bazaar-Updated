@@ -35,6 +35,7 @@ interface MarketState {
   clearToast: () => void;
   updateFromMessage: (msg: any) => void;
   setPortfolioData: (data: any) => void;
+  updateSessionFromPoll: (sessionData: { state: string; g: number; n?: number; is_frozen?: boolean }) => void;
 }
 
 const DEFAULT_R1_PRICES: Record<string, [number, number]> = {
@@ -62,6 +63,24 @@ export const useMarketStore = create<MarketState>((set) => ({
   setConnected: (status) => set({ connected: status }),
   clearToast: () => set({ latestToast: null }),
   setPortfolioData: (data) => set({ portfolioData: data }),
+  updateSessionFromPoll: (sessionData) => {
+    set((state) => {
+      const isNewSession = sessionData.g !== undefined && sessionData.g !== state.currentSession;
+      const isRestart = sessionData.state === 'STARTING' || sessionData.state === 'READY';
+      if (
+        state.sessionState !== sessionData.state ||
+        (sessionData.g !== undefined && state.currentSession !== sessionData.g)
+      ) {
+        return {
+          sessionState: sessionData.state,
+          currentSession: sessionData.g !== undefined ? sessionData.g : state.currentSession,
+          globalTick: typeof sessionData.n === 'number' ? sessionData.n : (isRestart ? 0 : state.globalTick),
+          priceHistory: (isNewSession || isRestart) ? {} : state.priceHistory
+        };
+      }
+      return state;
+    });
+  },
   updateFromMessage: (msg) => {
     if (msg.type === "hello") {
       set((state) => {
@@ -80,11 +99,15 @@ export const useMarketStore = create<MarketState>((set) => ({
       set((state) => {
         const isNewSession = msg.g !== undefined && msg.g !== state.currentSession;
         const isRestart = msg.state === 'STARTING' || msg.state === 'READY';
+        const updatedPrices = (msg.prices && Object.keys(msg.prices).length > 0)
+          ? { ...state.prices, ...msg.prices }
+          : state.prices;
         return { 
           sessionState: msg.state, 
           currentSession: msg.g !== undefined ? msg.g : state.currentSession,
           globalTick: typeof msg.n === 'number' ? msg.n : (isRestart ? 0 : state.globalTick),
-          priceHistory: (isNewSession || isRestart) ? {} : state.priceHistory
+          priceHistory: (isNewSession || isRestart) ? {} : state.priceHistory,
+          prices: updatedPrices
         };
       });
     } else if (msg.type === "tick") {

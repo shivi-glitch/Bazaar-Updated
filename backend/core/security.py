@@ -3,6 +3,10 @@ import bcrypt
 import jwt
 import time
 from datetime import datetime, timedelta, timezone
+from dotenv import load_dotenv
+
+env_path = os.path.join(os.path.dirname(__file__), "..", ".env")
+load_dotenv(env_path)
 
 SECRET_KEY = os.getenv("JWT_SECRET", "fallback-secret")
 ALGORITHM = "HS256"

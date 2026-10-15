@@ -184,7 +184,24 @@ async def get_portfolio(team: Team = Depends(get_current_team), db: AsyncSession
     return {
         "cash_paise": cash, "equity_paise": equity, "positions": pos_data,
         "eliminated": team.eliminated, "r2_unlocked": engine_app.r2_unlocked,
-        "stats": {"research": team.research_level, "capital": team.capital_level, "speed": team.speed_level}
+        "stats": {"research": team.research_level, "capital": team.capital_level, "speed": team.speed_level},
+        "session": {
+            "state": engine_app.get_current_session_state(),
+            "g": engine_app.current_g,
+            "n": engine_app.n,
+            "is_frozen": engine_app.is_frozen,
+            "r2_unlocked": engine_app.r2_unlocked
+        }
+    }
+
+@router.get("/session/current")
+async def get_current_session_info():
+    return {
+        "state": engine_app.get_current_session_state(),
+        "g": engine_app.current_g,
+        "n": engine_app.n,
+        "is_frozen": engine_app.is_frozen,
+        "r2_unlocked": engine_app.r2_unlocked
     }
 
 @router.get("/leaderboard")

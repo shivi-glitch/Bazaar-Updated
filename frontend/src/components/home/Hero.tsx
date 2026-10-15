@@ -120,22 +120,7 @@ export function Hero() {
           </a>
         </motion.div>
 
-        {/* 6. Telemetry Indicator - Fades in sixth */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: d(1.15) }}
-          className="mt-6 sm:mt-8 flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-[10px] sm:text-[11px] font-mono text-tx-muted"
-        >
-          <span className="flex items-center gap-1.5 text-gain font-semibold">
-            <span className="w-1.5 h-1.5 rounded-full bg-gain animate-pulse" />
-            LIVE MATCHING
-          </span>
-          <span className="text-bd-strong">/</span>
-          <span>TWO-PHASE ENGINE</span>
-          <span className="text-bd-strong">/</span>
-          <span>STOCHASTIC ROUND 2</span>
-        </motion.div>
+
 
       </div>
 

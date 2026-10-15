@@ -24,6 +24,9 @@ export default function LoginPage() {
       const formattedId = teamId.trim().toLowerCase();
       const res = await api.post("/auth/login", { team_id: formattedId, pin });
       localStorage.setItem("merx_token", res.token);
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("merx_auth_change"));
+      }
       router.push("/market");
     } catch (err: any) {
       setError(err.message || "Authentication failed. Check your Team ID and PIN.");
