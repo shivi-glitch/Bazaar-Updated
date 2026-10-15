@@ -17,12 +17,31 @@ class TokenBucket:
             return True
         return False
 
-_team_buckets: dict[str, TokenBucket] = {}
+# Distinct token buckets by category and identifier
+_order_buckets: dict[str, TokenBucket] = {}
+_shop_buckets: dict[str, TokenBucket] = {}
+_login_buckets: dict[str, TokenBucket] = {}
 
 def check_rate_limit(team_id: str) -> bool:
-    if team_id not in _team_buckets:
-        _team_buckets[team_id] = TokenBucket(capacity=3.0, rate=1.5)
-    return _team_buckets[team_id].allow_request()
+    """Rate limit for /orders: burst capacity 3, refills 1.5 tokens/sec (~1-2 orders/sec)."""
+    clean_id = str(team_id).strip().lower()
+    if clean_id not in _order_buckets:
+        _order_buckets[clean_id] = TokenBucket(capacity=3.0, rate=1.5)
+    return _order_buckets[clean_id].allow_request()
+
+def check_shop_rate_limit(team_id: str) -> bool:
+    """Rate limit for /stats/purchase: burst capacity 2, refills 0.5 tokens/sec (prevents upgrade spam)."""
+    clean_id = str(team_id).strip().lower()
+    if clean_id not in _shop_buckets:
+        _shop_buckets[clean_id] = TokenBucket(capacity=2.0, rate=0.5)
+    return _shop_buckets[clean_id].allow_request()
+
+def check_login_rate_limit(identifier: str) -> bool:
+    """Rate limit for /auth/login: burst capacity 5, refills 1.0 token/sec (prevents CPU-heavy bcrypt DDoS)."""
+    clean_id = str(identifier).strip().lower()
+    if clean_id not in _login_buckets:
+        _login_buckets[clean_id] = TokenBucket(capacity=5.0, rate=1.0)
+    return _login_buckets[clean_id].allow_request()
 
 def calculate_fee(qty: int, price_paise: int) -> int:
     # 0.05% brokerage/exchange fee in paise

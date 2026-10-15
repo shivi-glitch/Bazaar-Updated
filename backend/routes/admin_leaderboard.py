@@ -8,13 +8,9 @@ from backend.database import AsyncSessionLocal
 from backend.models import Team, TeamLedger, Position, LeaderboardSnapshot
 from backend.core.engine import engine_app
 from backend.core.scoring import calculate_equity_paise, calculate_return_pct
+from backend.core.security import verify_admin
 
 router = APIRouter(prefix="/admin/leaderboard", tags=["admin-leaderboard"])
-ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "admin-master-secret")
-
-def verify_admin(authorization: str = Header(None)):
-    if not authorization or authorization != f"Bearer {ADMIN_TOKEN}":
-        raise HTTPException(status_code=403, detail="Forbidden")
 
 async def get_db():
     async with AsyncSessionLocal() as session:

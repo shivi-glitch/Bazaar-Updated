@@ -1,4 +1,5 @@
 import uuid
+import time
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, Header
 from pydantic import BaseModel
@@ -47,9 +48,16 @@ async def get_current_team(authorization: str = Header(...), db: AsyncSession = 
 async def place_order(req: OrderRequest, team: Team = Depends(get_current_team), db: AsyncSession = Depends(get_db)):
     if team.eliminated:
         raise HTTPException(status_code=403, detail="Account liquidated")
+
+    if engine_app.is_frozen:
+        raise HTTPException(status_code=403, detail="Market is frozen by administrator")
+
+    current_state = engine_app.get_current_session_state()
+    if current_state != "RUNNING":
+        raise HTTPException(status_code=403, detail=f"Trading closed. Market session is currently {current_state}")
     
     if not check_rate_limit(team.id):
-        raise HTTPException(status_code=429, detail={"error": "rate_limited"})
+        raise HTTPException(status_code=429, detail={"error": "rate_limited", "message": "Order rate limit reached. Please wait a moment."})
         
     if req.qty < 1:
         raise HTTPException(status_code=400, detail="invalid_qty")
@@ -273,9 +281,17 @@ async def get_news_ledger(authorization: str = Header(None), db: AsyncSession = 
         except Exception:
             pass
 
+    delays = {0: 15, 1: 10, 2: 7, 3: 3}
+    team_delay = delays.get(team_research_level, 15)
+    now = time.time()
+
     filtered = []
     for item in engine_app.news_ledger:
         if item.get("source") == "IN" and team_research_level < 2:
+            continue
+        item_ts = item.get("timestamp", 0)
+        # Enforce Research level delay so REST polling cannot bypass WebSocket delays
+        if item_ts > 0 and (now < item_ts + team_delay):
             continue
         filtered.append({
             "id": item.get("id"),

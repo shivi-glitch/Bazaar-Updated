@@ -51,8 +51,21 @@ export function DashboardShell({
     };
 
     fetchPortfolio();
-    const interval = setInterval(fetchPortfolio, 2500);
-    return () => clearInterval(interval);
+    const interval = setInterval(fetchPortfolio, 10000);
+
+    const handleRefreshEvent = () => {
+      fetchPortfolio();
+    };
+    if (typeof window !== "undefined") {
+      window.addEventListener("merx_portfolio_refresh", handleRefreshEvent);
+    }
+
+    return () => {
+      clearInterval(interval);
+      if (typeof window !== "undefined") {
+        window.removeEventListener("merx_portfolio_refresh", handleRefreshEvent);
+      }
+    };
   }, [setPortfolioData]);
 
   // Only the 4 essential subtabs: Markets, News, Portfolio, Stat Shop (orderbook & standings removed)

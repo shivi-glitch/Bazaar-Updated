@@ -9,14 +9,9 @@ from sqlalchemy import delete
 
 from backend.database import AsyncSessionLocal
 from backend.models import Team, TeamLedger
-from backend.core.security import hash_pin
+from backend.core.security import hash_pin, verify_admin
 
 router = APIRouter(prefix="/admin", tags=["admin"])
-ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "admin-master-secret")
-
-def verify_admin(authorization: str = Header(None)):
-    if not authorization or authorization != f"Bearer {ADMIN_TOKEN}":
-        raise HTTPException(status_code=403, detail="Forbidden: Admin access only")
 
 async def get_db():
     async with AsyncSessionLocal() as session:

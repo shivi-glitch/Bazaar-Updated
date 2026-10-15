@@ -420,7 +420,8 @@ class MarketEngine:
                 "ticker": item["ticker"],
                 "text": item["text"],
                 "impact": item["impact"],
-                "is_fake": item["is_fake"]
+                "is_fake": item["is_fake"],
+                "timestamp": time.time()
             }
 
             # 1. EARLY LEAK DISPATCH
@@ -598,9 +599,9 @@ class MarketEngine:
                     prices_payload[ticker] = [current_paise, volume, bids, asks]
 
                 if self.ws_manager:
-                    await self.ws_manager.broadcast({
+                    asyncio.create_task(self.ws_manager.broadcast({
                         "type": "tick", "g": self.current_g, "n": self.n, "prices": prices_payload
-                    })
+                    }))
 
                 self.n += 1
                 if self.n > 200:

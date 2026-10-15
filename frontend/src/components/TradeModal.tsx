@@ -62,6 +62,9 @@ export function TradeModal({ ticker, currentPricePaise, onClose }: TradeModalPro
       await api.post("/orders", {
         client_key: crypto.randomUUID(), ticker, side, qty: numericQty, type: "MARKET"
       }, token || undefined);
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("merx_portfolio_refresh"));
+      }
       onClose();
     } catch (err: any) {
       setError(err.message || "Trade failed");

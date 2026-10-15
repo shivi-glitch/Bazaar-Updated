@@ -8,6 +8,7 @@ from backend.core.security import SECRET_KEY, ALGORITHM
 from backend.database import AsyncSessionLocal
 from backend.models import Team, TeamLedger, StatPurchase
 from backend.core.engine import engine_app
+from backend.core.trading import check_shop_rate_limit
 
 router = APIRouter(prefix="/stats", tags=["shop"])
 
@@ -45,6 +46,9 @@ async def get_current_team(authorization: str = Header(...), db: AsyncSession = 
 
 @router.post("/purchase")
 async def purchase_stat(req: ShopRequest, team: Team = Depends(get_current_team), db: AsyncSession = Depends(get_db)):
+    if not check_shop_rate_limit(team.id):
+        raise HTTPException(status_code=429, detail="Too many purchase attempts. Please wait a moment.")
+
     # Rule: Only when R2 unlocked[cite: 7]
     if not engine_app.r2_unlocked:
         raise HTTPException(status_code=403, detail="stat_locked")

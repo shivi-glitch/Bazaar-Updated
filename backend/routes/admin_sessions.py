@@ -10,13 +10,9 @@ from backend.models import Team, TeamLedger, Position, Order, StatPurchase, Equi
 from backend.core.scoring import calculate_equity_paise, calculate_return_pct
 from backend.core.engine import engine_app
 from backend.core.news_ledger import SCRIPTED_NEWS_DATABASE
+from backend.core.security import verify_admin
 
 router = APIRouter(prefix="/admin", tags=["admin_sessions"])
-ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "admin-master-secret")
-
-def verify_admin(authorization: str = Header(None)):
-    if not authorization or authorization != f"Bearer {ADMIN_TOKEN}":
-        raise HTTPException(status_code=403, detail="Forbidden: Admin access only")
 
 async def get_db():
     async with AsyncSessionLocal() as session:

@@ -76,6 +76,9 @@ export function TradeBar({ ticker, currentPricePaise }: TradeBarProps) {
       
       // Auto-update position immediately without requiring page refresh
       await refreshPosition();
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("merx_portfolio_refresh"));
+      }
     } catch (err: any) {
       setError(err.message || "Trade failed");
     } finally {

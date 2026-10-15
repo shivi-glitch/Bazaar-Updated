@@ -43,9 +43,9 @@ else:
         DATABASE_URL,
         echo=False,
         connect_args=connect_args,
-        pool_size=15,
-        max_overflow=15,
-        pool_timeout=60,
+        pool_size=30,
+        max_overflow=30,
+        pool_timeout=30,
         pool_pre_ping=True,
     )
 

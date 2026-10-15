@@ -36,7 +36,7 @@ class ConnectionManager:
             return
         try:
             async with lock:
-                await asyncio.wait_for(ws.send_text(text), timeout=3.0)
+                await asyncio.wait_for(ws.send_text(text), timeout=0.8)
         except Exception:
             self.disconnect(ws)
             try:
