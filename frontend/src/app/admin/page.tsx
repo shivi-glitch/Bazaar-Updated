@@ -766,11 +766,11 @@ export default function AdminDashboard() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {activeAssets.map((asset) => {
-                const archetypeColor =
-                  asset.archetype === "Trending" ? "bg-gain-dim border-gain-border text-gain" :
-                    asset.archetype === "Mean-Reverting" ? "bg-accent-dim border-accent-border text-accent" :
-                      asset.archetype === "Safe Haven" ? "bg-warn-dim border-warn-border text-warn" :
-                        "bg-loss-dim border-loss-border text-loss";
+                const categoryColor =
+                  asset.category === "Large Cap" ? "bg-accent-dim border-accent-border text-accent" :
+                  asset.category === "Sovereign Reserve" ? "bg-warn-dim border-warn-border text-warn" :
+                  asset.category === "Micro Cap" || asset.category === "Digital Asset" ? "bg-loss-dim border-loss-border text-loss" :
+                  "bg-cyan-500/10 border-cyan-500/30 text-cyan-400";
 
                 return (
                   <div
@@ -795,8 +795,8 @@ export default function AdminDashboard() {
 
                     <div className="flex items-center justify-between pt-3.5 border-t border-bd-hairline text-xs font-mono">
                       <span className="text-tx-secondary font-medium">{asset.sector}</span>
-                      <span className={clsx("text-xs uppercase tracking-wider font-bold px-2.5 py-1 rounded-md border", archetypeColor)}>
-                        {asset.archetype}
+                      <span className={clsx("text-xs uppercase tracking-wider font-bold px-2.5 py-1 rounded-md border", categoryColor)}>
+                        {asset.category}
                       </span>
                     </div>
                   </div>

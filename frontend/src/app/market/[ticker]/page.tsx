@@ -14,7 +14,7 @@ import { TradeBar } from "@/components/TradeBar";
 export interface AssetFundamental {
   name: string;
   sector: string;
-  archetype: "Mean-Reverting" | "Trending" | "High-Beta Volatile" | "Safe Haven" | "Macro Benchmark";
+  category: string;
   dossier: string;
   deskNote: string;
   metrics: {
@@ -31,11 +31,11 @@ export const ASSET_META: Record<string, AssetFundamental> = {
   "RLNT": {
     name: "Reliant Energy Corp",
     sector: "Energy & Infrastructure",
-    archetype: "Mean-Reverting",
+    category: "Large Cap",
     dossier:
       "Meridian's state-linked energy giant and sovereign infrastructure anchor. Backed by long-term power concessions and sovereign guarantees, it is the cornerstone holding of domestic pension funds. While expansion contracts cause short rallies, institutional supply walls routinely absorb euphoria and pull price back to historical fair value.",
     deskNote:
-      "Heavy institutional absorption profile. Fade impulsive extensions outside the 20-tick band; accumulate when price dips below equilibrium support and take profit as it mean-reverts toward VWAP.",
+      "Blue-chip sovereign energy anchor. Solid cash flow backed by long-term power concessions, with heavy sovereign wealth fund and domestic pension fund custody.",
     metrics: {
       beta: "0.72",
       marketCap: "₹3,20,000 Cr",
@@ -48,11 +48,11 @@ export const ASSET_META: Record<string, AssetFundamental> = {
   "INFN": {
     name: "Infinity Systems",
     sector: "IT & Enterprise Cloud",
-    archetype: "Trending",
+    category: "Large Cap",
     dossier:
       "A software exporter and technology pioneer riding persistent multi-year enterprise digital transformation cycles. Foreign institutional investors (FIIs) accumulate in large programmatic blocks, generating strong directional momentum that sustains across consecutive trading sessions.",
     deskNote:
-      "High directional autocorrelation. Counter-trend trading here leads to severe drawdown. Respect fast SMA 9 / SMA 20 momentum crosses and ride multi-tick breakout runs.",
+      "Tier-1 technology exporter with high recurring SaaS billings and strong multi-currency enterprise customer accounts across Europe and North America.",
     metrics: {
       beta: "1.15",
       marketCap: "₹2,10,000 Cr",
@@ -65,11 +65,11 @@ export const ASSET_META: Record<string, AssetFundamental> = {
   "HRZN": {
     name: "Horizon Commercial Bank",
     sector: "Commercial Banking & Credit",
-    archetype: "Trending",
+    category: "Large Cap",
     dossier:
       "The primary credit bellwether of the economy whose expansive loan portfolio fueled the multi-year domestic lending cycle. Extremely sensitive to interest rate policy shifts and macro liquidity headlines, repricing in pronounced multi-session trend waves rather than choppy intraday noise.",
     deskNote:
-      "Macro trend transmitter. Catalysts provoke persistent directional waves. Monitor regulatory disclosures and gross NPA shifts closely before positioning against trend impulses.",
+      "Key commercial lending pillar. Net interest margins and capital adequacy remain closely tethered to Meridian Central Bank repo policy decisions and credit cycles.",
     metrics: {
       beta: "1.25",
       marketCap: "₹2,40,000 Cr",
@@ -82,11 +82,11 @@ export const ASSET_META: Record<string, AssetFundamental> = {
   "BZR-V": {
     name: "Bazaar Ventures Media",
     sector: "Digital Media & Consumer Tech",
-    archetype: "High-Beta Volatile",
+    category: "Micro Cap",
     dossier:
       "A fast-scaling digital media and consumer marketplace platform with elevated retail enthusiasm and vocal leadership. Operates with tight market-maker depth, making it prone to sudden liquidity gaps and violent price swings upon unexpected rumors or earnings surprises.",
     deskNote:
-      "High-beta asymmetric risk engine. Vulnerable to fast margin liquidations and rumor spikes. Scalp with tight risk or exploit fast news speed upgrades to front-run headline order flow.",
+      "Fast-growing consumer marketplace platform with elevated retail float and aggressive operational expansion into quick commerce.",
     metrics: {
       beta: "1.95",
       marketCap: "₹30,000 Cr",
@@ -99,11 +99,11 @@ export const ASSET_META: Record<string, AssetFundamental> = {
   "GOLDCORE": {
     name: "Goldcore Reserve Trust",
     sector: "Physical Commodities & Safe Haven",
-    archetype: "Safe Haven",
+    category: "Sovereign Reserve",
     dossier:
       "An allocated physical bullion depository trust designed for baseline capital preservation. Exhibits minimal day-to-day volatility during baseline market conditions, but serves as the emergency safe haven whenever broad equity or banking stress arises.",
     deskNote:
-      "Negative beta asset with positive macro drift. Dormant during retail speculative runs, but delivers sharp defensive upside when panic headlines shock risk assets.",
+      "Allocated physical bullion trust held in sovereign custody. Primary institutional safe haven asset during periods of broad macroeconomic stress.",
     metrics: {
       beta: "-0.35",
       marketCap: "N/A (Bullion Reserve)",
@@ -116,11 +116,11 @@ export const ASSET_META: Record<string, AssetFundamental> = {
   "PULSE": {
     name: "Pulsechain Token",
     sector: "Digital Assets & DeFi",
-    archetype: "High-Beta Volatile",
+    category: "Digital Asset",
     dossier:
       "A speculative decentralized liquidity token trading purely on community sentiment, retail leverage, and algorithmic pool rebalancing. Lacks physical collateral or institutional floor support, producing explosive rallies and precipitous sell-offs.",
     deskNote:
-      "Zero structural valuation floor. Highly reactive to broad market liquidity sentiment. Avoid holding long positions when market-wide momentum indicators roll over.",
+      "Decentralized liquidity token with high community trading velocity. Highly reactive to macro liquidity sentiment and speculative leverage.",
     metrics: {
       beta: "2.80",
       marketCap: "N/A (Synthetic Asset)",
@@ -133,11 +133,11 @@ export const ASSET_META: Record<string, AssetFundamental> = {
   "TYRL": {
     name: "Tyrell Autoworks",
     sector: "Heavy Infrastructure & Mobility",
-    archetype: "Mean-Reverting",
+    category: "Mid Cap",
     dossier:
       "A mid-cap industrial mobility manufacturer that consistently returns to its historical production cost baseline. While raw material cost pressures create periodic earnings dips, strong industrial consortium buying forms a predictable valuation floor.",
     deskNote:
-      "Reliable cyclical corridor asset. Sells off on commodity headline spikes, providing high-probability entry points near established cyclical support levels.",
+      "Commercial automotive and logistics fleet manufacturer with growing exposure to federal transport corridors and defense logistics tenders.",
     metrics: {
       beta: "0.85",
       marketCap: "₹60,000 Cr",
@@ -150,11 +150,11 @@ export const ASSET_META: Record<string, AssetFundamental> = {
   "NIMBUS": {
     name: "Nimbus Cloud Datacenters",
     sector: "IT & Server Infrastructure",
-    archetype: "Trending",
+    category: "Mid Cap",
     dossier:
       "A high-growth cloud compute and AI server infrastructure provider. Competing aggressively with legacy IT leaders, continuous corporate cap-ex commitments drive prolonged directional trend expansions.",
     deskNote:
-      "Growth momentum engine. Follow directional breakout alerts and volume expansion; avoid counter-trend shorting during active trend phases.",
+      "Specialized cloud compute and enterprise AI datacenter provider scaling rapidly with expanding enterprise subscription revenue.",
     metrics: {
       beta: "1.45",
       marketCap: "₹22,000 Cr",
@@ -167,11 +167,11 @@ export const ASSET_META: Record<string, AssetFundamental> = {
   "STAPLE": {
     name: "Staple & Co. Provisions",
     sector: "Consumer Staples & FMCG",
-    archetype: "Safe Haven",
+    category: "Defensive Mid Cap",
     dossier:
       "Everyday household goods and essential consumer consumables producer. Characterized by predictable revenue and steady profit margins regardless of macroeconomic cycles.",
     deskNote:
-      "Low-beta defensive sanctuary. Uncorrelated with speculative retail hype; ideal for capital preservation during high-volatility sessions.",
+      "Consumer non-cyclical staple brand with strong retail pricing power and stable household demand across macroeconomic cycles.",
     metrics: {
       beta: "0.32",
       marketCap: "₹45,000 Cr",
@@ -184,11 +184,11 @@ export const ASSET_META: Record<string, AssetFundamental> = {
   "VOLTAGE": {
     name: "Voltage Power Matrix",
     sector: "Energy & Battery Storage",
-    archetype: "High-Beta Volatile",
+    category: "Small Cap",
     dossier:
       "A small-cap electrical grid operator and battery storage manufacturer highly geared to national power tariffs and lithium supply costs. Highly sensitive to energy subsidy announcements.",
     deskNote:
-      "High intraday elasticity. Prone to wide percentage moves on sector policy bulletins. Execute disciplined entries with defined risk boundaries.",
+      "Electrical transmission and utility infrastructure operator with regulated tariff structures and state grid support.",
     metrics: {
       beta: "1.85",
       marketCap: "₹18,000 Cr",
@@ -201,11 +201,11 @@ export const ASSET_META: Record<string, AssetFundamental> = {
   "CRANE": {
     name: "Crane Maritime Logistics",
     sector: "Infrastructure & Freight",
-    archetype: "Mean-Reverting",
+    category: "Small Cap",
     dossier:
       "Deepwater container carrier fleet and port logistics operator whose revenues mirror Baltic freight tariffs and national trade volumes. Swings predictably between supply gluts and shipping demand surges.",
     deskNote:
-      "Corridor-bound cyclical name. Accumulate near lower channel bounds and offload inventory near channel tops.",
+      "Maritime port logistics and civil crane contractor directly benefiting from multi-year federal infrastructure modernization budgets.",
     metrics: {
       beta: "0.90",
       marketCap: "₹26,000 Cr",
@@ -218,11 +218,11 @@ export const ASSET_META: Record<string, AssetFundamental> = {
   "APEX": {
     name: "Apex Capital Bank",
     sector: "Commercial Banking & Credit",
-    archetype: "High-Beta Volatile",
+    category: "Mid Cap",
     dossier:
       "A fast-growing regional lender that expanded aggressively during the credit boom. Underneath its optimistic headline returns lies elevated balance sheet leverage and mounting credit exposure.",
     deskNote:
-      "High-volatility risk play. Watch credit quality and NPA disclosures carefully. Rallies can be shorted aggressively upon regulatory scrutiny.",
+      "Aggressive private lending institution with substantial retail portfolio growth and sensitivity to asset quality metrics.",
     metrics: {
       beta: "2.10",
       marketCap: "₹28,000 Cr",
@@ -235,11 +235,11 @@ export const ASSET_META: Record<string, AssetFundamental> = {
   "LEDGER": {
     name: "Ledger Data Systems",
     sector: "IT & Enterprise Data",
-    archetype: "Mean-Reverting",
+    category: "Mid Cap",
     dossier:
       "A mature, cash-rich enterprise database and financial software vendor with sticky multi-year government and banking contracts. Trades within well-defined valuation bands.",
     deskNote:
-      "Mean-reverting quality holding. Sells off rarely and rebounds swiftly toward fundamental value corridor.",
+      "Enterprise database architecture vendor operating with zero long-term debt and resilient institutional customer retention.",
     metrics: {
       beta: "0.80",
       marketCap: "₹40,000 Cr",
@@ -252,11 +252,11 @@ export const ASSET_META: Record<string, AssetFundamental> = {
   "FORGE": {
     name: "Forge Industrial Holdings",
     sector: "Heavy Infrastructure & Engineering",
-    archetype: "Trending",
+    category: "Mid Cap",
     dossier:
       "An industrial engineering contractor strategically positioned for sovereign infrastructure and defense procurement allocations. Strong order backlog powers persistent upward momentum.",
     deskNote:
-      "Late-round trending momentum leader. Catalyzed by capital expansion tenders; ride breakout channels.",
+      "Turnkey heavy industrial engineering specialist executing state-backed corridor developments and defense manufacturing orders.",
     metrics: {
       beta: "1.30",
       marketCap: "₹38,000 Cr",
@@ -269,11 +269,11 @@ export const ASSET_META: Record<string, AssetFundamental> = {
   "MERX50": {
     name: "MERX 50 Index",
     sector: "Composite Macro Benchmark",
-    archetype: "Macro Benchmark",
+    category: "Market Index",
     dossier:
       "The comprehensive benchmark index aggregating the top corporate equities across Energy, Banking, Technology, and Infrastructure. Reflects the aggregate economic pulse and system liquidity.",
     deskNote:
-      "Broad market gauge. Use as systemic risk benchmark; index shifts dictate macro direction for individual equities.",
+      "Meridian flagship composite benchmark tracking 50 premier public equities across banking, energy, technology, and manufacturing.",
     metrics: {
       beta: "1.00",
       marketCap: "₹10,49,000 Cr",
@@ -357,13 +357,9 @@ export function AssetDetailTab({ ticker, onBack }: { ticker: string, onBack: () 
               <div>
                 <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
                   <h1 className="text-[24px] sm:text-[30px] font-sans font-bold tracking-tight text-tx-primary">{ticker}</h1>
-                  <span className={clsx(
-                    "text-[10px] font-mono uppercase tracking-wider font-bold px-2.5 py-0.5 rounded border",
-                    meta.archetype === "Trending" ? "bg-accent-dim border-accent-border text-accent" :
-                    meta.archetype === "Mean-Reverting" ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-400" :
-                    meta.archetype === "Safe Haven" ? "bg-warn-dim border-warn-border text-warn" :
-                    "bg-loss-dim border-loss-border text-loss"
-                  )}>{meta.archetype}</span>
+                  <span className="text-[10px] font-mono uppercase tracking-wider font-bold px-2.5 py-0.5 rounded border bg-bg-void/80 border-bd-subtle text-accent">
+                    {meta.category}
+                  </span>
                 </div>
                 <p className="text-tx-secondary text-[12px] sm:text-[13px] mt-0.5 font-medium">{meta.name} · <span className="text-tx-muted font-mono">{meta.sector}</span></p>
               </div>
@@ -444,11 +440,11 @@ export function AssetDetailTab({ ticker, onBack }: { ticker: string, onBack: () 
               <TradeBar ticker={ticker} currentPricePaise={currentPricePaise} variant="card" />
             </div>
 
-            {/* Quantitative Desk Edge (Tactical Playbook) */}
+            {/* Institutional Equity Research Note */}
             <div className="bg-bg-void border-l-4 border-l-accent border border-bd-subtle rounded-xl p-4 sm:p-5 shadow-card space-y-2">
               <div className="text-[11px] font-bold text-accent uppercase tracking-[0.06em] flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-                Quantitative Desk Edge
+                Institutional Equity Research Note
               </div>
               <div className="text-[13px] font-bold text-tx-primary leading-snug">
                 {meta.deskNote}

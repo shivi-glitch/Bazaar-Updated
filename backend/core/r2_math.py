@@ -21,11 +21,11 @@ LIQUIDITY_PROFILE = {
 }
 
 MOODS = {
-    "calm":     {"tau": 8.0, "L": 2.5, "s_n": 0.05, "kappa_mo": 0.04, "kappa_inf": 0.075, "L_inf": 6.0},
-    "tense":    {"tau": 6.0, "L": 2.0, "s_n": 0.08, "kappa_mo": 0.08, "kappa_inf": 0.100, "L_inf": 5.0},
-    "panic":    {"tau": 4.0, "L": 1.5, "s_n": 0.12, "kappa_mo": 0.15, "kappa_inf": 0.125, "L_inf": 4.0},
-    "recovery": {"tau": 6.0, "L": 2.0, "s_n": 0.07, "kappa_mo": 0.10, "kappa_inf": 0.100, "L_inf": 5.0},
-    "pulse-own":{"tau": 12.0, "L": 3.0, "s_n": 0.18, "kappa_mo": 0.18, "kappa_inf": 0.000, "L_inf": 0.0},
+    "calm":     {"tau": 30.0, "L": 2.5, "s_n": 0.04, "kappa_mo": 0.04, "kappa_inf": 0.025, "L_inf": 6.0},
+    "tense":    {"tau": 24.0, "L": 2.0, "s_n": 0.06, "kappa_mo": 0.07, "kappa_inf": 0.035, "L_inf": 5.0},
+    "panic":    {"tau": 18.0, "L": 1.5, "s_n": 0.10, "kappa_mo": 0.12, "kappa_inf": 0.050, "L_inf": 4.0},
+    "recovery": {"tau": 24.0, "L": 2.0, "s_n": 0.05, "kappa_mo": 0.08, "kappa_inf": 0.030, "L_inf": 5.0},
+    "pulse-own":{"tau": 38.0, "L": 3.0, "s_n": 0.14, "kappa_mo": 0.16, "kappa_inf": 0.000, "L_inf": 0.0},
 }
 
 class R2InstrumentState:
