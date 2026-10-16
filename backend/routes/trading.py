@@ -1,5 +1,7 @@
 import uuid
 import time
+import asyncio
+import random
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, Header
 from pydantic import BaseModel
@@ -61,6 +63,14 @@ async def place_order(req: OrderRequest, team: Team = Depends(get_current_team),
         
     if req.qty < 1:
         raise HTTPException(status_code=400, detail="invalid_qty")
+
+    # In Round 2 (g >= 7), apply execution latency determined by team's Speed Level
+    if engine_app.current_g >= 7:
+        speed_delays = {0: 2.4, 1: 1.8, 2: 1.2, 3: 0.6}
+        base_delay = speed_delays.get(team.speed_level or 0, 2.4)
+        jitter = random.uniform(-0.15, 0.15)
+        exec_latency = max(0.1, base_delay + jitter)
+        await asyncio.sleep(exec_latency)
 
     live_prices = {t: d[0] for t, d in engine_app.current_prices.items()}
     if req.ticker not in live_prices:
