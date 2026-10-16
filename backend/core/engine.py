@@ -17,6 +17,12 @@ from backend.core.liquidity import LiquidityBots
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), '..', '..', 'data')
 
+WAVE_PROFILE_24 = [
+    0.0, 0.12, 0.25, 0.37, 0.50, 0.59, 0.60, 0.56, 0.51, 0.50,
+    0.56, 0.65, 0.73, 0.81, 0.89, 0.98, 1.04, 1.05, 1.03, 1.02,
+    1.01, 1.00, 1.00, 1.00
+]
+
 class MarketEngine:
     def __init__(self):
         self.current_g: int = 1
@@ -32,8 +38,8 @@ class MarketEngine:
         self.current_prices: Dict[str, list] = {}
         self.news_ledger: List[dict] = []
         self.delivered_news: set = set()
-        self.active_shocks: List[dict] = []  # Tracks impacts spreading over 2-8 ticks
-        self.r1_cumulative_shock: Dict[str, float] = {}  # Retains post-news impact levels in R1
+        self.active_shocks: List[dict] = []  # Tracks dynamic multi-wave news shocks
+        self.session_continuity: Dict[str, float] = {}  # Guarantees seamless inter-session price continuity
         
         # Phase 9: Round 2 Live State
         self.r2_states: Dict[str, R2InstrumentState] = {}
@@ -155,10 +161,27 @@ class MarketEngine:
         
         # Immediately prepare baseline prices for this session
         if g < 7:
-            self.r1_cumulative_shock = {t: 1.0 for t in self.get_live_or_initial_prices().keys()}
             g_data = self.price_table.get(g, {})
+            p_first_tick = g_data.get(0, {})
+            
+            # If transitioning from previous session, ensure seamless continuity with zero gap
+            if g > 1 and self.current_prices:
+                for t, data in p_first_tick.items():
+                    if t in self.current_prices:
+                        last_close = self.current_prices[t][0]
+                        parquet_open = data[0]
+                        if parquet_open > 0:
+                            self.session_continuity[t] = last_close / parquet_open
+                    else:
+                        self.session_continuity[t] = 1.0
+            else:
+                self.session_continuity = {t: 1.0 for t in self.get_live_or_initial_prices().keys()}
+                
             if 0 in g_data:
-                self.current_prices = dict(g_data[0])
+                self.current_prices = {
+                    t: [max(100, int(data[0] * self.session_continuity.get(t, 1.0))), data[1]]
+                    for t, data in g_data[0].items()
+                }
         else:
             if not self.r2_states:
                 base_prices = {"RLNT": 2450.0, "TYRL": 880.0, "INFN": 1520.0, "HRZN": 1640.0, "BZR-V": 640.0, "GOLDCORE": 6200.0, "PULSE": 850.0, "NIMBUS": 410.0, "STAPLE": 1180.0, "VOLTAGE": 310.0, "CRANE": 520.0}
@@ -441,56 +464,52 @@ class MarketEngine:
                 if self.ws_manager:
                     await self.ws_manager.dispatch_targeted_news(news_payload)
                 
-                # Instead of instantly changing the price, queue a smooth shock
-                if item["impact"] != 0:
-                    duration_ticks = random.randint(2, 8)
-                    impact_per_tick = item["impact"] / duration_ticks
-                    
+                # In Round 2 (g >= 7), queue a multi-wave price discovery shock (higher highs & higher lows)
+                # In Round 1 (g < 7), the authentic multi-wave trajectory is already embedded in prices_r1.parquet!
+                if self.current_g >= 7 and item["impact"] != 0:
+                    targets = []
                     if item["ticker"] == "GLOBAL":
-                        # Broad macroeconomic shock applies across active non-safe-haven instruments
-                        for t in list(self.current_prices.keys()):
-                            if t != "GOLDCORE":
-                                self.active_shocks.append({
-                                    "ticker": t,
-                                    "impact_per_tick": impact_per_tick,
-                                    "ticks_remaining": duration_ticks,
-                                    "volume_boost": 3.0
-                                })
+                        targets = [t for t in self.current_prices.keys() if t != "GOLDCORE"]
                     elif item["ticker"] in self.current_prices:
+                        targets = [item["ticker"]]
+                    
+                    for t in targets:
+                        curr_p = self.current_prices[t][0]
                         self.active_shocks.append({
-                            "ticker": item["ticker"],
-                            "impact_per_tick": impact_per_tick,
-                            "ticks_remaining": duration_ticks,
-                            "volume_boost": 3.5
+                            "ticker": t,
+                            "total_impact": item["impact"],
+                            "current_step": 0,
+                            "total_steps": 24,
+                            "base_paise": curr_p,
+                            "volume_boost": 3.0
                         })
 
     def apply_active_shocks(self):
-        """Runs every single tick to smoothly apply fractional price changes."""
+        """Applies authentic higher-highs and higher-lows multi-wave price discovery."""
         still_active = []
         for shock in self.active_shocks:
-            if shock["ticks_remaining"] > 0:
+            step = shock.get("current_step", 0)
+            total_steps = shock.get("total_steps", 24)
+            if step < total_steps:
                 ticker = shock["ticker"]
                 if ticker in self.current_prices:
-                    current_paise, vol = self.current_prices[ticker]
-                    
-                    # Apply just a fraction of the total news impact this tick
-                    step_multiplier = (1.0 + shock["impact_per_tick"])
-                    new_paise = int(current_paise * step_multiplier)
-                    new_vol = int(vol * shock["volume_boost"])
+                    _, vol = self.current_prices[ticker]
+                    fraction = WAVE_PROFILE_24[min(step, len(WAVE_PROFILE_24) - 1)]
+                    base_paise = shock["base_paise"]
+                    new_paise = int(base_paise * (1.0 + shock["total_impact"] * fraction))
+                    new_vol = int(vol * shock.get("volume_boost", 3.0))
                     
                     self.current_prices[ticker] = [max(100, new_paise), new_vol]
-                    if self.current_g < 7:
-                        self.r1_cumulative_shock[ticker] = self.r1_cumulative_shock.get(ticker, 1.0) * step_multiplier
-                    else:
-                        if ticker in self.r2_states:
-                            self.r2_states[ticker].P = new_paise / 100.0
-                            self.r2_f_values[ticker] = new_paise / 100.0
-                            self.r2_states[ticker].history_F = [new_paise / 100.0] * 120
-                
-                shock["ticks_remaining"] -= 1
-                if shock["ticks_remaining"] > 0:
+                    
+                    if self.current_g >= 7 and ticker in self.r2_states:
+                        self.r2_states[ticker].P = new_paise / 100.0
+                        self.r2_f_values[ticker] = new_paise / 100.0
+                        self.r2_states[ticker].history_F = [new_paise / 100.0] * 120
+                        
+                shock["current_step"] = step + 1
+                if shock["current_step"] < total_steps:
                     still_active.append(shock)
-                
+                    
         self.active_shocks = still_active
 
     async def run_loop(self):
@@ -506,14 +525,14 @@ class MarketEngine:
                 if self.session_states.get(self.current_g) != "RUNNING" or self.is_frozen:
                     continue
                     
-                # R1: Deterministic Engine with persistent news impact
+                # R1: Deterministic Engine with continuous session continuity
                 if self.current_g < 7:
                     g_data = self.price_table.get(self.current_g, {})
                     if self.n in g_data:
                         for t, p_v in g_data[self.n].items():
                             base_p = p_v[0]
                             base_vol = p_v[1]
-                            factor = self.r1_cumulative_shock.get(t, 1.0)
+                            factor = self.session_continuity.get(t, 1.0)
                             adjusted_p = max(100, int(base_p * factor))
                             self.current_prices[t] = [adjusted_p, base_vol]
                 
@@ -592,17 +611,19 @@ class MarketEngine:
                     self.current_prices[ticker] = [current_paise, volume]
 
                     # Record into price_table for continuous historical chart continuity
-                    if self.current_g not in self.price_table:
-                        self.price_table[self.current_g] = {}
-                    if self.n not in self.price_table[self.current_g]:
-                        self.price_table[self.current_g][self.n] = {}
-                    self.price_table[self.current_g][self.n][ticker] = [current_paise, volume]
+                    # Only overwrite price_table in R2 so R1 ground-truth parquet arrays stay clean
+                    if self.current_g >= 7:
+                        if self.current_g not in self.price_table:
+                            self.price_table[self.current_g] = {}
+                        if self.n not in self.price_table[self.current_g]:
+                            self.price_table[self.current_g][self.n] = {}
+                        self.price_table[self.current_g][self.n][ticker] = [current_paise, volume]
                     
                     # Determine if news bots need to react
                     active_impact = 0.0
                     for shock in self.active_shocks:
                         if shock["ticker"] == ticker:
-                            active_impact = shock["impact_per_tick"]
+                            active_impact = shock.get("total_impact", 0.0) / 24.0
                     
                     # Generate the live limit order book
                     bids, asks = LiquidityBots.generate_order_book(current_paise, active_impact)
