@@ -627,9 +627,21 @@ class MarketEngine:
                     for shock in self.active_shocks:
                         if shock["ticker"] == ticker:
                             active_impact = shock.get("total_impact", 0.0) / 24.0
+
+                    # Calculate structural trend pull towards fundamental story target F(t) in R2
+                    directional_trend = 0.0
+                    if self.current_g >= 7 and ticker in self.r2_f_values:
+                        f_target = self.r2_f_values[ticker]
+                        p_curr = current_paise / 100.0
+                        directional_trend = (f_target - p_curr) / max(1.0, p_curr)
                     
                     # Generate the live limit order book with persistent memory per ticker
-                    bids, asks = LiquidityBots.generate_order_book(current_paise, active_impact, ticker=ticker)
+                    bids, asks = LiquidityBots.generate_order_book(
+                        current_paise, 
+                        active_shock_impact=active_impact, 
+                        directional_trend=directional_trend,
+                        ticker=ticker
+                    )
                     
                     # Append the DOM arrays to the standard price payload
                     prices_payload[ticker] = [current_paise, current_vol, bids, asks]

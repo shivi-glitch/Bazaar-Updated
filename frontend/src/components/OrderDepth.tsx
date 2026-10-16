@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { Lock, Layers, HelpCircle, Shield, TrendingUp, TrendingDown } from "lucide-react";
+import { Lock, Layers, TrendingUp, TrendingDown } from "lucide-react";
 
 interface OrderDepthProps {
   isActive: boolean;
@@ -9,8 +8,6 @@ interface OrderDepthProps {
 }
 
 export function OrderDepth({ isActive, orderBook }: OrderDepthProps) {
-  const [showGuide, setShowGuide] = useState(false);
-
   // ROUND 1: LOCKED STATE
   if (!isActive) {
     return (
@@ -51,22 +48,22 @@ export function OrderDepth({ isActive, orderBook }: OrderDepthProps) {
     15000
   );
 
-  // Determine market order flow bias
+  // Direct, readable indication of impending price direction based on order book depth
   let sentimentBadge = {
-    label: "Balanced Order Flow",
+    label: "Balanced Market Depth",
     color: "text-tx-secondary border-bd-subtle bg-bg-base",
     icon: Layers
   };
 
-  if (imbalance >= 66) {
+  if (imbalance >= 65) {
     sentimentBadge = {
-      label: "Institutional Support (Bid Absorption)",
+      label: "▲ Upward Pressure (Bids Absorbing Supply)",
       color: "text-gain border-gain/40 bg-gain-dim/50",
       icon: TrendingUp
     };
-  } else if (imbalance <= 34) {
+  } else if (imbalance <= 35) {
     sentimentBadge = {
-      label: "Heavy Supply Overhead (Ask Resistance)",
+      label: "▼ Downward Pressure (Asks Capping Price)",
       color: "text-loss border-loss/40 bg-loss-dim/50",
       icon: TrendingDown
     };
@@ -74,8 +71,8 @@ export function OrderDepth({ isActive, orderBook }: OrderDepthProps) {
 
   return (
     <div className="bg-bg-raised/75 border border-bd-subtle rounded-xl p-5 sm:p-6 shadow-card space-y-4">
-      {/* Top Header & Telemetry */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-bd-hairline">
+      {/* Top Header & Spread */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-bd-hairline">
         <div className="flex items-center gap-2">
           <Layers className="w-4 h-4 text-accent" />
           <h3 className="text-[12px] font-mono font-bold text-tx-primary uppercase tracking-wider">
@@ -86,47 +83,11 @@ export function OrderDepth({ isActive, orderBook }: OrderDepthProps) {
           </span>
         </div>
 
-        <div className="flex items-center gap-3">
-          {/* Spread Display */}
-          <div className="text-[11px] font-mono text-tx-muted">
-            Spread: <span className="font-bold text-tx-primary">₹{spreadPaise.toFixed(2)}</span>
-            <span className="text-[10px] text-tx-muted ml-1">({spreadPct.toFixed(2)}%)</span>
-          </div>
-
-          {/* Strategy Help Toggle */}
-          <button
-            onClick={() => setShowGuide(!showGuide)}
-            className="flex items-center gap-1 text-[10px] font-mono text-accent hover:underline cursor-pointer bg-accent/5 px-2 py-0.5 rounded border border-accent/20"
-          >
-            <HelpCircle className="w-3 h-3" />
-            <span>{showGuide ? "Hide Guide" : "Trading Guide"}</span>
-          </button>
+        <div className="text-[11px] font-mono text-tx-muted tabular-nums">
+          Spread: <span className="font-bold text-tx-primary">₹{spreadPaise.toFixed(2)}</span>
+          <span className="text-[10px] text-tx-muted ml-1">({spreadPct.toFixed(2)}%)</span>
         </div>
       </div>
-
-      {/* Actionable DOM Strategy Micro-Guide */}
-      {showGuide && (
-        <div className="p-3.5 rounded-lg bg-bg-base border border-accent-border/50 text-[11px] font-mono space-y-2 animate-in fade-in duration-200">
-          <div className="flex items-center gap-1.5 text-accent font-bold uppercase tracking-wider text-[10px]">
-            <Shield className="w-3.5 h-3.5" />
-            <span>How Institutional Teams Profit from Market Depth:</span>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-tx-secondary text-[11px] leading-relaxed">
-            <div className="p-2 rounded bg-bg-raised border border-bd-subtle">
-              <span className="text-gain font-bold block mb-0.5">1. Bid Absorption (Buy Signal)</span>
-              When a 20,000+ share wall appears on the Bid and absorption reaches 70%+, institutional algorithms are supporting the price floor. Buy before the upward price bounce!
-            </div>
-            <div className="p-2 rounded bg-bg-raised border border-bd-subtle">
-              <span className="text-loss font-bold block mb-0.5">2. Ask Resistance (Sell/Short)</span>
-              When an Ask Wall of 20,000+ shares caps the top, supply exceeds buying power. Exit long positions or open Short trades to profit from the price drop.
-            </div>
-            <div className="p-2 rounded bg-bg-raised border border-bd-subtle">
-              <span className="text-cyan-400 font-bold block mb-0.5">3. News Shock Pre-Run</span>
-              During major events, institutional directional bots stack order book walls 2–5s before retail news is broadcast. Read the DOM to front-run the news cycle!
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Order Book Grid (Bids vs Asks) */}
       <div className="grid grid-cols-2 gap-4 sm:gap-6 relative">
@@ -144,12 +105,12 @@ export function OrderDepth({ isActive, orderBook }: OrderDepthProps) {
               return (
                 <div 
                   key={i} 
-                  className={`flex justify-between items-center text-[12px] font-mono relative overflow-hidden rounded px-2.5 py-1.5 transition-all ${
+                  className={`flex justify-between items-center text-[12px] font-mono tabular-nums relative overflow-hidden rounded px-2.5 py-1.5 transition-all duration-300 ${
                     isWall ? "bg-gain-dim/70 border border-gain/40 shadow-xs" : "bg-bg-base/40 border border-bd-hairline"
                   }`}
                 >
                   <div 
-                    className="absolute right-0 top-0 bottom-0 bg-gain-dim/60 transition-all duration-300" 
+                    className="absolute right-0 top-0 bottom-0 bg-gain-dim/60 transition-all duration-500" 
                     style={{ width: `${(bid[1] / maxRowSize) * 100}%` }} 
                   />
                   <div className="flex items-center gap-1.5 relative z-10">
@@ -180,12 +141,12 @@ export function OrderDepth({ isActive, orderBook }: OrderDepthProps) {
               return (
                 <div 
                   key={i} 
-                  className={`flex justify-between items-center text-[12px] font-mono relative overflow-hidden rounded px-2.5 py-1.5 transition-all ${
+                  className={`flex justify-between items-center text-[12px] font-mono tabular-nums relative overflow-hidden rounded px-2.5 py-1.5 transition-all duration-300 ${
                     isWall ? "bg-loss-dim/70 border border-loss/40 shadow-xs" : "bg-bg-base/40 border border-bd-hairline"
                   }`}
                 >
                   <div 
-                    className="absolute left-0 top-0 bottom-0 bg-loss-dim/60 transition-all duration-300" 
+                    className="absolute left-0 top-0 bottom-0 bg-loss-dim/60 transition-all duration-500" 
                     style={{ width: `${(ask[1] / maxRowSize) * 100}%` }} 
                   />
                   <span className="text-loss font-bold relative z-10">₹{ask[0].toFixed(2)}</span>
@@ -209,13 +170,13 @@ export function OrderDepth({ isActive, orderBook }: OrderDepthProps) {
       {/* Imbalance Tug-of-War & Institutional Bias */}
       <div className="pt-3 border-t border-bd-hairline space-y-2">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[10px] font-mono">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 tabular-nums">
             <span className="text-gain font-bold">
-              Total Bids: {totalBidSize.toLocaleString()} shs ({imbalance.toFixed(0)}%)
+              Bids: {totalBidSize.toLocaleString()} ({imbalance.toFixed(0)}%)
             </span>
             <span className="text-tx-muted">|</span>
             <span className="text-loss font-bold">
-              Total Asks: {totalAskSize.toLocaleString()} shs ({(100 - imbalance).toFixed(0)}%)
+              Asks: {totalAskSize.toLocaleString()} ({(100 - imbalance).toFixed(0)}%)
             </span>
           </div>
 
@@ -235,6 +196,11 @@ export function OrderDepth({ isActive, orderBook }: OrderDepthProps) {
             className="h-full bg-loss transition-all duration-500 ease-out" 
             style={{ width: `${100 - imbalance}%` }} 
           />
+        </div>
+
+        {/* Simple Hint on how to use DOM to predict price */}
+        <div className="text-[10px] font-mono text-tx-muted text-center pt-0.5">
+          Order Book Imbalance signals price direction: Heavy Bids absorb supply for upside moves, Heavy Asks signal downward pressure.
         </div>
       </div>
     </div>
