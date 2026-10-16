@@ -85,9 +85,12 @@ class MarketEngine:
                 self.n = 0 # Restart tick counter after crash
 
     async def _update_db_state(self, g: int, state: str):
-        async with AsyncSessionLocal() as db:
-            await db.execute(update(SessionBlock).where(SessionBlock.g == g).values(state=state))
-            await db.commit()
+        try:
+            async with AsyncSessionLocal() as db:
+                await db.execute(update(SessionBlock).where(SessionBlock.g == g).values(state=state))
+                await db.commit()
+        except Exception:
+            pass
         
     def register_flow(self, ticker: str, notional_rupees: float, side: str):
         """Accumulates live player flow to impact Round 2 prices."""
@@ -418,16 +421,19 @@ class MarketEngine:
     async def get_upgraded_research_teams(self):
         """Fetches a list of team IDs that possess Research Level 2 or 3."""
         teams_with_l2 = []
-        async with AsyncSessionLocal() as db:
-            res = await db.execute(select(StatPurchase))
-            purchases = res.scalars().all()
-            for p in purchases:
-                if (getattr(p, "research", 0) >= 2) or (getattr(p, "stat", "") == "Research" and getattr(p, "level", 0) >= 2):
-                    teams_with_l2.append(p.team_id)
-            res2 = await db.execute(select(Team))
-            for t in res2.scalars().all():
-                if (t.research_level or 0) >= 2:
-                    teams_with_l2.append(t.id)
+        try:
+            async with AsyncSessionLocal() as db:
+                res = await db.execute(select(StatPurchase))
+                purchases = res.scalars().all()
+                for p in purchases:
+                    if (getattr(p, "research", 0) >= 2) or (getattr(p, "stat", "") == "Research" and getattr(p, "level", 0) >= 2):
+                        teams_with_l2.append(p.team_id)
+                res2 = await db.execute(select(Team))
+                for t in res2.scalars().all():
+                    if (t.research_level or 0) >= 2:
+                        teams_with_l2.append(t.id)
+        except Exception:
+            pass
         return list(set(teams_with_l2))
 
     async def check_and_dispatch_scripted_news(self):
@@ -450,9 +456,9 @@ class MarketEngine:
             }
 
             # 1. EARLY LEAK DISPATCH
-            if self.n == early_tick:
+            if self.n == early_tick and self.ws_manager:
                 privileged_teams = await self.get_upgraded_research_teams()
-                if self.ws_manager and privileged_teams:
+                if privileged_teams:
                     await self.ws_manager.broadcast_to_specific_teams(privileged_teams, {
                         "type": "news", **news_payload
                     })
@@ -464,7 +470,7 @@ class MarketEngine:
                 if self.ws_manager:
                     await self.ws_manager.dispatch_targeted_news(news_payload)
                 
-                # In Round 2 (g >= 7), queue a multi-wave price discovery shock (higher highs & higher lows)
+                # In Round 2 (g >= 7), queue a multi-wave price discovery shock to the fundamental anchor F(t)
                 # In Round 1 (g < 7), the authentic multi-wave trajectory is already embedded in prices_r1.parquet!
                 if self.current_g >= 7 and item["impact"] != 0:
                     targets = []
@@ -474,38 +480,34 @@ class MarketEngine:
                         targets = [item["ticker"]]
                     
                     for t in targets:
-                        curr_p = self.current_prices[t][0]
+                        curr_f = self.r2_f_values.get(t, (self.current_prices[t][0] / 100.0) if t in self.current_prices else 100.0)
                         self.active_shocks.append({
                             "ticker": t,
                             "total_impact": item["impact"],
                             "current_step": 0,
                             "total_steps": 24,
-                            "base_paise": curr_p,
+                            "base_f": curr_f,
                             "volume_boost": 3.0
                         })
 
     def apply_active_shocks(self):
-        """Applies authentic higher-highs and higher-lows multi-wave price discovery."""
+        """Applies authentic higher-highs and higher-lows multi-wave price discovery to the fundamental anchor."""
         still_active = []
         for shock in self.active_shocks:
             step = shock.get("current_step", 0)
             total_steps = shock.get("total_steps", 24)
             if step < total_steps:
                 ticker = shock["ticker"]
-                if ticker in self.current_prices:
-                    _, vol = self.current_prices[ticker]
-                    fraction = WAVE_PROFILE_24[min(step, len(WAVE_PROFILE_24) - 1)]
-                    base_paise = shock["base_paise"]
-                    new_paise = int(base_paise * (1.0 + shock["total_impact"] * fraction))
-                    new_vol = int(vol * shock.get("volume_boost", 3.0))
+                fraction = WAVE_PROFILE_24[min(step, len(WAVE_PROFILE_24) - 1)]
+                base_f = shock.get("base_f")
+                if base_f is None:
+                    base_f = shock.get("base_paise", 10000) / 100.0
+                
+                # In Round 2 (g >= 7), smoothly evolve the fundamental anchor F(t).
+                # The market engine and bot populations naturally pull P(t) without artificial snaps.
+                if self.current_g >= 7 and ticker in self.r2_f_values:
+                    self.r2_f_values[ticker] = base_f * (1.0 + shock["total_impact"] * fraction)
                     
-                    self.current_prices[ticker] = [max(100, new_paise), new_vol]
-                    
-                    if self.current_g >= 7 and ticker in self.r2_states:
-                        self.r2_states[ticker].P = new_paise / 100.0
-                        self.r2_f_values[ticker] = new_paise / 100.0
-                        self.r2_states[ticker].history_F = [new_paise / 100.0] * 120
-                        
                 shock["current_step"] = step + 1
                 if shock["current_step"] < total_steps:
                     still_active.append(shock)
@@ -524,8 +526,14 @@ class MarketEngine:
                 
                 if self.session_states.get(self.current_g) != "RUNNING" or self.is_frozen:
                     continue
+                
+                # 1. Apply ongoing news shock momentum to fundamental anchor F(t)
+                self.apply_active_shocks()
+
+                # 2. Check if new news needs to be dispatched today / queue new shocks
+                await self.check_and_dispatch_scripted_news()
                     
-                # R1: Deterministic Engine with continuous session continuity
+                # 3. R1: Deterministic Engine with continuous session continuity
                 if self.current_g < 7:
                     g_data = self.price_table.get(self.current_g, {})
                     if self.n in g_data:
@@ -536,7 +544,7 @@ class MarketEngine:
                             adjusted_p = max(100, int(base_p * factor))
                             self.current_prices[t] = [adjusted_p, base_vol]
                 
-                # R2: Live Mathematical Simulation
+                # 4. R2: Live Mathematical Simulation
                 else:
                     if not self.r2_states:
                         base_prices = {"RLNT": 2450.0, "TYRL": 880.0, "INFN": 1520.0, "HRZN": 1640.0, "BZR-V": 640.0, "GOLDCORE": 6200.0, "PULSE": 850.0, "NIMBUS": 410.0, "STAPLE": 1180.0, "VOLTAGE": 310.0, "CRANE": 520.0}
@@ -558,10 +566,10 @@ class MarketEngine:
                         current_mood = "calm"
                             
                     for ticker, state in self.r2_states.items():
-                        # Micro Brownian motion so the market breathes organically
+                        # Micro Brownian motion on anchor so the market breathes organically
                         self.r2_f_values[ticker] *= (1 + random.gauss(0, 0.00015))
                         
-                        # Extract the aggregated player flow over the last 1.0s
+                        # Extract the aggregated player flow over the last tick
                         net_flow = self.flow_buffer.get(ticker, 0.0)
                         self.flow_buffer[ticker] = 0.0 
                         
@@ -569,46 +577,41 @@ class MarketEngine:
                             F_current=self.r2_f_values[ticker],
                             A_net_notional=net_flow,
                             active_teams=300, 
-                            mood=current_mood
+                            mood=current_mood,
+                            dt=1.5
                         )
-                        self.current_prices[ticker] = [int(new_p * 100), random.randint(200, 800)]
-                
-                # 1. Apply ongoing momentum from previous news
-                self.apply_active_shocks()
+                        base_vol = random.randint(200, 800)
+                        if abs(net_flow) > 0:
+                            base_vol += int(abs(net_flow) / max(1.0, new_p * 10))
+                        
+                        # Volume boost if news shock is active
+                        for shock in self.active_shocks:
+                            if shock["ticker"] == ticker:
+                                base_vol = int(base_vol * shock.get("volume_boost", 2.5))
+                                break
 
-                # 2. Check if new news needs to be fired today / queue new shocks
-                await self.check_and_dispatch_scripted_news()
+                        self.current_prices[ticker] = [int(new_p * 100), base_vol]
 
-                # 3. Broadcast prices via websocket
+                # 5. Broadcast prices via websocket
                 prices_payload = {}
                 for ticker, data in self.current_prices.items():
                     current_paise = data[0]
                     current_vol = data[1]
                     
-                    # 1. INJECT CONTINUOUS STOCHASTIC DRIFT (The "Heartbeat")
-                    # Default micro-volatility range (+/- 0.1%)
-                    noise_limit = 0.001 
-                    
-                    # Apply asset-specific multipliers based on their fundamental Beta
-                    if ticker in ["BZR-V", "PULSE"]:
-                        noise_limit = 0.0035  # Highly volatile, wide swings
-                    elif ticker in ["INFN", "HRZN"]:
-                        noise_limit = 0.0015  # Trending, moderate noise
-                    elif ticker == "GOLDCORE":
-                        noise_limit = 0.0004  # Safe haven, very tight noise
-                    
-                    # Generate the random walk percentage for this specific tick
-                    drift_percent = random.uniform(-noise_limit, noise_limit)
-                    
-                    # Apply the drift and add baseline bot volume
-                    current_paise = int(current_paise * (1.0 + drift_percent))
-                    
-                    # Generate a baseline "background" volume so the volume bars aren't empty
-                    background_vol = random.randint(100, 500)
-                    volume = max(background_vol, current_vol)
-                    
-                    # Update the engine's state (preserve shock volume if it's currently spiking)
-                    self.current_prices[ticker] = [current_paise, volume]
+                    # For Round 1 only, inject small live stochastic drift to parquet ticks
+                    if self.current_g < 7:
+                        noise_limit = 0.001 
+                        if ticker in ["BZR-V", "PULSE"]:
+                            noise_limit = 0.0035
+                        elif ticker in ["INFN", "HRZN"]:
+                            noise_limit = 0.0015
+                        elif ticker == "GOLDCORE":
+                            noise_limit = 0.0004
+                        drift_percent = random.uniform(-noise_limit, noise_limit)
+                        current_paise = int(current_paise * (1.0 + drift_percent))
+                        background_vol = random.randint(100, 500)
+                        current_vol = max(background_vol, current_vol)
+                        self.current_prices[ticker] = [current_paise, current_vol]
 
                     # Record into price_table for continuous historical chart continuity
                     # Only overwrite price_table in R2 so R1 ground-truth parquet arrays stay clean
@@ -617,7 +620,7 @@ class MarketEngine:
                             self.price_table[self.current_g] = {}
                         if self.n not in self.price_table[self.current_g]:
                             self.price_table[self.current_g][self.n] = {}
-                        self.price_table[self.current_g][self.n][ticker] = [current_paise, volume]
+                        self.price_table[self.current_g][self.n][ticker] = [current_paise, current_vol]
                     
                     # Determine if news bots need to react
                     active_impact = 0.0
