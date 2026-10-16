@@ -628,11 +628,11 @@ class MarketEngine:
                         if shock["ticker"] == ticker:
                             active_impact = shock.get("total_impact", 0.0) / 24.0
                     
-                    # Generate the live limit order book
-                    bids, asks = LiquidityBots.generate_order_book(current_paise, active_impact)
+                    # Generate the live limit order book with persistent memory per ticker
+                    bids, asks = LiquidityBots.generate_order_book(current_paise, active_impact, ticker=ticker)
                     
                     # Append the DOM arrays to the standard price payload
-                    prices_payload[ticker] = [current_paise, volume, bids, asks]
+                    prices_payload[ticker] = [current_paise, current_vol, bids, asks]
 
                 if self.ws_manager:
                     asyncio.create_task(self.ws_manager.broadcast({

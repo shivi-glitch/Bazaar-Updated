@@ -44,6 +44,87 @@ async def get_current_team(authorization: str = Header(...), db: AsyncSession = 
         raise HTTPException(status_code=401, detail="Unauthorized")
     return team
 
+IMPACT_SPECS = {
+    "Research": {
+        1: {
+            "title": "News Wire Latency Slashed to 10s",
+            "summary": "Wire latency reduced from 15.0s to 10.0s (33% faster delivery).",
+            "bullets": [
+                "News delivery speed improved from 15.0s to 10.0s.",
+                "5-second lead over unupgraded retail teams.",
+                "Allows earlier position entry before retail price waves start."
+            ]
+        },
+        2: {
+            "title": "Insider Wire Feed ('IN') Unlocked + 7s Latency",
+            "summary": "7.0s wire latency + privileged access to private corporate leaks.",
+            "bullets": [
+                "News wire latency reduced to 7.0s (over 2x faster than base).",
+                "UNLOCKED: Institutional Insider Rumor Wire ('IN' tag) with 90% directional accuracy.",
+                "See impending market moves before official announcements hit retail."
+            ]
+        },
+        3: {
+            "title": "Ultra-Low Latency News Wire (3.0s)",
+            "summary": "Sub-5s institutional news feed for immediate alpha capture.",
+            "bullets": [
+                "Wire latency slashed to 3.0s (maximum tier).",
+                "Receive news 12 full seconds ahead of standard retail terminals.",
+                "Capture peak price momentum at ground-floor valuations."
+            ]
+        }
+    },
+    "Capital": {
+        1: {
+            "title": "Short Selling (Bearish Positions) Unlocked",
+            "summary": "Allows opening short positions to profit from falling prices.",
+            "bullets": [
+                "UNLOCKED: Short selling capability up to 1.0x total equity.",
+                "Sell high and buy back low to profit during bearish market crashes.",
+                "Order slip 'Sell to Open' short controls now active."
+            ]
+        },
+        2: {
+            "title": "2.0x Margin Leverage Enabled",
+            "summary": "Doubles total buying power to 200% of portfolio equity.",
+            "bullets": [
+                "UNLOCKED: 2.0x Margin Leverage.",
+                "Maximum gross exposure expanded from 1.0x to 2.0x equity.",
+                "Hold up to ₹2 Crore of positions on ₹1 Crore equity for high-conviction plays."
+            ]
+        }
+    },
+    "Speed": {
+        1: {
+            "title": "Order Routing Latency Reduced to 1.8s",
+            "summary": "Execution delay decreased from 2.4s to 1.8s (25% faster fills).",
+            "bullets": [
+                "Order fill delay improved to 1.8s.",
+                "25% faster execution over base retail queues.",
+                "Reduced price slippage when chasing active breakout candles."
+            ]
+        },
+        2: {
+            "title": "Direct Market Access (DMA) Queue: 1.2s",
+            "summary": "Order fill delay dropped to 1.2s (50% faster fills).",
+            "bullets": [
+                "Fill delay improved to 1.2s.",
+                "Front-runs standard retail orders when liquidity is thin.",
+                "Priority matching on fast momentum breakouts."
+            ]
+        },
+        3: {
+            "title": "Co-Located Ultra-Fast Routing: 0.6s",
+            "summary": "Institutional direct routing with near-zero fill latency.",
+            "bullets": [
+                "Fill delay slashed to 0.6s (maximum speed tier).",
+                "Instantaneous execution priority on high-volatility news candles.",
+                "Guaranteed top-of-queue priority ahead of competing teams."
+            ]
+        }
+    }
+}
+
 @router.post("/purchase")
 async def purchase_stat(req: ShopRequest, team: Team = Depends(get_current_team), db: AsyncSession = Depends(get_db)):
     if not check_shop_rate_limit(team.id):
@@ -87,4 +168,17 @@ async def purchase_stat(req: ShopRequest, team: Team = Depends(get_current_team)
     db.add(purchase)
     await db.commit()
     
-    return {"status": "SUCCESS", "new_balance": ledger.cash_paise}
+    impact = IMPACT_SPECS.get(req.stat, {}).get(req.level, {
+        "title": f"{req.stat} Level {req.level} Activated",
+        "summary": "Terminal capability upgraded.",
+        "bullets": ["System specifications refreshed."]
+    })
+    
+    return {
+        "status": "SUCCESS", 
+        "new_balance": ledger.cash_paise,
+        "stat": req.stat,
+        "level": req.level,
+        "cost_paise": cost_paise,
+        "impact": impact
+    }
