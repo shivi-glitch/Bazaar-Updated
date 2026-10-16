@@ -7,10 +7,10 @@ os.makedirs(DATA_DIR, exist_ok=True)
 
 # 1. Roster Data (03_INSTRUMENTS_AND_FUNDAMENTALS.md)
 INSTRUMENTS = [
-    {"ticker": "RELI-X", "name": "Reliant Energy Corp", "sector": "Energy", "live_from": "R1S1", "open_price": 2450.00, "s_i": 1.5, "d_i_pct": 0.60},
-    {"ticker": "TATA-Y", "name": "Tyrell Autoworks", "sector": "Infrastructure", "live_from": "R1S1", "open_price": 880.00, "s_i": 0.9, "d_i_pct": 0.40},
-    {"ticker": "INFY-Z", "name": "Infinity Systems", "sector": "IT", "live_from": "R1S1", "open_price": 1520.00, "s_i": 1.2, "d_i_pct": 0.50},
-    {"ticker": "HDFC-W", "name": "Horizon Commercial Bank", "sector": "Banking", "live_from": "R1S1", "open_price": 1640.00, "s_i": 1.4, "d_i_pct": 0.50},
+    {"ticker": "RLNT", "name": "Reliant Energy Corp", "sector": "Energy", "live_from": "R1S1", "open_price": 2450.00, "s_i": 1.5, "d_i_pct": 0.60},
+    {"ticker": "TYRL", "name": "Tyrell Autoworks", "sector": "Infrastructure", "live_from": "R1S1", "open_price": 880.00, "s_i": 0.9, "d_i_pct": 0.40},
+    {"ticker": "INFN", "name": "Infinity Systems", "sector": "IT", "live_from": "R1S1", "open_price": 1520.00, "s_i": 1.2, "d_i_pct": 0.50},
+    {"ticker": "HRZN", "name": "Horizon Commercial Bank", "sector": "Banking", "live_from": "R1S1", "open_price": 1640.00, "s_i": 1.4, "d_i_pct": 0.50},
     {"ticker": "BZR-V", "name": "Bazaar Ventures Media", "sector": "Consumables", "live_from": "R1S1", "open_price": 640.00, "s_i": 1.0, "d_i_pct": 0.30},
     {"ticker": "GOLDCORE", "name": "Goldcore Reserve Trust", "sector": "Safe Haven", "live_from": "R1S1", "open_price": 6200.00, "s_i": 0.6, "d_i_pct": 0.80},
     {"ticker": "PULSE", "name": "Pulsechain Token", "sector": "Digital Assets", "live_from": "R1S1", "open_price": 850.00, "s_i": 1.6, "d_i_pct": 0.25}
@@ -20,14 +20,14 @@ INSTRUMENTS = [
 # 2. Session Targets Data (R1S1)
 SESSION_TARGETS = {
     "R1S1": {
-        "RELI-X": 0.8, "TATA-Y": 0.5, "INFY-Z": 3.0, "HDFC-W": 2.5, 
+        "RLNT": 0.8, "TYRL": 0.5, "INFN": 3.0, "HRZN": 2.5, 
         "BZR-V": 1.5, "GOLDCORE": 0.3, "PULSE": 0.5
     }
 }
 
 # 3. News Ledger Data (Sample set to validate Truth Flag Logic)
 NEWS_LEDGER = [
-    {"id": "R1S1-01", "t": 120, "source": "NP", "event": "E1.1", "implied": "HDFC-W", "dir": 1, "truth_target": False},
+    {"id": "R1S1-01", "t": 120, "source": "NP", "event": "E1.1", "implied": "HRZN", "dir": 1, "truth_target": False},
     {"id": "R1S1-02", "t": 200, "source": "FF", "event": "E1.2", "implied": "BZR-V", "dir": 1, "truth_target": False}
 ]
 

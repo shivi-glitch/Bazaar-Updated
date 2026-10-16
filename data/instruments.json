@@ -1,6 +1,6 @@
 [
   {
-    "ticker": "RELI-X",
+    "ticker": "RLNT",
     "name": "Reliant Energy Corp",
     "sector": "Energy",
     "live_from": "R1S1",
@@ -9,7 +9,7 @@
     "open_price_paise": 245000
   },
   {
-    "ticker": "TATA-Y",
+    "ticker": "TYRL",
     "name": "Tyrell Autoworks",
     "sector": "Infrastructure",
     "live_from": "R1S1",
@@ -18,7 +18,7 @@
     "open_price_paise": 88000
   },
   {
-    "ticker": "INFY-Z",
+    "ticker": "INFN",
     "name": "Infinity Systems",
     "sector": "IT",
     "live_from": "R1S1",
@@ -27,7 +27,7 @@
     "open_price_paise": 152000
   },
   {
-    "ticker": "HDFC-W",
+    "ticker": "HRZN",
     "name": "Horizon Commercial Bank",
     "sector": "Banking",
     "live_from": "R1S1",

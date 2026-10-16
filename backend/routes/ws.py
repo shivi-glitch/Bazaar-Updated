@@ -64,11 +64,14 @@ class ConnectionManager:
             await asyncio.gather(*tasks, return_exceptions=True)
 
     async def dispatch_targeted_news(self, news_item: dict):
-        """Routes news asynchronously based on Research Level delays."""
-        delays = {0: 15, 1: 10, 2: 7, 3: 3}
+        """Routes news asynchronously based on Research Level delays.
+        In Round 1, no stats can be purchased and all teams receive news at t_E with 0s delay."""
+        is_r1 = engine_app.current_g < 7
+        delays = {0: 0, 1: 0, 2: 0, 3: 0} if is_r1 else {0: 15, 1: 10, 2: 7, 3: 3}
         
         async def send_with_delay(ws: WebSocket, delay_sec: int, msg: str):
-            await asyncio.sleep(delay_sec)
+            if delay_sec > 0:
+                await asyncio.sleep(delay_sec)
             await self.safe_send(ws, msg)
 
         msg_text = json.dumps({
@@ -81,11 +84,11 @@ class ConnectionManager:
 
         for ws, data in list(self.active_connections.items()):
             r_level = data["research_level"]
-            # Insider (IN) blocker
-            if news_item.get("source") == "IN" and r_level < 2:
+            # Insider (IN) blocker: only active in R2 for research level < 2
+            if not is_r1 and news_item.get("source") == "IN" and r_level < 2:
                 continue
             
-            delay = delays.get(r_level, 15)
+            delay = delays.get(r_level, 0 if is_r1 else 15)
             asyncio.create_task(send_with_delay(ws, delay, msg_text))
 
 manager = ConnectionManager()

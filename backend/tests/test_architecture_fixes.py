@@ -82,8 +82,8 @@ async def test_news_delay_logic():
     news_item = {
         "id": "1-30",
         "source": "NP",
-        "ticker": "RELI-X",
-        "text": "Reliance Q2 Results Exceed Estimates",
+        "ticker": "RLNT",
+        "text": "Reliant Energy Q2 Results Exceed Estimates",
         "timestamp": now - 5.0
     }
     

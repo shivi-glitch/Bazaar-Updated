@@ -2,10 +2,10 @@
 
 export function TickerStrip() {
   const tickers = [
-    { symbol: "RELI-X", change: "+2.4%" },
-    { symbol: "INFY-Z", change: "-1.2%" },
-    { symbol: "HDFC-W", change: "+0.8%" },
-    { symbol: "TATA-Y", change: "+4.1%" },
+    { symbol: "RLNT", change: "+2.4%" },
+    { symbol: "INFN", change: "-1.2%" },
+    { symbol: "HRZN", change: "+0.8%" },
+    { symbol: "TYRL", change: "+4.1%" },
     { symbol: "GOLDCORE", change: "+0.2%" },
     { symbol: "PULSE",   change: "-5.5%" },
     { symbol: "BZR-V",   change: "+8.9%" },

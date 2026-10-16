@@ -16,8 +16,8 @@ export interface TickerInfo {
 
 export const HERO_TICKERS: TickerInfo[] = [
   {
-    ticker: "RELI-X",
-    name: "Reliance X",
+    ticker: "RLNT",
+    name: "Reliant Energy Corp",
     sector: "Energy",
     price: "₹2,914.50",
     change: "+2.4%",
@@ -26,8 +26,8 @@ export const HERO_TICKERS: TickerInfo[] = [
     orderVolume: "14,500 sh",
   },
   {
-    ticker: "INFY-Z",
-    name: "Infosys Z",
+    ticker: "INFN",
+    name: "Infinity Systems",
     sector: "Technology",
     price: "₹1,842.20",
     change: "+1.8%",
@@ -57,7 +57,7 @@ export const HERO_TICKERS: TickerInfo[] = [
   },
   {
     ticker: "PULSE",
-    name: "Pulse Biotech",
+    name: "Pulsechain Token",
     sector: "Speculative",
     price: "₹194.20",
     change: "-4.2%",
@@ -66,8 +66,8 @@ export const HERO_TICKERS: TickerInfo[] = [
     orderVolume: "31,400 sh",
   },
   {
-    ticker: "HDFC-W",
-    name: "HDFC Bank W",
+    ticker: "HRZN",
+    name: "Horizon Commercial Bank",
     sector: "Banking",
     price: "₹1,684.00",
     change: "+0.9%",
@@ -76,8 +76,8 @@ export const HERO_TICKERS: TickerInfo[] = [
     orderVolume: "19,200 sh",
   },
   {
-    ticker: "TATA-Y",
-    name: "Tata Motors Y",
+    ticker: "TYRL",
+    name: "Tyrell Autoworks",
     sector: "Industrials",
     price: "₹1,124.00",
     change: "+3.1%",

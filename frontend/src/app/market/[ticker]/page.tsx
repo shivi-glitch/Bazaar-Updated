@@ -28,7 +28,7 @@ export interface AssetFundamental {
 }
 
 export const ASSET_META: Record<string, AssetFundamental> = {
-  "RELI-X": {
+  "RLNT": {
     name: "Reliant Energy Corp",
     sector: "Energy & Infrastructure",
     archetype: "Mean-Reverting",
@@ -45,7 +45,7 @@ export const ASSET_META: Record<string, AssetFundamental> = {
       instHolding: "72.4%",
     },
   },
-  "INFY-Z": {
+  "INFN": {
     name: "Infinity Systems",
     sector: "IT & Enterprise Cloud",
     archetype: "Trending",
@@ -62,7 +62,7 @@ export const ASSET_META: Record<string, AssetFundamental> = {
       instHolding: "58.1%",
     },
   },
-  "HDFC-W": {
+  "HRZN": {
     name: "Horizon Commercial Bank",
     sector: "Commercial Banking & Credit",
     archetype: "Trending",
@@ -130,7 +130,7 @@ export const ASSET_META: Record<string, AssetFundamental> = {
       instHolding: "4.8%",
     },
   },
-  "TATA-Y": {
+  "TYRL": {
     name: "Tyrell Autoworks",
     sector: "Heavy Infrastructure & Mobility",
     archetype: "Mean-Reverting",
@@ -487,7 +487,7 @@ export function AssetDetailTab({ ticker, onBack }: { ticker: string, onBack: () 
 export default function StockDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const ticker = (params?.ticker as string) || "RELI-X";
+  const ticker = (params?.ticker as string) || "RLNT";
 
   return (
     <DashboardShell activeTab="chart">

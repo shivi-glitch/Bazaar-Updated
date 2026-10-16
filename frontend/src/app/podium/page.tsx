@@ -37,10 +37,10 @@ const SESSION_GUIDES: SessionGuide[] = [
     title: "Opening Bell · The Credit Foundation",
     subtitle: "Calm regime · Stable credit · Baseline trend discovery",
     world: "Stable growth and cheap credit. The Meridian Central Bank (MCB) held rates at 4.00%. GOLDCORE barely moved, while broad equities enjoyed calm liquidity.",
-    theEdge: "INFY-Z (+3.0%) and HDFC-W (+2.5%) were established as steady trend names. TATA-Y swung ±1.8% around its mean—the first recurring range-bound oscillator.",
-    winningPlay: "Buy the trend on INFY-Z / HDFC-W; scalp TATA-Y's swings using SMA20; minimize churn.",
+    theEdge: "INFN (+3.0%) and HRZN (+2.5%) were established as steady trend names. TYRL swung ±1.8% around its mean—the first recurring range-bound oscillator.",
+    winningPlay: "Buy the trend on INFN / HRZN; scalp TYRL's swings using SMA20; minimize churn.",
     trapToAvoid: "@BullRunBhai pumped BZR-V with urgent tweets. Chasing the pump resulted in immediate losses when it faded −1.5%. Over-trading also drained capital through fees.",
-    keyAssets: ["INFY-Z", "HDFC-W", "TATA-Y", "BZR-V"]
+    keyAssets: ["INFN", "HRZN", "TYRL", "BZR-V"]
   },
   {
     g: 2,
@@ -49,10 +49,10 @@ const SESSION_GUIDES: SessionGuide[] = [
     title: "Cheap Money · Post-News Drift",
     subtitle: "Euphoric growth names · Nimbus Datacenters unlocks",
     world: "Bank credit growth surged to 16%. Euphoria spread through tech and speculative high-beta names. PULSE caught its first retail rally.",
-    theEdge: "The Post-Earnings Announcement Drift (PEAD): When INFY-Z and NIMBUS beat estimates, their price didn't jump instantly—it drifted upward for 40+ seconds.",
-    winningPlay: "Buy INFY-Z and NIMBUS the moment analyst wires confirmed earnings, then patiently hold the drift. Ride PULSE and take profit into the rally.",
+    theEdge: "The Post-Earnings Announcement Drift (PEAD): When INFN and NIMBUS beat estimates, their price didn't jump instantly—it drifted upward for 40+ seconds.",
+    winningPlay: "Buy INFN and NIMBUS the moment analyst wires confirmed earnings, then patiently hold the drift. Ride PULSE and take profit into the rally.",
     trapToAvoid: "Selling tech the instant the headline hit. The move had prolonged momentum after the print.",
-    keyAssets: ["NIMBUS", "INFY-Z", "PULSE"]
+    keyAssets: ["NIMBUS", "INFN", "PULSE"]
   },
   {
     g: 3,
@@ -73,10 +73,10 @@ const SESSION_GUIDES: SessionGuide[] = [
     title: "The Corridor Closes · The War Shock",
     subtitle: "Geopolitical shock · Voltage Power unlocks · Market correlation jumps to 1",
     world: "A sudden regional conflict severed the key maritime oil corridor. Energy prices exploded; broad equity correlations jumped toward 1.",
-    theEdge: "Asset Decoupling: RELI-X (pure energy producer) surged +5%, and GOLDCORE caught safe-haven inflows. Meanwhile, VOLTAGE spiked initially on correlation but crashed −12% because its feedstock was cut.",
-    winningPlay: "Aggressively buy RELI-X; allocate capital to GOLDCORE as a hedge; avoid or short VOLTAGE (the Calder & Wyn analyst explicitly warned of its corridor exposure).",
+    theEdge: "Asset Decoupling: RLNT (pure energy producer) surged +5%, and GOLDCORE caught safe-haven inflows. Meanwhile, VOLTAGE spiked initially on correlation but crashed −12% because its feedstock was cut.",
+    winningPlay: "Aggressively buy RLNT; allocate capital to GOLDCORE as a hedge; avoid or short VOLTAGE (the Calder & Wyn analyst explicitly warned of its corridor exposure).",
     trapToAvoid: "Buying VOLTAGE because 'all energy is rising'. Sector is not destiny—feedstock vulnerabilities matter.",
-    keyAssets: ["RELI-X", "VOLTAGE", "GOLDCORE"]
+    keyAssets: ["RLNT", "VOLTAGE", "GOLDCORE"]
   },
   {
     g: 5,
@@ -85,10 +85,10 @@ const SESSION_GUIDES: SessionGuide[] = [
     title: "Stimulus Whispers · Sector Rotation",
     subtitle: "State infrastructure pivot · Crane Maritime unlocks",
     world: "The government signaled targeted maritime infrastructure stimulus to bypass the closed corridor. Capital rotated out of expensive energy into infrastructure.",
-    theEdge: "Mean-Reversion on Panic: TATA-Y missed delivery targets and dipped −2.5%, but immediately reverted to positive net gains.",
-    winningPlay: "Rotate capital into CRANE on the stimulus signal; buy the TATA-Y earnings dip; take profits on RELI-X before its −3.0% retracement.",
-    trapToAvoid: "Panic selling TATA-Y at the absolute low. Heavy industrials mean-revert when supported by broad infrastructure spending.",
-    keyAssets: ["CRANE", "TATA-Y", "RELI-X"]
+    theEdge: "Mean-Reversion on Panic: TYRL missed delivery targets and dipped −2.5%, but immediately reverted to positive net gains.",
+    winningPlay: "Rotate capital into CRANE on the stimulus signal; buy the TYRL earnings dip; take profits on RLNT before its −3.0% retracement.",
+    trapToAvoid: "Panic selling TYRL at the absolute low. Heavy industrials mean-revert when supported by broad infrastructure spending.",
+    keyAssets: ["CRANE", "TYRL", "RLNT"]
   },
   {
     g: 6,
@@ -97,10 +97,10 @@ const SESSION_GUIDES: SessionGuide[] = [
     title: "Last Dance of the Boom · Euphoria Before Reset",
     subtitle: "Consumer confidence peak · MERX50 Index unlocks · The Reset approaching",
     world: "Consumer confidence hit an 18-month high. Valuations were stretched to perfection. PULSE experienced a massive blow-off top (+14%).",
-    theEdge: "The Fundamentals Clue: Looking at Horizon Bank (HDFC-W)'s fundamentals tab revealed Gross NPAs quietly creeping from 2.1% → 2.3%, foreshadowing future distress.",
+    theEdge: "The Fundamentals Clue: Looking at Horizon Bank (HRZN)'s fundamentals tab revealed Gross NPAs quietly creeping from 2.1% → 2.3%, foreshadowing future distress.",
     winningPlay: "Ride PULSE early then aggressively exit near the top; lighten exposure to banks; stash capital in GOLDCORE or cash before the Round 2 reset.",
     trapToAvoid: "Holding speculative bags into the end of Round 1. The reset wiped positions to ₹1 Cr, so taking profits and observing was optimal.",
-    keyAssets: ["PULSE", "HDFC-W", "MERX50"]
+    keyAssets: ["PULSE", "HRZN", "MERX50"]
   },
 
   // ROUND 2: THE INSTITUTIONAL RECKONING
@@ -114,7 +114,7 @@ const SESSION_GUIDES: SessionGuide[] = [
     theEdge: "Reactive Math Engine: Market orders moved prices, but market maker bots pulled prices back over 10–25 seconds. Pushing price without size was self-inflicted slippage.",
     winningPlay: "Buy GOLDCORE as safe haven (+1.2%); avoid aggressive market-buys; use the Stat Shop between sessions to unlock Research L2.",
     trapToAvoid: "Believing @BullRunBhai that 'PULSE is a digital hedge against inflation'. PULSE dumped −5% immediately.",
-    keyAssets: ["GOLDCORE", "HDFC-W", "PULSE"]
+    keyAssets: ["GOLDCORE", "HRZN", "PULSE"]
   },
   {
     g: 8,
@@ -122,11 +122,11 @@ const SESSION_GUIDES: SessionGuide[] = [
     round: "Round 2",
     title: "Apex Falls · The Value Trap",
     subtitle: "Acute banking panic · Apex Bank unlocks · Short selling unlocks",
-    world: "Apex Capital Bank disclosed catastrophic bad loans from the retail boom. Gross NPA surged from 3.1% → 8.9%. Contagion hit Horizon Bank (HDFC-W).",
+    world: "Apex Capital Bank disclosed catastrophic bad loans from the retail boom. Gross NPA surged from 3.1% → 8.9%. Contagion hit Horizon Bank (HRZN).",
     theEdge: "The Value Trap: APEX appeared deceptively cheap with a P/E of 12, but its 'E' (earnings) was based on stale pre-crisis numbers. It was insolvent.",
-    winningPlay: "Unlock Capital ≥ 1 in the Stat Shop to short APEX (−14%) and HDFC-W (−9%) early with fast Research L2 leaks; fade the temporary PULSE herd.",
+    winningPlay: "Unlock Capital ≥ 1 in the Stat Shop to short APEX (−14%) and HRZN (−9%) early with fast Research L2 leaks; fade the temporary PULSE herd.",
     trapToAvoid: "Buying APEX because 'it fell 10% and looks like a discount'. Cheap banks in a credit crunch go to zero.",
-    keyAssets: ["APEX", "HDFC-W", "GOLDCORE"]
+    keyAssets: ["APEX", "HRZN", "GOLDCORE"]
   },
   {
     g: 9,
@@ -135,7 +135,7 @@ const SESSION_GUIDES: SessionGuide[] = [
     title: "Contagion · Flight to Quality",
     subtitle: "Risk-off panic · Ledger FinTech unlocks · Crypto exploit",
     world: "Lenders froze interbank credit lines. High-flying growth tech was liquidated for margin collateral. A protocol exploit struck PULSE.",
-    theEdge: "Flight to Quality Inside Tech: While NIMBUS and INFY-Z were dumped for margin, LEDGER (unlocked with steady enterprise cash flows) gained +4%. Meanwhile, PULSE crashed −16%.",
+    theEdge: "Flight to Quality Inside Tech: While NIMBUS and INFN were dumped for margin, LEDGER (unlocked with steady enterprise cash flows) gained +4%. Meanwhile, PULSE crashed −16%.",
     winningPlay: "Long LEDGER; stay short or flat on banks; avoid PULSE entirely; keep core equity in GOLDCORE.",
     trapToAvoid: "Trying to catch the falling knife on PULSE. Exploits plus regulatory crackdowns are unrecoverable in the short term.",
     keyAssets: ["LEDGER", "PULSE", "NIMBUS"]
@@ -147,10 +147,10 @@ const SESSION_GUIDES: SessionGuide[] = [
     title: "The Turn · The Bailout & Short Squeeze",
     subtitle: "State intervention · Forge Steel unlocks · Violent short squeeze",
     world: "The government announced an emergency liquidity backstop and massive reconstruction contracts. Panic transitioned violently into relief.",
-    theEdge: "The Short Squeeze: Over-confident retail traders remained short on banks. When the liquidity facility was announced, HDFC-W and APEX spiked +4%, while FORGE exploded +9%.",
+    theEdge: "The Short Squeeze: Over-confident retail traders remained short on banks. When the liquidity facility was announced, HRZN and APEX spiked +4%, while FORGE exploded +9%.",
     winningPlay: "Immediately cover bank shorts; buy FORGE on the contract announcement; ride the infrastructure momentum and take profits into the spike.",
     trapToAvoid: "Staying short into state intervention. Fighting central bank liquidity is financial suicide.",
-    keyAssets: ["FORGE", "CRANE", "HDFC-W", "APEX"]
+    keyAssets: ["FORGE", "CRANE", "HRZN", "APEX"]
   },
   {
     g: 11,
@@ -160,9 +160,9 @@ const SESSION_GUIDES: SessionGuide[] = [
     subtitle: "Peak rates signaled · Partial recovery · The Closing Bell",
     world: "The Central Bank signaled peak policy rates. The banking crisis settled into an uneven, partial recovery. The market reached its final equilibrium.",
     theEdge: "Calm Discipline: With volatility subsiding, churn and excessive fees were the primary destroyer of rank. High-conviction holdings won the day.",
-    winningPlay: "Hold quality recovery assets (INFY-Z, NIMBUS, select banks); avoid over-leveraged intraday gambles; close open risk before the terminal tick.",
+    winningPlay: "Hold quality recovery assets (INFN, NIMBUS, select banks); avoid over-leveraged intraday gambles; close open risk before the terminal tick.",
     trapToAvoid: "Believing finfluencer calls that 'we are going to all-time highs'. The post-war economy was permanently transformed—recovery was selective.",
-    keyAssets: ["INFY-Z", "NIMBUS", "APEX", "MERX50"]
+    keyAssets: ["INFN", "NIMBUS", "APEX", "MERX50"]
   }
 ];
 
@@ -643,13 +643,13 @@ export default function PodiumPage() {
                   rule: "Zero move during calm, explosive alpha during S4 war shock, S7 hike, and S8-S9 banking panic. The anchor of any defensive portfolio."
                 },
                 {
-                  ticker: "RELI-X",
+                  ticker: "RLNT",
                   name: "Reliant Energy Corp",
                   nature: "Energy Anchor & Commodity Spine",
                   rule: "Insulated from corridor shock in S4 (+5%), steady momentum driver. Trimmed in S5 as capital rotated to infrastructure."
                 },
                 {
-                  ticker: "HDFC-W",
+                  ticker: "HRZN",
                   name: "Horizon Commercial Bank",
                   nature: "Credit Cycle Core",
                   rule: "Drove the retail boom in S1-S2. Fundamentals page quietly warned of NPA distress in S6 before crashing in S8-S9 and recovering in S10."
@@ -667,7 +667,7 @@ export default function PodiumPage() {
                   rule: "Huge multi-day runs in S2 (+5%) and S6 (+14%), followed by devastating exploit crashes in S9 (−16%). Riding then exiting before the music stopped was key."
                 },
                 {
-                  ticker: "INFY-Z & NIMBUS",
+                  ticker: "INFN & NIMBUS",
                   name: "Tech Growth Twins",
                   nature: "Post-Earnings Drift",
                   rule: "Showcased the Post-Earnings Drift in S2. Liquidated for margin during S8-S9, then led the relief rally in S10-S11."
@@ -679,7 +679,7 @@ export default function PodiumPage() {
                   rule: "Exploded during S5 maritime stimulus and S10 reconstruction contracts (+9%). Fast buyers reaped instant momentum gains."
                 },
                 {
-                  ticker: "TATA-Y",
+                  ticker: "TYRL",
                   name: "Tyrell Autoworks",
                   nature: "Mean-Reverting Oscillator",
                   rule: "Oscillated ±1.8% cleanly around its 20-period moving average. Buying earnings dips and fading euphoria was free cash."

@@ -10,16 +10,16 @@ def to_paise(rupees): return int(round(rupees * 100))
 
 # Full Session Target Matrix for R1[cite: 4]
 TARGETS = {
-    1: {"RELI-X": 0.8, "TATA-Y": 0.5, "INFY-Z": 3.0, "HDFC-W": 2.5, "BZR-V": 1.5, "GOLDCORE": 0.3, "PULSE": 0.5},
-    2: {"RELI-X": 1.0, "TATA-Y": 0.4, "INFY-Z": 4.5, "HDFC-W": 3.5, "BZR-V": -2.0, "GOLDCORE": 0.3, "PULSE": 9.0, "NIMBUS": 6.0},
-    3: {"RELI-X": 0.5, "TATA-Y": -0.5, "INFY-Z": 1.0, "HDFC-W": 1.0, "BZR-V": 2.5, "GOLDCORE": 0.3, "PULSE": -3.0, "NIMBUS": 2.0, "STAPLE": 0.6},
-    4: {"RELI-X": 2.0, "TATA-Y": -1.5, "INFY-Z": -2.5, "HDFC-W": -1.0, "BZR-V": -3.0, "GOLDCORE": 2.8, "PULSE": -4.0, "NIMBUS": -3.0, "STAPLE": 0.2, "VOLTAGE": -9.0},
-    5: {"RELI-X": -3.0, "TATA-Y": 1.0, "INFY-Z": 1.5, "HDFC-W": 1.0, "BZR-V": 2.0, "GOLDCORE": 0.5, "PULSE": 2.0, "NIMBUS": 1.5, "STAPLE": 0.4, "VOLTAGE": 4.0, "CRANE": 5.0},
-    6: {"RELI-X": -1.0, "TATA-Y": 0.5, "INFY-Z": 3.0, "HDFC-W": 2.5, "BZR-V": 5.0, "GOLDCORE": 0.3, "PULSE": 14.0, "NIMBUS": 4.0, "STAPLE": 0.4, "VOLTAGE": 1.0, "CRANE": 2.5}
+    1: {"RLNT": 0.8, "TYRL": 0.5, "INFN": 3.0, "HRZN": 2.5, "BZR-V": 1.5, "GOLDCORE": 0.3, "PULSE": 0.5},
+    2: {"RLNT": 1.0, "TYRL": 0.4, "INFN": 4.5, "HRZN": 3.5, "BZR-V": -2.0, "GOLDCORE": 0.3, "PULSE": 9.0, "NIMBUS": 6.0},
+    3: {"RLNT": 0.5, "TYRL": -0.5, "INFN": 1.0, "HRZN": 1.0, "BZR-V": 2.5, "GOLDCORE": 0.3, "PULSE": -3.0, "NIMBUS": 2.0, "STAPLE": 0.6},
+    4: {"RLNT": 2.0, "TYRL": -1.5, "INFN": -2.5, "HRZN": -1.0, "BZR-V": -3.0, "GOLDCORE": 2.8, "PULSE": -4.0, "NIMBUS": -3.0, "STAPLE": 0.2, "VOLTAGE": -9.0},
+    5: {"RLNT": -3.0, "TYRL": 1.0, "INFN": 1.5, "HRZN": 1.0, "BZR-V": 2.0, "GOLDCORE": 0.5, "PULSE": 2.0, "NIMBUS": 1.5, "STAPLE": 0.4, "VOLTAGE": 4.0, "CRANE": 5.0},
+    6: {"RLNT": -1.0, "TYRL": 0.5, "INFN": 3.0, "HRZN": 2.5, "BZR-V": 5.0, "GOLDCORE": 0.3, "PULSE": 14.0, "NIMBUS": 4.0, "STAPLE": 0.4, "VOLTAGE": 1.0, "CRANE": 2.5}
 }
 
 # Base Open Prices
-BASE_PRICES = {"RELI-X": 2450.0, "TATA-Y": 880.0, "INFY-Z": 1520.0, "HDFC-W": 1640.0, "BZR-V": 640.0, "GOLDCORE": 6200.0, "PULSE": 850.0, "NIMBUS": 410.0, "STAPLE": 1180.0, "VOLTAGE": 310.0, "CRANE": 520.0}
+BASE_PRICES = {"RLNT": 2450.0, "TYRL": 880.0, "INFN": 1520.0, "HRZN": 1640.0, "BZR-V": 640.0, "GOLDCORE": 6200.0, "PULSE": 850.0, "NIMBUS": 410.0, "STAPLE": 1180.0, "VOLTAGE": 310.0, "CRANE": 520.0}
 
 def generate_r1_arrays():
     rng = np.random.Generator(np.random.PCG64(MASTER_SEED))

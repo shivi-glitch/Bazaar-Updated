@@ -41,13 +41,13 @@ interface MarketState {
 }
 
 const DEFAULT_R1_PRICES: Record<string, [number, number]> = {
-  "RELI-X": [245000, 1000],
-  "INFY-Z": [152000, 1200],
-  "HDFC-W": [168000, 1100],
+  "RLNT": [245000, 1000],
+  "INFN": [152000, 1200],
+  "HRZN": [168000, 1100],
   "BZR-V": [32000, 2500],
   "PULSE": [11500, 3000],
   "GOLDCORE": [620000, 500],
-  "TATA-Y": [98000, 1500]
+  "TYRL": [98000, 1500]
 };
 
 export const useMarketStore = create<MarketState>((set) => ({
@@ -140,7 +140,7 @@ export const useMarketStore = create<MarketState>((set) => ({
         const newHistory = { ...state.priceHistory };
         const newBooks = { ...state.orderBooks };
         
-        // msg.prices format: { "RELI-X": [price_paise, volume, bids, asks], ... }
+        // msg.prices format: { "RLNT": [price_paise, volume, bids, asks], ... }
         Object.entries(msg.prices as Record<string, any[]>).forEach(([ticker, data]) => {
           let currentArr = state.priceHistory[ticker] ? [...state.priceHistory[ticker]] : [];
           

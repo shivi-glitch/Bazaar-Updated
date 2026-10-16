@@ -33,6 +33,7 @@ class MarketEngine:
         self.news_ledger: List[dict] = []
         self.delivered_news: set = set()
         self.active_shocks: List[dict] = []  # Tracks impacts spreading over 2-8 ticks
+        self.r1_cumulative_shock: Dict[str, float] = {}  # Retains post-news impact levels in R1
         
         # Phase 9: Round 2 Live State
         self.r2_states: Dict[str, R2InstrumentState] = {}
@@ -122,13 +123,13 @@ class MarketEngine:
         if r1_s1:
             return dict(r1_s1)
         return {
-            "RELI-X": [245000, 1000],
-            "INFY-Z": [152000, 1200],
-            "HDFC-W": [168000, 1100],
+            "RLNT": [245000, 1000],
+            "INFN": [152000, 1200],
+            "HRZN": [168000, 1100],
             "BZR-V": [32000, 2500],
             "PULSE": [11500, 3000],
             "GOLDCORE": [620000, 500],
-            "TATA-Y": [98000, 1500]
+            "TYRL": [98000, 1500]
         }
 
     def get_current_session_state(self, g: Optional[int] = None) -> str:
@@ -154,12 +155,13 @@ class MarketEngine:
         
         # Immediately prepare baseline prices for this session
         if g < 7:
+            self.r1_cumulative_shock = {t: 1.0 for t in self.get_live_or_initial_prices().keys()}
             g_data = self.price_table.get(g, {})
             if 0 in g_data:
                 self.current_prices = dict(g_data[0])
         else:
             if not self.r2_states:
-                base_prices = {"RELI-X": 2450.0, "TATA-Y": 880.0, "INFY-Z": 1520.0, "HDFC-W": 1640.0, "BZR-V": 640.0, "GOLDCORE": 6200.0, "PULSE": 850.0, "NIMBUS": 410.0, "STAPLE": 1180.0, "VOLTAGE": 310.0, "CRANE": 520.0}
+                base_prices = {"RLNT": 2450.0, "TYRL": 880.0, "INFN": 1520.0, "HRZN": 1640.0, "BZR-V": 640.0, "GOLDCORE": 6200.0, "PULSE": 850.0, "NIMBUS": 410.0, "STAPLE": 1180.0, "VOLTAGE": 310.0, "CRANE": 520.0}
                 for t, def_p in base_prices.items():
                     # Inherit prior session close if available, else fallback to baseline
                     p = (self.current_prices[t][0] / 100.0) if t in self.current_prices else def_p
@@ -472,13 +474,18 @@ class MarketEngine:
                     current_paise, vol = self.current_prices[ticker]
                     
                     # Apply just a fraction of the total news impact this tick
-                    new_paise = int(current_paise * (1.0 + shock["impact_per_tick"]))
+                    step_multiplier = (1.0 + shock["impact_per_tick"])
+                    new_paise = int(current_paise * step_multiplier)
                     new_vol = int(vol * shock["volume_boost"])
                     
                     self.current_prices[ticker] = [max(100, new_paise), new_vol]
-                    if ticker in self.r2_states:
-                        self.r2_states[ticker].P = new_paise / 100.0
-                        self.r2_f_values[ticker] = new_paise / 100.0
+                    if self.current_g < 7:
+                        self.r1_cumulative_shock[ticker] = self.r1_cumulative_shock.get(ticker, 1.0) * step_multiplier
+                    else:
+                        if ticker in self.r2_states:
+                            self.r2_states[ticker].P = new_paise / 100.0
+                            self.r2_f_values[ticker] = new_paise / 100.0
+                            self.r2_states[ticker].history_F = [new_paise / 100.0] * 120
                 
                 shock["ticks_remaining"] -= 1
                 if shock["ticks_remaining"] > 0:
@@ -499,16 +506,21 @@ class MarketEngine:
                 if self.session_states.get(self.current_g) != "RUNNING" or self.is_frozen:
                     continue
                     
-                # R1: Deterministic Engine
+                # R1: Deterministic Engine with persistent news impact
                 if self.current_g < 7:
                     g_data = self.price_table.get(self.current_g, {})
                     if self.n in g_data:
-                        self.current_prices = g_data[self.n]
+                        for t, p_v in g_data[self.n].items():
+                            base_p = p_v[0]
+                            base_vol = p_v[1]
+                            factor = self.r1_cumulative_shock.get(t, 1.0)
+                            adjusted_p = max(100, int(base_p * factor))
+                            self.current_prices[t] = [adjusted_p, base_vol]
                 
                 # R2: Live Mathematical Simulation
                 else:
                     if not self.r2_states:
-                        base_prices = {"RELI-X": 2450.0, "TATA-Y": 880.0, "INFY-Z": 1520.0, "HDFC-W": 1640.0, "BZR-V": 640.0, "GOLDCORE": 6200.0, "PULSE": 850.0, "NIMBUS": 410.0, "STAPLE": 1180.0, "VOLTAGE": 310.0, "CRANE": 520.0}
+                        base_prices = {"RLNT": 2450.0, "TYRL": 880.0, "INFN": 1520.0, "HRZN": 1640.0, "BZR-V": 640.0, "GOLDCORE": 6200.0, "PULSE": 850.0, "NIMBUS": 410.0, "STAPLE": 1180.0, "VOLTAGE": 310.0, "CRANE": 520.0}
                         for t, def_p in base_prices.items():
                             p = (self.current_prices[t][0] / 100.0) if t in self.current_prices else def_p
                             self.r2_states[t] = R2InstrumentState(t, p)
@@ -561,7 +573,7 @@ class MarketEngine:
                     # Apply asset-specific multipliers based on their fundamental Beta
                     if ticker in ["BZR-V", "PULSE"]:
                         noise_limit = 0.0035  # Highly volatile, wide swings
-                    elif ticker in ["INFY-Z", "HDFC-W"]:
+                    elif ticker in ["INFN", "HRZN"]:
                         noise_limit = 0.0015  # Trending, moderate noise
                     elif ticker == "GOLDCORE":
                         noise_limit = 0.0004  # Safe haven, very tight noise

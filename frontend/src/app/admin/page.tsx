@@ -37,7 +37,7 @@ export default function AdminDashboard() {
   const [newsSessionFilter, setNewsSessionFilter] = useState<number | "ALL">("ALL");
   const [newsSearch, setNewsSearch] = useState("");
   const [newsSource, setNewsSource] = useState("IN");
-  const [newsTicker, setNewsTicker] = useState("RELI-X");
+  const [newsTicker, setNewsTicker] = useState("RLNT");
   const [newsText, setNewsText] = useState("");
 
   // Danger Zone State
@@ -256,8 +256,8 @@ export default function AdminDashboard() {
   }
 
   // ── 2. DATA PROCESSING ─────────────────────────────────────────
-  const round1Tickers = ["RELI-X", "INFY-Z", "HDFC-W", "BZR-V", "PULSE", "GOLDCORE", "TATA-Y"];
-  const round2Tickers = ["RELI-X", "INFY-Z", "HDFC-W", "BZR-V", "PULSE", "GOLDCORE", "TATA-Y", "NIMBUS", "STAPLE", "VOLTAGE", "CRANE"];
+  const round1Tickers = ["RLNT", "INFN", "HRZN", "BZR-V", "PULSE", "GOLDCORE", "TYRL"];
+  const round2Tickers = ["RLNT", "INFN", "HRZN", "BZR-V", "PULSE", "GOLDCORE", "TYRL", "NIMBUS", "STAPLE", "VOLTAGE", "CRANE"];
 
   const activeTickers = (sysState?.current_g >= 7) ? round2Tickers : round1Tickers;
   const activeAssets = activeTickers.map(ticker => {
@@ -1157,13 +1157,13 @@ export default function AdminDashboard() {
                             className="w-full bg-bg-base border border-bd-subtle rounded-lg px-3.5 py-2.5 text-tx-primary font-mono text-sm font-bold outline-none focus:border-accent"
                           >
                             <option value="GLOBAL">GLOBAL (Market-Wide)</option>
-                            <option value="RELI-X">RELI-X (Reliant Energy)</option>
-                            <option value="INFY-Z">INFY-Z (Infinity Systems)</option>
-                            <option value="HDFC-W">HDFC-W (Horizon Bank)</option>
+                            <option value="RLNT">RLNT (Reliant Energy)</option>
+                            <option value="INFN">INFN (Infinity Systems)</option>
+                            <option value="HRZN">HRZN (Horizon Bank)</option>
                             <option value="BZR-V">BZR-V (Bazaar Ventures)</option>
                             <option value="PULSE">PULSE (Pulsechain)</option>
                             <option value="GOLDCORE">GOLDCORE (Goldcore Reserve)</option>
-                            <option value="TATA-Y">TATA-Y (Tyrell Autoworks)</option>
+                            <option value="TYRL">TYRL (Tyrell Autoworks)</option>
                             <option value="NIMBUS">NIMBUS (Cloud Datacenters)</option>
                             <option value="STAPLE">STAPLE (Staple Agro)</option>
                             <option value="VOLTAGE">VOLTAGE (Power Matrix)</option>
@@ -1332,14 +1332,13 @@ export default function AdminDashboard() {
                           <th className="px-6 py-4 w-28">Rank</th>
                           <th className="px-6 py-4">Participant Team</th>
                           <th className="px-6 py-4 text-center">Round Return %</th>
-                          <th className="px-6 py-4 text-center">Status</th>
                           <th className="px-6 py-4 text-right">Round Equity</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-bd-hairline">
                         {!leaderboard?.rows || leaderboard.rows.length === 0 ? (
                           <tr>
-                            <td colSpan={5} className="text-center py-12 text-tx-muted font-sans text-sm">
+                            <td colSpan={4} className="text-center py-12 text-tx-muted font-sans text-sm">
                               No leaderboard standings available for this round yet.
                             </td>
                           </tr>
@@ -1350,8 +1349,6 @@ export default function AdminDashboard() {
                                 row.rank === 2 ? "text-tx-primary font-bold" :
                                   row.rank === 3 ? "text-warn font-bold" :
                                     "text-tx-muted";
-
-                            const isEliminated = row.status === "ELIM" || row.eliminated;
 
                             return (
                               <tr key={row.team_id} className="hover:bg-bg-overlay/40 transition-colors">
@@ -1372,25 +1369,14 @@ export default function AdminDashboard() {
                                 </td>
                                 <td className="px-6 py-4 font-mono text-center whitespace-nowrap">
                                   {row.return_pct !== undefined ? (
-                                    <span className={clsx("text-sm font-bold", row.return_pct >= 0 ? "text-gain" : "text-loss")}>
-                                      {row.return_pct >= 0 ? `+${row.return_pct.toFixed(2)}%` : `${row.return_pct.toFixed(2)}%`}
+                                    <span className={clsx("text-sm font-bold", row.return_pct > 0 ? "text-gain" : "text-loss")}>
+                                      {row.return_pct > 0 ? `+${row.return_pct.toFixed(2)}%` : `${row.return_pct.toFixed(2)}%`}
                                     </span>
                                   ) : (
-                                    <span className="text-tx-muted text-sm">0.00%</span>
+                                    <span className="text-loss text-sm font-bold">0.00%</span>
                                   )}
                                 </td>
-                                <td className="px-6 py-4 text-center whitespace-nowrap">
-                                  {isEliminated ? (
-                                    <span className="text-xs font-mono font-bold text-loss bg-loss-dim px-2.5 py-1 rounded-md border border-loss-border">
-                                      LIQUIDATED
-                                    </span>
-                                  ) : (
-                                    <span className="text-xs font-mono font-bold text-gain bg-gain-dim px-2.5 py-1 rounded-md border border-gain-border">
-                                      ACTIVE
-                                    </span>
-                                  )}
-                                </td>
-                                <td className="px-6 py-4 font-mono font-bold text-right text-gain text-base whitespace-nowrap">
+                                <td className="px-6 py-4 font-mono font-bold text-right text-white text-base whitespace-nowrap">
                                   ₹{(row.equity_paise / 100).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                                 </td>
                               </tr>

@@ -3,10 +3,10 @@ import math
 # LIQUIDITY PROFILES (Market Depth)
 # Represents the exact Rupee amount of net buying/selling required to move the stock 1%.
 LIQUIDITY_PROFILE = {
-    "RELI-X": 3_00_00_000,   # Blue-chip: 3.0 Cr for 1%
-    "HDFC-W": 2_50_00_000,
-    "INFY-Z": 2_00_00_000,
-    "TATA-Y": 1_50_00_000,
+    "RLNT": 3_00_00_000,   # Blue-chip: 3.0 Cr for 1%
+    "HRZN": 2_50_00_000,
+    "INFN": 2_00_00_000,
+    "TYRL": 1_50_00_000,
     "GOLDCORE": 4_00_00_000, # Massive depth
     "STAPLE": 1_00_00_000,
     "NIMBUS": 75_00_000,
