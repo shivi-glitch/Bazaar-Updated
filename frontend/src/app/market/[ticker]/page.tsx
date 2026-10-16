@@ -333,8 +333,9 @@ export function AssetDetailTab({ ticker, onBack }: { ticker: string, onBack: () 
   const sma20Data = useMemo(() => calculateSMA(20), [chartData]);
 
   return (
-      <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto space-y-6 pb-[120px]">
+      <div className="p-3 sm:p-5 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-5 pb-28 lg:pb-12">
         
+        {/* Top Navigation */}
         <div className="flex items-center justify-between">
           <button 
             onClick={onBack} 
@@ -345,141 +346,163 @@ export function AssetDetailTab({ ticker, onBack }: { ticker: string, onBack: () 
           <div className="text-[10px] font-mono font-bold text-tx-muted uppercase tracking-widest">ASSET TERMINAL</div>
         </div>
 
-        {/* Ticker Header Card */}
-        <div className="bg-bg-raised/75 border border-bd-subtle rounded-xl p-5 sm:p-7 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 shadow-card">
-          <div>
-            <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
-              <h1 className="text-[26px] sm:text-[32px] font-sans font-bold tracking-tight text-tx-primary">{ticker}</h1>
-              <span className={clsx(
-                "text-[10px] font-mono uppercase tracking-wider font-bold px-2.5 py-0.5 rounded border",
-                meta.archetype === "Trending" ? "bg-accent-dim border-accent-border text-accent" :
-                meta.archetype === "Mean-Reverting" ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-400" :
-                meta.archetype === "Safe Haven" ? "bg-warn-dim border-warn-border text-warn" :
-                "bg-loss-dim border-loss-border text-loss"
-              )}>{meta.archetype}</span>
-            </div>
-            <p className="text-tx-secondary text-[13px] sm:text-[14px] mt-1 font-medium">{meta.name} · <span className="text-tx-muted font-mono">{meta.sector}</span></p>
-          </div>
-          <div className="text-left sm:text-right">
-            <div className="text-[28px] sm:text-[34px] font-mono font-bold text-tx-primary tracking-tight">₹{currentPrice.toFixed(2)}</div>
-          </div>
-        </div>
-
-        {/* Chart Panel */}
-        <div className="bg-bg-raised/70 border border-bd-subtle rounded-xl p-4 sm:p-6 shadow-card">
-          <LiveChart 
-            stockId={ticker} 
-            priceHistory={chartData} 
-            volumeHistory={volumeData}
-            sma9History={sma9Data} 
-            sma20History={sma20Data} 
-            showSma9={showSma9} 
-            showSma20={showSma20}
-            accentColor="#00D4AA"
-            height={380}
-          />
-          <div className="flex items-center gap-2 mt-4 pt-3 border-t border-bd-hairline">
-            <button 
-              onClick={() => setShowSma9(!showSma9)} 
-              className={clsx(
-                "px-3 py-1 text-[11px] font-mono font-bold uppercase tracking-wider rounded border transition-colors cursor-pointer", 
-                showSma9 
-                  ? "bg-accent-dim border-accent-border text-accent" 
-                  : "bg-bg-base border-bd-subtle text-tx-muted hover:text-tx-secondary"
-              )}
-            >
-              SMA 9 (Fast)
-            </button>
-            <button 
-              onClick={() => setShowSma20(!showSma20)} 
-              className={clsx(
-                "px-3 py-1 text-[11px] font-mono font-bold uppercase tracking-wider rounded border transition-colors cursor-pointer", 
-                showSma20 
-                  ? "bg-cyan-500/15 border-cyan-500/30 text-cyan-400" 
-                  : "bg-bg-base border-bd-subtle text-tx-muted hover:text-tx-secondary"
-              )}
-            >
-              SMA 20 (Trend)
-            </button>
-          </div>
-        </div>
-
-        <OrderDepth isActive={isRound2} orderBook={orderBook} />
-
-        <div className="glass-panel p-6 space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-bd-subtle pb-4">
+        {/* 2-Column Responsive Layout: 8 cols Left (Chart & Company), 4 cols Right (Execution & Metrics) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 items-start">
+          
+          {/* ─── LEFT COLUMN (lg:col-span-8) ─── */}
+          <div className="lg:col-span-8 space-y-5">
+            
+            {/* Ticker Header Card */}
+            <div className="bg-bg-raised/75 border border-bd-subtle rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 shadow-card">
               <div>
-                <h3 className="text-[11px] font-bold text-tx-muted uppercase tracking-[0.06em]">
-                  Company Dossier & Market Profile
-                </h3>
-                <div className="text-[16px] font-bold text-tx-primary mt-0.5">{meta.name}</div>
+                <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
+                  <h1 className="text-[24px] sm:text-[30px] font-sans font-bold tracking-tight text-tx-primary">{ticker}</h1>
+                  <span className={clsx(
+                    "text-[10px] font-mono uppercase tracking-wider font-bold px-2.5 py-0.5 rounded border",
+                    meta.archetype === "Trending" ? "bg-accent-dim border-accent-border text-accent" :
+                    meta.archetype === "Mean-Reverting" ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-400" :
+                    meta.archetype === "Safe Haven" ? "bg-warn-dim border-warn-border text-warn" :
+                    "bg-loss-dim border-loss-border text-loss"
+                  )}>{meta.archetype}</span>
+                </div>
+                <p className="text-tx-secondary text-[12px] sm:text-[13px] mt-0.5 font-medium">{meta.name} · <span className="text-tx-muted font-mono">{meta.sector}</span></p>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-[0.06em] text-tx-secondary bg-bg-raised px-2.5 py-1 rounded-sm border border-bd-subtle">
-                  Sector: {meta.sector}
-                </span>
+              <div className="text-left sm:text-right">
+                <div className="text-[26px] sm:text-[32px] font-mono font-bold text-tx-primary tracking-tight">₹{currentPrice.toFixed(2)}</div>
               </div>
             </div>
 
-            <p className="text-[14px] text-tx-secondary leading-relaxed font-medium">
-              {meta.dossier}
-            </p>
+            {/* Chart Panel */}
+            <div className="bg-bg-raised/70 border border-bd-subtle rounded-xl p-3 sm:p-5 shadow-card">
+              <LiveChart 
+                stockId={ticker} 
+                priceHistory={chartData} 
+                volumeHistory={volumeData}
+                sma9History={sma9Data} 
+                sma20History={sma20Data} 
+                showSma9={showSma9} 
+                showSma20={showSma20}
+                accentColor="#00D4AA"
+                className="h-[290px] xs:h-[320px] sm:h-[360px] lg:h-[410px]"
+              />
+              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-bd-hairline">
+                <button 
+                  onClick={() => setShowSma9(!showSma9)} 
+                  className={clsx(
+                    "px-3 py-1 text-[11px] font-mono font-bold uppercase tracking-wider rounded border transition-colors cursor-pointer", 
+                    showSma9 
+                      ? "bg-accent-dim border-accent-border text-accent" 
+                      : "bg-bg-base border-bd-subtle text-tx-muted hover:text-tx-secondary"
+                  )}
+                >
+                  SMA 9 (Fast)
+                </button>
+                <button 
+                  onClick={() => setShowSma20(!showSma20)} 
+                  className={clsx(
+                    "px-3 py-1 text-[11px] font-mono font-bold uppercase tracking-wider rounded border transition-colors cursor-pointer", 
+                    showSma20 
+                      ? "bg-cyan-500/15 border-cyan-500/30 text-cyan-400" 
+                      : "bg-bg-base border-bd-subtle text-tx-muted hover:text-tx-secondary"
+                  )}
+                >
+                  SMA 20 (Trend)
+                </button>
+              </div>
+            </div>
 
-            <div className="bg-bg-void border-l-4 border-l-accent border border-bd-subtle rounded-md p-4 shadow-card">
-              <div className="text-[11px] font-bold text-accent uppercase tracking-[0.06em] mb-1 flex items-center gap-1.5">
+            {/* Order Depth in R2 */}
+            <OrderDepth isActive={isRound2} orderBook={orderBook} />
+
+            {/* Company Dossier & Profile */}
+            <div className="glass-panel p-5 sm:p-6 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-bd-subtle pb-3">
+                <div>
+                  <h3 className="text-[11px] font-bold text-tx-muted uppercase tracking-[0.06em]">
+                    Company Dossier & Market Profile
+                  </h3>
+                  <div className="text-[15px] font-bold text-tx-primary mt-0.5">{meta.name}</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.06em] text-tx-secondary bg-bg-raised px-2.5 py-1 rounded-sm border border-bd-subtle">
+                    Sector: {meta.sector}
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-[13px] sm:text-[14px] text-tx-secondary leading-relaxed font-medium">
+                {meta.dossier}
+              </p>
+            </div>
+          </div>
+
+          {/* ─── RIGHT COLUMN (lg:col-span-4) ─── */}
+          <div className="lg:col-span-4 space-y-5">
+            
+            {/* Desktop-Only Order Execution Ticket */}
+            <div className="hidden lg:block">
+              <TradeBar ticker={ticker} currentPricePaise={currentPricePaise} variant="card" />
+            </div>
+
+            {/* Quantitative Desk Edge (Tactical Playbook) */}
+            <div className="bg-bg-void border-l-4 border-l-accent border border-bd-subtle rounded-xl p-4 sm:p-5 shadow-card space-y-2">
+              <div className="text-[11px] font-bold text-accent uppercase tracking-[0.06em] flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-                Quantitative Desk Edge (Tactical Playbook)
+                Quantitative Desk Edge
               </div>
               <div className="text-[13px] font-bold text-tx-primary leading-snug">
                 {meta.deskNote}
               </div>
             </div>
 
-            <div>
-              <div className="text-[11px] font-bold text-tx-muted uppercase tracking-[0.06em] mb-3">
-                Key Fundamental & Valuation Metrics
+            {/* Key Fundamental & Valuation Metrics */}
+            <div className="glass-panel p-5 space-y-4">
+              <div className="text-[11px] font-bold text-tx-muted uppercase tracking-[0.06em] border-b border-bd-subtle pb-2.5">
+                Fundamental & Valuation Metrics
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                <div className="bg-bg-void border border-bd-subtle p-3.5 rounded-md hover:border-accent-border/40 transition-colors">
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="bg-bg-void border border-bd-subtle p-3 rounded-md hover:border-accent-border/40 transition-colors">
                   <div className="text-[10px] font-bold text-tx-muted uppercase tracking-[0.06em]">Market Beta</div>
-                  <div className="text-[16px] font-mono font-bold text-accent mt-1">{meta.metrics?.beta || "-"}</div>
-                  <div className="text-[10px] text-tx-muted mt-0.5">Sensitivity to MERX50</div>
+                  <div className="text-[15px] font-mono font-bold text-accent mt-0.5">{meta.metrics?.beta || "-"}</div>
+                  <div className="text-[9px] text-tx-muted mt-0.5">Sensitivity to MERX50</div>
                 </div>
 
-                <div className="bg-bg-void border border-bd-subtle p-3.5 rounded-md hover:border-accent-border/40 transition-colors">
+                <div className="bg-bg-void border border-bd-subtle p-3 rounded-md hover:border-accent-border/40 transition-colors">
                   <div className="text-[10px] font-bold text-tx-muted uppercase tracking-[0.06em]">Market Cap</div>
-                  <div className="text-[16px] font-mono font-bold text-tx-primary mt-1">{meta.metrics?.marketCap || "-"}</div>
-                  <div className="text-[10px] text-tx-muted mt-0.5">Total market valuation</div>
+                  <div className="text-[15px] font-mono font-bold text-tx-primary mt-0.5 truncate">{meta.metrics?.marketCap || "-"}</div>
+                  <div className="text-[9px] text-tx-muted mt-0.5">Total valuation</div>
                 </div>
 
-                <div className="bg-bg-void border border-bd-subtle p-3.5 rounded-md hover:border-accent-border/40 transition-colors">
+                <div className="bg-bg-void border border-bd-subtle p-3 rounded-md hover:border-accent-border/40 transition-colors">
                   <div className="text-[10px] font-bold text-tx-muted uppercase tracking-[0.06em]">P/E Ratio</div>
-                  <div className="text-[16px] font-mono font-bold text-tx-primary mt-1">{meta.metrics?.peRatio || "-"}</div>
-                  <div className="text-[10px] text-tx-muted mt-0.5">Valuation multiple</div>
+                  <div className="text-[15px] font-mono font-bold text-tx-primary mt-0.5">{meta.metrics?.peRatio || "-"}</div>
+                  <div className="text-[9px] text-tx-muted mt-0.5">Valuation multiple</div>
                 </div>
 
-                <div className="bg-bg-void border border-bd-subtle p-3.5 rounded-md hover:border-accent-border/40 transition-colors">
-                  <div className="text-[10px] font-bold text-tx-muted uppercase tracking-[0.06em]">Equilibrium Band</div>
-                  <div className="text-[15px] font-mono font-bold text-gain mt-1">{meta.metrics?.supportRange || "-"}</div>
-                  <div className="text-[10px] text-tx-muted mt-0.5">Historical trading corridor</div>
+                <div className="bg-bg-void border border-bd-subtle p-3 rounded-md hover:border-accent-border/40 transition-colors">
+                  <div className="text-[10px] font-bold text-tx-muted uppercase tracking-[0.06em]">Equilibrium</div>
+                  <div className="text-[13px] font-mono font-bold text-gain mt-0.5 truncate">{meta.metrics?.supportRange || "-"}</div>
+                  <div className="text-[9px] text-tx-muted mt-0.5">Trading corridor</div>
                 </div>
 
-                <div className="bg-bg-void border border-bd-subtle p-3.5 rounded-md hover:border-accent-border/40 transition-colors">
+                <div className="bg-bg-void border border-bd-subtle p-3 rounded-md hover:border-accent-border/40 transition-colors">
                   <div className="text-[10px] font-bold text-tx-muted uppercase tracking-[0.06em]">Active Float</div>
-                  <div className="text-[15px] font-mono font-bold text-tx-secondary mt-1">{meta.metrics?.freeFloat || "-"}</div>
-                  <div className="text-[10px] text-tx-muted mt-0.5">Tradeable market liquidity</div>
+                  <div className="text-[13px] font-mono font-bold text-tx-secondary mt-0.5 truncate">{meta.metrics?.freeFloat || "-"}</div>
+                  <div className="text-[9px] text-tx-muted mt-0.5">Tradeable liquidity</div>
                 </div>
 
-                <div className="bg-bg-void border border-bd-subtle p-3.5 rounded-md hover:border-accent-border/40 transition-colors">
+                <div className="bg-bg-void border border-bd-subtle p-3 rounded-md hover:border-accent-border/40 transition-colors">
                   <div className="text-[10px] font-bold text-tx-muted uppercase tracking-[0.06em]">Inst. Holding</div>
-                  <div className="text-[15px] font-mono font-bold text-tx-secondary mt-1">{meta.metrics?.instHolding || "-"}</div>
-                  <div className="text-[10px] text-tx-muted mt-0.5">Order absorption depth</div>
+                  <div className="text-[13px] font-mono font-bold text-tx-secondary mt-0.5">{meta.metrics?.instHolding || "-"}</div>
+                  <div className="text-[9px] text-tx-muted mt-0.5">Absorption depth</div>
                 </div>
               </div>
             </div>
+          </div>
         </div>
 
-        <TradeBar ticker={ticker} currentPricePaise={currentPricePaise} />
+        {/* Mobile-Only Bottom Fixed Bar (hidden on desktop) */}
+        <TradeBar ticker={ticker} currentPricePaise={currentPricePaise} variant="bar" className="lg:hidden" />
       </div>
   );
 }

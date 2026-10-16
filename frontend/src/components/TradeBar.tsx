@@ -9,9 +9,11 @@ import clsx from "clsx";
 interface TradeBarProps {
   ticker: string;
   currentPricePaise: number;
+  variant?: "bar" | "card";
+  className?: string;
 }
 
-export function TradeBar({ ticker, currentPricePaise }: TradeBarProps) {
+export function TradeBar({ ticker, currentPricePaise, variant = "bar", className }: TradeBarProps) {
   const [qty, setQty] = useState<number | string>(1);
   const [currentPos, setCurrentPos] = useState<number>(0);
   const [loading, setLoading] = useState(false);
@@ -86,9 +88,146 @@ export function TradeBar({ ticker, currentPricePaise }: TradeBarProps) {
     }
   };
 
+  // DESKTOP CARD VARIANT
+  if (variant === "card") {
+    const notionalValue = ((numericQty * currentPricePaise) / 100).toLocaleString('en-IN', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+
+    return (
+      <div className={clsx(
+        "bg-bg-raised/75 border border-bd-subtle rounded-xl p-5 shadow-card relative overflow-hidden flex flex-col gap-4",
+        className
+      )}>
+        {/* Flash indicator */}
+        <div className={clsx(
+          "absolute inset-0 transition-opacity duration-300 pointer-events-none opacity-0 z-0",
+          flash === "buy" ? "bg-gain-dim opacity-100" : "",
+          flash === "sell" ? "bg-loss-dim opacity-100" : ""
+        )} />
+
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-bd-hairline pb-3 relative z-10">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+            <span className="text-[11px] font-bold text-tx-muted uppercase tracking-[0.06em]">
+              Order Ticket
+            </span>
+          </div>
+          <span className="text-[13px] font-mono font-bold text-accent">
+            ₹{(currentPricePaise / 100).toFixed(2)}
+          </span>
+        </div>
+
+        {/* Current Position Status */}
+        <div className="bg-bg-void border border-bd-subtle rounded-lg p-3 flex items-center justify-between relative z-10">
+          <span className="text-[11px] font-mono text-tx-secondary uppercase tracking-wider font-medium">Position</span>
+          <div>
+            {currentPos > 0 ? (
+              <span className="font-mono font-bold text-[12px] text-gain bg-gain-dim border border-gain-border px-2.5 py-0.5 rounded inline-flex items-center gap-1.5 shadow-xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-gain animate-pulse" />
+                LONG: {currentPos}
+              </span>
+            ) : currentPos < 0 ? (
+              <span className="font-mono font-bold text-[12px] text-loss bg-loss-dim border border-loss-border px-2.5 py-0.5 rounded inline-flex items-center gap-1.5 shadow-xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-loss animate-pulse" />
+                SHORT: {Math.abs(currentPos)}
+              </span>
+            ) : (
+              <span className="font-mono font-bold text-[12px] text-tx-muted bg-bg-raised border border-bd-subtle px-2 py-0.5 rounded">
+                FLAT: 0
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Quantity Controls */}
+        <div className="space-y-2 relative z-10">
+          <div className="flex justify-between items-center text-[11px] font-mono text-tx-secondary">
+            <span className="uppercase tracking-wider font-medium">Lots</span>
+            <span className="text-tx-muted font-bold">1 Lot = 1 Share</span>
+          </div>
+          <div className="flex items-center bg-bg-void border border-bd-subtle rounded-lg h-[44px] w-full overflow-hidden">
+            <button 
+              onClick={() => setQty(Math.max(1, numericQty - 1))}
+              className="w-12 h-full text-tx-secondary hover:text-tx-primary hover:bg-bg-raised active:bg-bg-overlay font-bold text-[18px] transition-colors flex items-center justify-center cursor-pointer"
+              aria-label="Decrease quantity"
+            >-</button>
+            <input
+              type="number" min="1" value={qty}
+              onChange={(e) => setQty(e.target.value === "" ? "" : parseInt(e.target.value, 10))}
+              className="flex-1 h-full text-center font-mono font-bold text-[15px] bg-transparent text-tx-primary outline-none focus:bg-bg-raised transition-colors"
+              aria-label="Trade quantity"
+            />
+            <button 
+              onClick={() => setQty(numericQty + 1)}
+              className="w-12 h-full text-tx-secondary hover:text-tx-primary hover:bg-bg-raised active:bg-bg-overlay font-bold text-[18px] transition-colors flex items-center justify-center cursor-pointer"
+              aria-label="Increase quantity"
+            >+</button>
+          </div>
+          
+          {/* Quick Presets */}
+          <div className="grid grid-cols-4 gap-1.5 pt-0.5">
+            {[1, 5, 10, 25].map((preset) => (
+              <button
+                key={preset}
+                type="button"
+                onClick={() => setQty(preset)}
+                className={clsx(
+                  "py-1 text-[11px] font-mono font-bold rounded border transition-colors cursor-pointer",
+                  numericQty === preset 
+                    ? "bg-accent-dim border-accent-border text-accent" 
+                    : "bg-bg-void border-bd-subtle text-tx-muted hover:text-tx-primary hover:border-bd-strong"
+                )}
+              >
+                +{preset}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Estimated Outlay */}
+        <div className="flex items-center justify-between text-[11px] font-mono text-tx-muted pt-1 border-t border-bd-hairline relative z-10">
+          <span>Est. Value</span>
+          <span className="font-bold text-tx-primary">₹{notionalValue}</span>
+        </div>
+
+        {/* Inline Error */}
+        {error && (
+          <div className="bg-loss-dim border border-loss-border text-loss text-center py-1.5 px-2 rounded-md text-[11px] font-mono font-bold relative z-10">
+            {error}
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="grid grid-cols-2 gap-2.5 pt-1 relative z-10">
+          <Button 
+            variant="sell" size="md" 
+            isLoading={loading} onClick={() => executeTrade("SELL")}
+            className="w-full font-mono font-bold tracking-wider py-2.5 cursor-pointer"
+          >
+            {leftLabel}
+          </Button>
+          <Button 
+            variant="buy" size="md" 
+            isLoading={loading} onClick={() => executeTrade("BUY")}
+            className="w-full font-mono font-bold tracking-wider py-2.5 cursor-pointer"
+          >
+            {rightLabel}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // MOBILE BOTTOM BAR VARIANT
   return (
     <div 
-      className="fixed bottom-0 left-0 w-full bg-bg-raised border-t border-bd-subtle shadow-modal z-30"
+      className={clsx(
+        "fixed bottom-0 left-0 w-full bg-bg-raised border-t border-bd-subtle shadow-modal z-30",
+        className
+      )}
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       {error && (
@@ -102,26 +241,26 @@ export function TradeBar({ ticker, currentPricePaise }: TradeBarProps) {
         flash === "sell" ? "bg-loss-dim opacity-100" : ""
       )} />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-[80px] flex items-center justify-between gap-4 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-[76px] flex items-center justify-between gap-4 relative z-10">
         
-        {/* Position Display Only (Ticker name and price removed per spec) */}
+        {/* Position Display Only */}
         <div className="flex flex-col justify-center min-w-0 shrink">
           <div className="text-[10px] font-mono font-bold text-tx-muted uppercase tracking-wider mb-0.5">
             Position
           </div>
           <div>
             {currentPos > 0 ? (
-              <span className="font-mono font-bold text-[13px] sm:text-[15px] text-gain bg-gain-dim border border-gain-border px-2.5 py-1 rounded-md inline-flex items-center gap-1.5 shadow-xs">
+              <span className="font-mono font-bold text-[12px] sm:text-[14px] text-gain bg-gain-dim border border-gain-border px-2 py-0.5 rounded-md inline-flex items-center gap-1.5 shadow-xs">
                 <span className="w-1.5 h-1.5 rounded-full bg-gain animate-pulse" />
                 LONG: {currentPos}
               </span>
             ) : currentPos < 0 ? (
-              <span className="font-mono font-bold text-[13px] sm:text-[15px] text-loss bg-loss-dim border border-loss-border px-2.5 py-1 rounded-md inline-flex items-center gap-1.5 shadow-xs">
+              <span className="font-mono font-bold text-[12px] sm:text-[14px] text-loss bg-loss-dim border border-loss-border px-2 py-0.5 rounded-md inline-flex items-center gap-1.5 shadow-xs">
                 <span className="w-1.5 h-1.5 rounded-full bg-loss animate-pulse" />
                 SHORT: {Math.abs(currentPos)}
               </span>
             ) : (
-              <span className="font-mono font-bold text-[12px] sm:text-[13px] text-tx-secondary bg-bg-void border border-bd-subtle px-2.5 py-1 rounded-md inline-block">
+              <span className="font-mono font-bold text-[11px] sm:text-[12px] text-tx-secondary bg-bg-void border border-bd-subtle px-2 py-0.5 rounded-md inline-block">
                 FLAT: 0
               </span>
             )}
@@ -129,21 +268,21 @@ export function TradeBar({ ticker, currentPricePaise }: TradeBarProps) {
         </div>
 
         {/* Quantity Controls */}
-        <div className="flex items-center bg-bg-void border border-bd-subtle rounded-md h-[44px] shrink-0">
+        <div className="flex items-center bg-bg-void border border-bd-subtle rounded-md h-[40px] shrink-0">
           <button 
             onClick={() => setQty(Math.max(1, numericQty - 1))}
-            className="touch-target w-[44px] text-tx-secondary hover:text-tx-primary active:bg-bg-raised transition-colors"
+            className="touch-target w-[40px] text-tx-secondary hover:text-tx-primary active:bg-bg-raised transition-colors flex items-center justify-center font-bold text-[16px] cursor-pointer"
             aria-label="Decrease quantity"
           >-</button>
           <input
             type="number" min="1" value={qty}
             onChange={(e) => setQty(e.target.value === "" ? "" : parseInt(e.target.value, 10))}
-            className="w-12 sm:w-16 h-full text-center font-mono font-bold text-[14px] sm:text-[16px] bg-transparent text-tx-primary outline-none focus:bg-bg-raised transition-colors"
+            className="w-12 sm:w-16 h-full text-center font-mono font-bold text-[14px] sm:text-[15px] bg-transparent text-tx-primary outline-none focus:bg-bg-raised transition-colors"
             aria-label="Trade quantity"
           />
           <button 
             onClick={() => setQty(numericQty + 1)}
-            className="touch-target w-[44px] text-tx-secondary hover:text-tx-primary active:bg-bg-raised transition-colors"
+            className="touch-target w-[40px] text-tx-secondary hover:text-tx-primary active:bg-bg-raised transition-colors flex items-center justify-center font-bold text-[16px] cursor-pointer"
             aria-label="Increase quantity"
           >+</button>
         </div>
@@ -153,14 +292,14 @@ export function TradeBar({ ticker, currentPricePaise }: TradeBarProps) {
           <Button 
             variant="sell" size="md" 
             isLoading={loading} onClick={() => executeTrade("SELL")}
-            className="w-[80px] sm:w-[100px]"
+            className="w-[80px] sm:w-[95px] cursor-pointer"
           >
             {leftLabel}
           </Button>
           <Button 
             variant="buy" size="md" 
             isLoading={loading} onClick={() => executeTrade("BUY")}
-            className="w-[80px] sm:w-[100px]"
+            className="w-[80px] sm:w-[95px] cursor-pointer"
           >
             {rightLabel}
           </Button>

@@ -25,6 +25,7 @@ interface Props {
   sma20History: Array<{ time: number | string; value: number } | null>;
   volumeHistory?: PricePoint[];
   height?: number;
+  className?: string;
   showSma9?: boolean;
   showSma20?: boolean;
   accentColor?: string;
@@ -71,6 +72,7 @@ export default function LiveChart({
   sma20History,
   volumeHistory = [],
   height = 280,
+  className,
   showSma9 = true,
   showSma20 = true,
   accentColor = "#3b82f6",
@@ -94,9 +96,10 @@ export default function LiveChart({
   useEffect(() => {
     if (!containerRef.current) return;
 
+    const initialHeight = containerRef.current.clientHeight || height;
     const chart = createChart(containerRef.current, {
       width: containerRef.current.clientWidth,
-      height: containerRef.current.clientHeight || height,
+      height: initialHeight,
       layout: {
         background: { type: ColorType.Solid, color: "transparent" },
         textColor: "#94a3b8",
@@ -106,12 +109,18 @@ export default function LiveChart({
         horzLines: { color: "rgba(255,255,255,0.05)" },
       },
       crosshair: { mode: 1 },
-      rightPriceScale: { borderColor: "rgba(255,255,255,0.1)" },
+      rightPriceScale: { 
+        borderColor: "rgba(255,255,255,0.1)",
+        scaleMargins: { top: 0.08, bottom: 0.22 }
+      },
       timeScale: {
         visible: true,
         timeVisible: true,
         secondsVisible: false,
         borderColor: "rgba(255,255,255,0.1)",
+        barSpacing: 7,
+        minBarSpacing: 3,
+        rightOffset: 6,
       },
       handleScroll: true,
       handleScale: true,
@@ -127,7 +136,7 @@ export default function LiveChart({
       lastValueVisible: true,
     });
 
-    // Volume Series (Isolated to the bottom 15%)
+    // Volume Series (Isolated to the bottom with breathing room from time axis)
     const volumeSeries = chart.addSeries(HistogramSeries, {
       color: "rgba(255, 255, 255, 0.1)",
       priceFormat: { type: "volume" },
@@ -136,7 +145,7 @@ export default function LiveChart({
     });
 
     chart.priceScale("vol_scale").applyOptions({
-      scaleMargins: { top: 0.85, bottom: 0 },
+      scaleMargins: { top: 0.80, bottom: 0.05 },
     });
 
     const sma9Series = chart.addSeries(LineSeries, {
@@ -312,8 +321,8 @@ export default function LiveChart({
 
       <div 
         ref={containerRef} 
-        className={clsx("w-full rounded-xl overflow-hidden", isFullscreen ? "flex-1" : "")} 
-        style={{ height: isFullscreen ? undefined : height }} 
+        className={clsx("w-full rounded-xl overflow-hidden", isFullscreen ? "flex-1" : (className || "h-[290px] sm:h-[350px] lg:h-[400px]"))} 
+        style={{ height: isFullscreen ? undefined : (className ? undefined : height) }} 
       />
       {drawMode !== "none" && (
         <div className="absolute top-16 left-1/2 -translate-x-1/2 bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-bold px-3 py-1.5 rounded-full pointer-events-none animate-pulse">

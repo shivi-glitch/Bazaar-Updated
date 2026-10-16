@@ -62,20 +62,12 @@ def get_session_events(g, ticker):
     """Collects all news events relevant to this ticker in session g."""
     events = []
     for item in SCRIPTED_NEWS_DATABASE:
-        if item["g"] == g:
-            if item["ticker"] == ticker:
-                events.append({
-                    "tick": item["public_tick"],
-                    "impact": item["impact"],
-                    "is_fake": item["is_fake"]
-                })
-            elif item["ticker"] == "GLOBAL" and ticker != "GOLDCORE":
-                # Macro global events exert market-wide sentiment
-                events.append({
-                    "tick": item["public_tick"],
-                    "impact": item["impact"] * 0.7,
-                    "is_fake": item["is_fake"]
-                })
+        if item["g"] == g and item["ticker"] == ticker:
+            events.append({
+                "tick": item["public_tick"],
+                "impact": item["impact"],
+                "is_fake": item["is_fake"]
+            })
     events.sort(key=lambda x: x["tick"])
     # Check if a fake event has a subsequent follow-up event in the same session
     for i, ev in enumerate(events):
