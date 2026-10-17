@@ -35,7 +35,7 @@ export const ASSET_META: Record<string, AssetFundamental> = {
     dossier:
       "Meridian's state-linked energy giant and sovereign infrastructure anchor. Backed by long-term power concessions and sovereign guarantees, it is the cornerstone holding of domestic pension funds. While expansion contracts cause short rallies, institutional supply walls routinely absorb euphoria and pull price back to historical fair value.",
     deskNote:
-      "Blue-chip sovereign energy anchor. Solid cash flow backed by long-term power concessions, with heavy sovereign wealth fund and domestic pension fund custody.",
+      "Proprietary Flow Memo: Sovereign pension mandates enforce strict 2.5σ Bollinger rebalancing. Notice that while expansion headlines generate sudden retail impulse spikes, institutional block desks use these surges as exit liquidity to replenish inventory, pulling price back to the volume-weighted baseline within 15–20 ticks. Quantitative rule of thumb: never chase the initial expansion candle; fade the second-sigma excursion.",
     metrics: {
       beta: "0.72",
       marketCap: "₹3,20,000 Cr",
@@ -52,7 +52,7 @@ export const ASSET_META: Record<string, AssetFundamental> = {
     dossier:
       "A software exporter and technology pioneer riding persistent multi-year enterprise digital transformation cycles. Foreign institutional investors (FIIs) accumulate in large programmatic blocks, generating strong directional momentum that sustains across consecutive trading sessions.",
     deskNote:
-      "Tier-1 technology exporter with high recurring SaaS billings and strong multi-currency enterprise customer accounts across Europe and North America.",
+      "Quant Strategy Memo: Exhibits textbook Post-Announcement Drift (PEAD). When foreign programmatic block orders trigger above the SMA 20, supply walls evaporate rather than absorb. Desks attempting to mean-revert contract rallies face severe gamma bleed—trend persistence here typically spans 2 to 3 consecutive trading sessions before volume exhaustion occurs.",
     metrics: {
       beta: "1.15",
       marketCap: "₹2,10,000 Cr",
@@ -69,7 +69,7 @@ export const ASSET_META: Record<string, AssetFundamental> = {
     dossier:
       "The primary credit bellwether of the economy whose expansive loan portfolio fueled the multi-year domestic lending cycle. Extremely sensitive to interest rate policy shifts and macro liquidity headlines, repricing in pronounced multi-session trend waves rather than choppy intraday noise.",
     deskNote:
-      "Key commercial lending pillar. Net interest margins and capital adequacy remain closely tethered to Meridian Central Bank repo policy decisions and credit cycles.",
+      "Credit Risk Committee: Highly levered to the sovereign yield curve. In easing regimes, net interest expansion fuels multi-day trend waves. However, watch the 50+ bps repo rate threshold: once borrowing costs jump, loan-loss provisioning acts as an accelerating drag. Most critically, watch interbank counterparty disclosures—if regional private lenders show mounting delinquency, contagion shorting on HRZN offers asymmetric downside.",
     metrics: {
       beta: "1.25",
       marketCap: "₹2,40,000 Cr",
@@ -86,7 +86,7 @@ export const ASSET_META: Record<string, AssetFundamental> = {
     dossier:
       "A fast-scaling digital media and consumer marketplace platform with elevated retail enthusiasm and vocal leadership. Operates with tight market-maker depth, making it prone to sudden liquidity gaps and violent price swings upon unexpected rumors or earnings surprises.",
     deskNote:
-      "Fast-growing consumer marketplace platform with elevated retail float and aggressive operational expansion into quick commerce.",
+      "Special Situations Desk: A classic 'gamma-trap' asset with a thin 28% commercial float. Retail forum chatter frequently engineers artificial short squeezes, but scrutinize the debt-to-operating-cash ratio. When macro rates tighten, cash burn forces aggressive liquidity dumping by early seed holders into every retail spike. Trade setup: wait for the retail squeeze volume to peak, then initiate short exposure as Bid absorption drops below 35%.",
     metrics: {
       beta: "1.95",
       marketCap: "₹30,000 Cr",
@@ -103,7 +103,7 @@ export const ASSET_META: Record<string, AssetFundamental> = {
     dossier:
       "An allocated physical bullion depository trust designed for baseline capital preservation. Exhibits minimal day-to-day volatility during baseline market conditions, but serves as the emergency safe haven whenever broad equity or banking stress arises.",
     deskNote:
-      "Allocated physical bullion trust held in sovereign custody. Primary institutional safe haven asset during periods of broad macroeconomic stress.",
+      "Macro Allocation Desk: Displays zero yield and negligible baseline drift during calm risk-on sessions. However, its correlation matrix with MERX50 is deeply negative (-0.35). When geopolitical chokepoints close or systemic banking defaults trigger margin liquidation cascades, institutional capital allocates convex flight-to-safety flow here. Treat this not as a trading stock, but as an underpriced disaster call option.",
     metrics: {
       beta: "-0.35",
       marketCap: "N/A (Bullion Reserve)",
@@ -120,7 +120,7 @@ export const ASSET_META: Record<string, AssetFundamental> = {
     dossier:
       "A speculative decentralized liquidity token trading purely on community sentiment, retail leverage, and algorithmic pool rebalancing. Lacks physical collateral or institutional floor support, producing explosive rallies and precipitous sell-offs.",
     deskNote:
-      "Decentralized liquidity token with high community trading velocity. Highly reactive to macro liquidity sentiment and speculative leverage.",
+      "Digital Asset Desk: Liquidity depth is paper-thin (₹10 Lakhs moves price 1%). Tokenomics are hyper-reflexive: social sentiment waves trigger exponential upward feedback loops, but order books suffer severe asymmetric downside slippage. Critical risk factor: smart contracts lacking timelock multi-sigs carry binary liquidation risk. Scalp the momentum with trailing stops, but never hold through an unverified on-chain exploit headline.",
     metrics: {
       beta: "2.80",
       marketCap: "N/A (Synthetic Asset)",
@@ -137,7 +137,7 @@ export const ASSET_META: Record<string, AssetFundamental> = {
     dossier:
       "A mid-cap industrial mobility manufacturer that consistently returns to its historical production cost baseline. While raw material cost pressures create periodic earnings dips, strong industrial consortium buying forms a predictable valuation floor.",
     deskNote:
-      "Commercial automotive and logistics fleet manufacturer with growing exposure to federal transport corridors and defense logistics tenders.",
+      "Industrial Cyclicals Note: Trades strictly within an input-cost valuation corridor. Raw material scrap price surges compress quarterly margins, driving price into a reliable institutional accumulation band near ₹815–₹840 where consortium buying absorbs all float. Watch the federal procurement calendar: heavy logistics defense and transport awards trigger sharp Wyckoff re-accumulation breakouts.",
     metrics: {
       beta: "0.85",
       marketCap: "₹60,000 Cr",
@@ -154,7 +154,7 @@ export const ASSET_META: Record<string, AssetFundamental> = {
     dossier:
       "A high-growth cloud compute and AI server infrastructure provider. Competing aggressively with legacy IT leaders, continuous corporate cap-ex commitments drive prolonged directional trend expansions.",
     deskNote:
-      "Specialized cloud compute and enterprise AI datacenter provider scaling rapidly with expanding enterprise subscription revenue.",
+      "Tech Infrastructure Desk: Software switching inertia and 40%+ ARR growth give Nimbus massive operating leverage. Unlike consumer apps, enterprise compute contracts don't cancel when macro sneezes. Institutional algos deploy VWAP accumulation algorithms on pullbacks to the SMA 9. If an earnings surprise prints above consensus, expect multi-session upward drift without retracing to previous lows.",
     metrics: {
       beta: "1.45",
       marketCap: "₹22,000 Cr",
@@ -171,7 +171,7 @@ export const ASSET_META: Record<string, AssetFundamental> = {
     dossier:
       "Everyday household goods and essential consumer consumables producer. Characterized by predictable revenue and steady profit margins regardless of macroeconomic cycles.",
     deskNote:
-      "Consumer non-cyclical staple brand with strong retail pricing power and stable household demand across macroeconomic cycles.",
+      "Defensive Portfolio Memo: Inelastic consumer demand guarantees near-instantaneous margin pass-through during input cost inflation. With a beta of 0.32, institutions treat this equity as a synthetic bond proxy. During monetary rate hikes and equity liquidations, capital allocators execute systematic defensive rotation into this book. It will not make you 50%, but it shields capital when everything else bleeds.",
     metrics: {
       beta: "0.32",
       marketCap: "₹45,000 Cr",
@@ -188,7 +188,7 @@ export const ASSET_META: Record<string, AssetFundamental> = {
     dossier:
       "A small-cap electrical grid operator and battery storage manufacturer highly geared to national power tariffs and lithium supply costs. Highly sensitive to energy subsidy announcements.",
     deskNote:
-      "Electrical transmission and utility infrastructure operator with regulated tariff structures and state grid support.",
+      "Utilities & Energy Desk: High debt-geared small cap whose cash flows are binary to state fuel subsidies and maritime LNG supply. Sudden supply-chain shocks cause steep gap-down panics. However, because electrical grid blackouts are politically unacceptable, severe drawdowns are almost inevitably countered by state tariff relief packages. The asymmetric trade is buying deep despair candles when the market prices in permanent insolvency.",
     metrics: {
       beta: "1.85",
       marketCap: "₹18,000 Cr",
@@ -205,7 +205,7 @@ export const ASSET_META: Record<string, AssetFundamental> = {
     dossier:
       "Deepwater container carrier fleet and port logistics operator whose revenues mirror Baltic freight tariffs and national trade volumes. Swings predictably between supply gluts and shipping demand surges.",
     deskNote:
-      "Maritime port logistics and civil crane contractor directly benefiting from multi-year federal infrastructure modernization budgets.",
+      "Maritime Trade Desk: Revenue velocity lags Baltic container freight tariffs by approximately 2 trading sessions. Look at the book-to-bill ratio: when federal port and railway modernization allocations unlock, backlog visibility provides prolonged trend stability. When Level 2 depth displays persistent Bid absorption walls during a consolidation squeeze, commercial float is being locked up for a multi-session leg.",
     metrics: {
       beta: "0.90",
       marketCap: "₹26,000 Cr",
@@ -222,7 +222,7 @@ export const ASSET_META: Record<string, AssetFundamental> = {
     dossier:
       "A fast-growing regional lender that expanded aggressively during the credit boom. Underneath its optimistic headline returns lies elevated balance sheet leverage and mounting credit exposure.",
     deskNote:
-      "Aggressive private lending institution with substantial retail portfolio growth and sensitivity to asset quality metrics.",
+      "Forensic Credit Desk: Explosive retail loan book growth concealed aggressive underwriting concessions during the boom. Balance sheet leverage exceeds 8x equity, meaning a mere 3% spike in gross non-performing assets wipes out entire annual net earnings. Watch for midnight board meetings or sudden CEO exits—when auditor disclosures reveal delinquency contagion, short positions capture violent, un-hedged downward re-ratings.",
     metrics: {
       beta: "2.10",
       marketCap: "₹28,000 Cr",
@@ -239,7 +239,7 @@ export const ASSET_META: Record<string, AssetFundamental> = {
     dossier:
       "A mature, cash-rich enterprise database and financial software vendor with sticky multi-year government and banking contracts. Trades within well-defined valuation bands.",
     deskNote:
-      "Enterprise database architecture vendor operating with zero long-term debt and resilient institutional customer retention.",
+      "Enterprise Quality Factor: The antithesis of speculative tech. Operates with zero net long-term debt, 90%+ contract renewal rates, and sovereign banking database monopolies. When interbank credit contagion freezes private lenders, macro allocators dump leveraged cyclicals and park liquidity into 'fortress balance sheet' software vendors with positive free cash flow yields.",
     metrics: {
       beta: "0.80",
       marketCap: "₹40,000 Cr",
@@ -256,7 +256,7 @@ export const ASSET_META: Record<string, AssetFundamental> = {
     dossier:
       "An industrial engineering contractor strategically positioned for sovereign infrastructure and defense procurement allocations. Strong order backlog powers persistent upward momentum.",
     deskNote:
-      "Turnkey heavy industrial engineering specialist executing state-backed corridor developments and defense manufacturing orders.",
+      "Capital Goods Desk: Sits directly at the beneficiary apex of counter-cyclical fiscal stimulus. When monetary policy reaches peak tightness and private credit freezes, sovereign economic planners historically deploy massive turnkey infrastructure corridor packages to reignite industrial employment. Announcements of sovereign corridor contracts mark the absolute cycle trough and trigger explosive institutional accumulation.",
     metrics: {
       beta: "1.30",
       marketCap: "₹38,000 Cr",
@@ -273,7 +273,7 @@ export const ASSET_META: Record<string, AssetFundamental> = {
     dossier:
       "The comprehensive benchmark index aggregating the top corporate equities across Energy, Banking, Technology, and Infrastructure. Reflects the aggregate economic pulse and system liquidity.",
     deskNote:
-      "Meridian flagship composite benchmark tracking 50 premier public equities across banking, energy, technology, and manufacturing.",
+      "Macro Strategy Desk: Tracks aggregate systemic liquidity across the 50 largest capitalizations. Watch internal market breadth: when High-Beta consumer equities diverge negatively while Sovereign Reserve assets print new highs, the index is entering a systemic regime shift. Never trade the index in isolation—use the spread between leading cyclicals and defensive shelters to confirm directional authenticity.",
     metrics: {
       beta: "1.00",
       marketCap: "₹10,49,000 Cr",
@@ -441,14 +441,19 @@ export function AssetDetailTab({ ticker, onBack }: { ticker: string, onBack: () 
             </div>
 
             {/* Institutional Equity Research Note */}
-            <div className="bg-bg-void border-l-4 border-l-accent border border-bd-subtle rounded-xl p-4 sm:p-5 shadow-card space-y-2">
-              <div className="text-[11px] font-bold text-accent uppercase tracking-[0.06em] flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-                Institutional Equity Research Note
+            <div className="bg-bg-void border-l-4 border-l-accent border border-bd-subtle rounded-xl p-4 sm:p-5 shadow-card space-y-2.5">
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-[11px] font-bold text-accent uppercase tracking-[0.06em] flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                  Institutional Desk Memo
+                </div>
+                <span className="text-[9px] font-mono text-tx-muted uppercase tracking-wider bg-bg-raised px-2 py-0.5 rounded border border-bd-subtle">
+                  Tactical Flow Clue
+                </span>
               </div>
-              <div className="text-[13px] font-bold text-tx-primary leading-snug">
+              <p className="text-[12px] sm:text-[13px] text-tx-secondary leading-relaxed font-medium">
                 {meta.deskNote}
-              </div>
+              </p>
             </div>
 
             {/* Key Fundamental & Valuation Metrics */}
