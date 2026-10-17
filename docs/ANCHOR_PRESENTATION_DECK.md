@@ -1,29 +1,29 @@
-# BAZAAR: MASTER ANCHOR PRESENTATION & STAGE GUIDE
+# BAZAAR: MASTER ANCHOR PRESENTATION & STAGE GUIDE (v2.0)
 > **The Official Host Script, Slide Deck, and Stage Operator Playbook**  
 > *Designed for the Main Stage Emcee / Anchor & Projector Display System*  
 > *Event Format: 11 Sessions · 2 Rounds · Mobile-First Trading Simulator*
 
 ---
 
-## Quick Reference for the Anchor & AV Crew
+## Stage Manager & AV Quick Reference
 
-| Parameter | Specification | Notes for Stage Operator |
+| Parameter | Specification | Notes for Stage & AV Crew |
 | :--- | :--- | :--- |
 | **Total Runtime** | ~90 – 120 Minutes | 11 Sessions × 5 min live + 3–5 min intermissions |
 | **Session Duration** | **300 Seconds (5 Minutes)** | Run strictly on server clock. No auto-starts. |
-| **Round 1 (Sessions 1–6)** | Starting Capital: **₹10,00,000 (10 Lakhs)** | Long-only, instant news delivery, calm credit regime. |
+| **Round 1 (Sessions 1–6)** | Starting Capital: **₹10,00,000 (10 Lakhs)** | Long-only, instant news broadcast, cheap credit regime. |
 | **The Great Reset** | After Session 6 | All portfolios reset to **₹1,00,00,000 (1 Crore)** cash. |
 | **Round 2 (Sessions 7–11)**| Starting Capital: **₹1,00,00,000 (1 Crore)** | Shared order book, algorithmic bots, short selling, news delay. |
-| **Transaction Fees** | **0.10% per executed trade** | Over-trading and fee drag destroy ranks. Remind players! |
-| **Liquidation Rule** | Equity ≤ ₹0 = **Permanent Elimination** | Call out margin calls live on the mic to build tension. |
+| **Transaction Fees** | **0.10% per executed trade** | Over-trading drains capital. Remind players! |
+| **Liquidation Rule** | Equity ≤ ₹0 = **Permanent Elimination** | Announce margin calls live on mic to build tension. |
 
 ---
 
-# PART 1: PRE-GAME BRIEFING (SLIDES 1 – 7)
+# PART 1: PRE-GAME BRIEFING (SLIDES 1 – 5)
 
 ---
 
-### SLIDE 1: TITLE SLIDE
+### SLIDE 1: INTRODUCTION TO BAZAAR
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │                                                                        │
@@ -39,714 +39,744 @@
 
 #### 📺 Big Screen Shows:
 - The Bazaar logo with dark-mode aesthetic.
-- Terminal URL and login instructions (`Team ID` and `PIN`).
+- Terminal URL and login instructions: `merx.live` (Enter Team ID and PIN).
 - Ambient countdown: "Trading floor opens in 10 minutes."
 
 #### 🎙️ Anchor Speaks:
-> *"Good morning, traders, analysts, and institutional desks! Welcome to **BAZAAR** — the flagship high-frequency trading simulation of the Meridian Financial District.*
+> *"Good morning, traders, analysts, and quantitative desks! Welcome to **BAZAAR** — the flagship high-frequency trading simulation of the Meridian Financial District.*
 >
-> *Today, you are not passive spectators. For the next two hours, every team in this room is the lead portfolio manager of an active proprietary trading desk. You will trade real macroeconomic shocks, manage leverage, outsmart algorithmic market makers, and separate genuine market intelligence from social media noise.*
+> *Today, you are not passive spectators. For the next two hours, every team in this room is the lead portfolio management desk of an active proprietary trading fund. You will trade real macroeconomic shocks, manage risk, outsmart algorithmic market makers, and separate genuine market intelligence from retail noise.*
 >
-> *Make sure your mobile phones or laptops are connected, open your browser, enter your Team ID and PIN, and hold your fire until the Opening Bell. Let’s walk through the mandate."*
+> *Make sure your mobile devices or laptops are connected to the venue WiFi, open your browser, enter your Team ID and PIN, and hold your fire until the Opening Bell. Let's walk through how this tournament will unfold."*
 
 ---
 
-### SLIDE 2: THE TRADING DESK MANDATE
+### SLIDE 2: ROUND 1 — THE RETAIL CREDIT BOOM
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│  THE MANDATE: WHAT IS BAZAAR?                                          │
-├────────────────────────────────────────────────────────────────────────┤
-│  • You are managing a quantitative proprietary trading desk.           │
-│  • The market is MERX (The Meridian Exchange).                         │
-│  • The macro economy is dynamic, interconnected, and reactive.         │
-│                                                                        │
-│  CORE OBJECTIVE:                                                       │
-│  Maximize Mark-to-Market Portfolio Equity across 11 trading sessions.   │
-│  Avoid liquidation, minimize transaction churn, and trade the truth.   │
-└────────────────────────────────────────────────────────────────────────┘
-```
-
-#### 📺 Big Screen Shows:
-- Key objectives: Maximize Terminal Equity, Manage Downside Risk, Trade Catalysts.
-- Visual of the simulated economy: Central Bank, Energy Corridors, Commercial Banks, Cloud Tech, Speculative Crypto.
-
-#### 🎙️ Anchor Speaks:
-> *"What is your goal today? Very simple: **Generate Alpha.** You are competing to maximize your terminal equity across 11 high-intensity sessions.*
->
-> *In Bazaar, markets are not a casino game of random coin flips. Prices move because macroeconomic events happen. Central banks change interest rates. War severs supply corridors. Corporate balance sheets hide catastrophic bad debts. And retail crowds fall into psychological traps.*
->
-> *The desks that win today won't be the ones clicking buy and sell 50 times a minute. The winners will be the ones who read the macro signals, spot the institutional order flow, and trade with cold mathematical discipline."*
-
----
-
-### SLIDE 3: YOUR TERMINAL INTERFACE
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│  TERMINAL NAVIGATION GUIDE                                             │
-├────────────────────────────────────────────────────────────────────────┤
-│  1. TICKER BOARD     → Live prices, percentage changes, 15 assets      │
-│  2. INTERACTIVE CHART→ Real-time candle ticks, SMA9, SMA20, RSI14      │
-│  3. ORDER DEPTH (L2) → Live bids, asks, buy/sell pressure walls        │
-│  4. ORDER ENTRY      → BUY / SELL, Quantity slider, Limit/Market       │
-│  5. NEWS WIRE        → Real-time intelligence feed (4 distinct sources)│
-│  6. PORTFOLIO        → Mark-to-Market equity, available cash, positions│
-└────────────────────────────────────────────────────────────────────────┘
-```
-
-#### 📺 Big Screen Shows:
-- Annotated screenshot of the Bazaar mobile/desktop UI.
-- Highlighted boxes over: (1) Price Header, (2) TradingView-style chart, (3) Order Book, (4) News tab, (5) Portfolio badge.
-
-#### 🎙️ Anchor Speaks:
-> *"Take a look at your screens right now. Your terminal gives you Tier-1 institutional visibility:*
->
-> *At the top, your **Live Ticker Strip**. Click any asset to open its terminal.*
-> *In the middle, your **Interactive Chart** with live 1-second candles and Moving Average overlays.*
-> *Below that, your **Level 2 Market Depth** — showing you live institutional buy and sell walls.*
-> *At the bottom right, your **Order Entry Ticket**.*
-> *And at the bottom bar, two critical tabs: **NEWS** — your lifeline to macroeconomic events, and **PORTFOLIO** — your live mark-to-market scorecard.*
->
-> *Get comfortable with this layout now. Speed and precision will matter the second the bell rings."*
-
----
-
-### SLIDE 4: THE TWO ACTS OF THE EVENT
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│  THE TOURNAMENT ARCHITECTURE                                           │
-├────────────────────────────────────────────────────────────────────────┤
 │  ROUND 1: THE RETAIL CREDIT BOOM (Sessions 1 – 6)                      │
-│  • Starting Capital: ₹10,00,000 (10 Lakhs)                             │
-│  • Mechanics: Long-Only · Cheap Credit · Instant News Delivery         │
+├────────────────────────────────────────────────────────────────────────┤
+│  • STARTING CAPITAL: ₹10,00,000 INR (10 Lakhs)                         │
+│  • TRADING REGIME  : Long-Only (Buying & Selling owned shares)         │
+│  • NEWS DELIVERY   : Instant Broadcast (Every desk receives news at t) │
+│  • MACRO BACKDROP  : Cheap Credit · 4.00% Policy Rate · High Optimism  │
 │                                                                        │
-│             ─── ⚡ THE GREAT RESET (AFTER SESSION 6) ───                │
-│                                                                        │
-│  ROUND 2: THE INSTITUTIONAL RECKONING (Sessions 7 – 11)                │
-│  • Starting Capital: ₹1,00,00,000 (1 Crore)                            │
-│  • Mechanics: Shared Order Book · Bot Swarms · Shorting · News Delays  │
+│  OBJECTIVE:                                                            │
+│  Capitalize on trend momentum, identify corporate catalysts, and       │
+│  grow your baseline ₹10 Lakhs equity before the Round 2 Reset.         │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
 #### 📺 Big Screen Shows:
-- Split comparison graphic: Round 1 (Green/Euphoric icon) vs Round 2 (Purple/Institutional icon).
-- The Great Reset callout in the center.
+- Round 1 Overview Card with green/euphoric accent styling.
+- Baseline metrics: Starting Cash ₹10 Lakhs · 7 Initial Instruments · Long-Only Trading.
+- Visual: An expanding credit graph showing cheap money.
 
 #### 🎙️ Anchor Speaks:
-> *"Pay close attention to how this tournament is structured. Bazaar is split into two distinct economic acts:*
+> *"Let's talk about **Round 1**, covering Sessions 1 through 6: 'The Retail Credit Boom'.*
 >
-> *In **Round 1**, covering Sessions 1 through 6, you are in 'The Retail Credit Boom'. Money is cheap, central bank interest rates are rock bottom at 4.00%, and everybody feels like a genius. Every team starts with **₹10 Lakhs**, trading is long-only, and news reaches every desk at the exact same second.*
+> *In Round 1, the economic waters are calm. Central bank policy rates are anchored at 4.00%, bank credit is expanding rapidly, and liquidity is abundant. Every team in this room starts with an even playing field of **₹10,00,000 — Ten Lakhs in cash**.*
 >
-> *Then, after Session 6, **THE GREAT RESET** happens. All stock holdings are liquidated, and every team's cash is bumped to **₹1 Crore**. Round 1 performance is locked into your permanent record.*
->
-> *In **Round 2**, Sessions 7 through 11, the training wheels come off. You enter 'The Institutional Reckoning'. You will face algorithmic bots, a shared order book where your orders move price, short selling, and news delays based on your Stat Shop upgrades. Prepare yourselves!"*
+> *Trading in Round 1 is **long-only** — you buy shares, ride momentum, and take profit. Every breaking news headline hits every desk at the exact same millisecond. Your goal is simple: Ride the credit wave, separate good news from bad news, and accumulate the maximum possible equity before the Round 1 closing bell!"*
 
 ---
 
-### SLIDE 5: GROUND RULES & SURVIVAL
+### SLIDE 3: ROUND 2 — THE INSTITUTIONAL RECKONING
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│  CRITICAL RULES OF ENGAGEMENT                                          │
+│  ROUND 2: THE INSTITUTIONAL RECKONING (Sessions 7 – 11)                │
 ├────────────────────────────────────────────────────────────────────────┤
-│  ⏱️ SESSION TIMER   → 300 Seconds (5 Minutes) per session strictly.    │
-│  💸 TRANSACTION FEE → 0.10% per trade (Excessive churn drains rank!). │
-│  ⚠️ LIQUIDATION RULE→ If Equity ≤ ₹0, your desk is MARGIN CALLED.      │
-│  ⏸️ PAUSE WINDOWS   → 3 minutes between sessions. Plan your trades!   │
+│  • STARTING CAPITAL: ₹1,00,00,000 INR (1 CRORE CASH RESET)            │
+│  • SHARED BOOK     : All teams trade against one live reactive book    │
+│  • ALGORITHMIC BOTS: Market makers penalize blind market-order pushes  │
+│  • SHORT SELLING   : Unlocked via Stat Shop (Profit from crashes)      │
+│  • NEWS DELAYS     : Research level determines headline arrival speed  │
+│                                                                        │
+│  OBJECTIVE:                                                            │
+│  Navigate late-cycle inflation, banking contagion, and systemic stress.│
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
 #### 📺 Big Screen Shows:
-- Big icons for Timer, Fee warning, and Liquidation skull badge.
-- Pro Tip banner: "Quality of execution > Quantity of trades."
+- Round 2 Overview Card with purple/institutional accent styling.
+- Baseline metrics: Reset to ₹1 Crore Cash · Shared Order Book · Algorithmic Bots · Shorting Enabled.
+- Visual: Live Level 2 order book showing bid/ask depth walls.
 
 #### 🎙️ Anchor Speaks:
-> *"Before we open the market, three life-or-death rules:*
+> *"Now, look ahead to **Round 2**, Sessions 7 through 11: 'The Institutional Reckoning'.*
 >
-> *Rule Number One: **Each session is exactly 300 seconds — 5 minutes.** When the timer hits zero, the closing bell rings and the order book freezes instantly.*
+> *After Session 6, the entire market undergoes **The Great Reset**. All open stock holdings will be settled, Round 1 scores will be locked into history, and every single desk will be credited with **₹1,00,00,000 — One Crore Rupees in cash**.*
 >
-> *Rule Number Two: **Transaction fees exist.** Every executed trade carries a 0.10% broker fee. If you panic-buy and panic-sell five times on the same stock, you will bleed thousands in fees. Trade with conviction.*
+> *In Round 2, the training wheels come off. You will no longer trade in isolation. You will trade against **one shared order book** populated by algorithmic market-making bots! If you dump a giant market order, you will create self-inflicted slippage.*
 >
-> *Rule Number Three: **Liquidation is permanent.** If your portfolio equity touches zero or negative, our risk engine triggers an immediate margin call. You will be eliminated from the trading floor. Protect your capital at all costs!"*
+> *You will also unlock the **Stat Shop** to buy Short Selling privileges, news speed upgrades, and exclusive insider syndicate leaks. Round 2 is where true quantitative desks thrive and over-leveraged traders get liquidated!"*
 
 ---
 
-### SLIDE 6: HOW NEWS WORKS — THE 4 FEEDS
+### SLIDE 4: TERMINAL NAVIGATION & TRADING RULES
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│  TERMINAL NAVIGATION & EXECUTION RULES                                 │
+├────────────────────────────────────────────────────────────────────────┤
+│  [SCREENSHOT PLACEHOLDER: Mobile / Desktop Terminal Layout]            │
+│                                                                        │
+│  1. TICKER BOARD     → Live prices, percentage changes, 15 assets      │
+│  2. INTERACTIVE CHART→ Real-time 1s candles, SMA9, SMA20, RSI14        │
+│  3. ORDER DEPTH (L2) → Live bids, asks, buy/sell institutional walls   │
+│  4. ORDER ENTRY TICKET→ Buy/Sell, Quantity Slider, Limit/Market orders │
+│  5. NEWS WIRE FEED   → Real-time macroeconomic & corporate headlines   │
+│  6. PORTFOLIO BADGE  → Live Mark-to-Market equity & cash balance       │
+│                                                                        │
+│  CRITICAL RULES:                                                       │
+│  ⏱️ 300s Session Timer · 💸 0.10% Trade Fee · ⚠️ Equity ≤ ₹0 = LIQUIDATED│
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+#### 📺 Big Screen Shows:
+- Annotated screenshots of the Bazaar terminal interface:
+  - Top: Ticker selection strip.
+  - Center: Live charting canvas with technical indicator toggles.
+  - Middle: Level 2 Market Depth (order book).
+  - Bottom: Order ticket slider, News tab, Portfolio tab.
+- Key execution rules banner: 300 seconds per session, 0.10% broker fee, Liquidation condition.
+
+#### 🎙️ Anchor Speaks:
+> *"Take a look at your screens right now. Your trading terminal gives you complete market control:*
+>
+> *At the top, click any asset on the **Ticker Strip** to inspect its terminal.*
+> *In the center is your **Interactive Chart** with live one-second candles and Moving Average overlays.*
+> *Below the chart is your **Level 2 Market Depth** — this displays institutional order walls.*
+> *At the bottom right is your **Order Entry Ticket** where you set size and execute.*
+> *And at the bottom bar, two essential tabs: **NEWS** for real-time intelligence, and **PORTFOLIO** for your live mark-to-market equity.*
+>
+> *Three critical rules of engagement:*
+> *One: **Each session is strictly 300 seconds (5 minutes).** When the timer hits zero, the bell rings and trading freezes.*
+> *Two: **Every trade costs 0.10% in fees.** Over-trading and rapid churning will bleed your capital.*
+> *Three: **Liquidation is permanent.** If your equity drops to zero, our risk engine triggers an immediate margin call and your desk is out. Protect your capital!"*
+
+---
+
+### SLIDE 5: THE NEWS INTELLIGENCE MATRIX
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │  THE INFORMATION MATRIX: WHO DO YOU TRUST?                             │
 ├────────────────────────────────────────────────────────────────────────┤
-│  [IN] DESK INSIDER LEAK     → 90% ACCURACY (Round 2 Only, Research L2) │
-│       Terse, anonymous, zero adjectives. The golden syndicate wire.   │
+│  [IN] DESK INSIDER LEAK      → 90% ACCURACY (Round 2 Only · Research L2)│
+│       Terse, anonymous, zero adjectives. The syndicate golden wire.    │
 │                                                                        │
 │  [AN] CALDER & WYN RESEARCH  → 75% ACCURACY (Institutional Research)   │
 │       Measured, names specific time horizons. Highly reliable.         │
 │                                                                        │
-│  [NP] THE MERIDIAN STANDARD → 55% ACCURACY (Public Newspaper)          │
-│       Reports past events. Often late or carries consensus spin.       │
+│  [NP] THE MERIDIAN STANDARD  → 55% ACCURACY (Public Newspaper)          │
+│       Reports past events. Lagged, often carries consensus spin.       │
 │                                                                        │
-│  [FF] @BullRunBhai           → 35% ACCURACY (65% INVERSE INDICATOR!)   │
+│  [FF] @BullRunBhai            → 35% ACCURACY (65% INVERSE INDICATOR!)   │
 │       ALL-CAPS urgency words (BUY NOW!). The classic retail FOMO trap. │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
 #### 📺 Big Screen Shows:
-- 4 color-coded cards representing the news sources: Purple (`IN`), Cyan (`AN`), Slate (`NP`), Red (`FF`).
-- Highlight callout on `@BullRunBhai`: "65% INVERSE ACCURACY".
+- 4 color-coded news badges:
+  - Purple `[IN]` Desk Insider (90% Accuracy)
+  - Cyan `[AN]` Calder & Wyn (75% Accuracy)
+  - Slate `[NP]` The Meridian Standard (55% Accuracy)
+  - Red `[FF]` @BullRunBhai (35% Accuracy / 65% Inverse Indicator)
 
 #### 🎙️ Anchor Speaks:
-> *"Now for the most important trading edge of the day: **The News Wire.** In Bazaar, you will see news popping up continuously on your screen. But listen carefully: **Not all news is true!***
+> *"Now for the most powerful alpha edge in Bazaar: **The News Wire.** News will break continuously on your terminals. But listen carefully: **Not all headlines are truthful!***
 >
-> *We have four distinct news sources in the Meridian economy:*
+> *We have four distinct intelligence sources in the Meridian economy:*
 >
-> *First: **[IN] Desk Insider Leaks.** These are verified syndicate leaks with a **90% statistical accuracy**. They appear only in Round 2 for teams with Research Level 2 or higher.*
+> *First: **[IN] Desk Insider Leaks.** Verified institutional syndicate leaks. They have a **90% statistical accuracy**, but they only unlock in Round 2 for teams with Research Level 2 or higher.*
 >
-> *Second: **[AN] Calder & Wyn Research.** Institutional equity analysts. They have a **75% accuracy rate** and name specific timeframes.*
+> *Second: **[AN] Calder & Wyn / Northgate Research.** Tier-1 institutional equity analysts. **75% accuracy.** When they name a timeline, pay attention.*
 >
-> *Third: **[NP] The Meridian Standard.** The public newspaper. **55% accuracy** — literally a coin flip! They report what already happened and often assure you that 'inflation is transitory' right before a crash.*
+> *Third: **[NP] The Meridian Standard.** The mainstream newspaper. **55% accuracy** — basically a coin flip! They report what already happened, and often tell you inflation is 'transitory' right before a crash.*
 >
-> *And Fourth: **[FF] @BullRunBhai.** A finfluencer who tweets in all-caps: 'BUY NOW! LAST CHANCE TO GET RICH!'. He has a **35% truth rate**... which means he is a **65% reliable INVERSE indicator!** Smart quantitative funds print money by doing the exact opposite of what he screams. Remember that!"*
+> *And Fourth: **[FF] @BullRunBhai.** A loud social media finfluencer who tweets in ALL CAPS with urgent words: 'BUY NOW! GENERATIONAL WEALTH!'. He has a **35% truth rate**... which means he is a **65% reliable INVERSE indicator!** Top quantitative funds generate pure alpha by doing the exact opposite of what he screams!*
+>
+> *Desks, prepare yourselves. The Opening Bell is 30 seconds away!"*
 
 ---
 
-### SLIDE 7: ROUND 1 OPENING COUNTDOWN
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│                                                                        │
-│                      ROUND 1: THE RETAIL BOOM                          │
-│                                                                        │
-│                 Starting Capital: ₹10,00,000 INR                       │
-│                     Active Instruments: 7 Assets                       │
-│                                                                        │
-│                [ S1: OPENING BELL COMMENCES IN 30 SECONDS ]            │
-│                                                                        │
-│             INITIAL ASSETS: RLNT · TYRL · INFN · HRZN                  │
-│                             BZR-V · GOLDCORE · PULSE                   │
-│                                                                        │
-└────────────────────────────────────────────────────────────────────────┘
-```
-
-#### 📺 Big Screen Shows:
-- Pulsing 30-second countdown clock.
-- The 7 starting tickers with starting prices:
-  - `RLNT` ₹2,450.00 (Energy)
-  - `TYRL` ₹880.00 (Industrials)
-  - `INFN` ₹1,520.00 (IT Cloud)
-  - `HRZN` ₹1,640.00 (Commercial Bank)
-  - `BZR-V` ₹640.00 (Media Speculation)
-  - `GOLDCORE` ₹6,200.00 (Reserve Safe Haven)
-  - `PULSE` ₹45.00 (High-Beta Digital Asset)
-
-#### 🎙️ Anchor Speaks:
-> *"Trading floor, synchronize your watches! In 30 seconds, the Opening Bell rings for Session 1.*
->
-> *You are starting with ₹10 Lakhs. Seven assets are live on your screens. The economy is calm, credit is cheap, and the Central Bank policy rate is 4.00%.*
->
-> *Look for clean trends, watch your support and resistance levels, and do not over-leverage on rumor spikes.*
->
-> *Opening in 5... 4... 3... 2... 1... **RING THE BELL! TRADING IS LIVE!**"*
+# PART 2: ROUND 1 SESSIONS (SLIDES 6 – 11)
 
 ---
 
-# PART 2: ROUND 1 SESSIONS (SLIDES 8 – 13)
-
----
-
-### SLIDE 8: SESSION 1 (R1S1) — "OPENING BELL"
+### SLIDE 6: SESSION 1 (R1S1) — "OPENING BELL"
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │  SESSION 1 (R1S1) · OPENING BELL                                       │
 ├────────────────────────────────────────────────────────────────────────┤
-│  MACRO REGIME: Cheap Credit (MCB 4.00%) · GDP 7.0% · Calm Volatility   │
-│  LIVE TICKERS: RLNT · TYRL · INFN · HRZN · BZR-V · GOLDCORE · PULSE   │
+│  OPENING INSTRUMENTS (7 LIVE):                                         │
+│  • RLNT (Reliant Energy)      • TYRL (Tyrell Autoworks)                │
+│  • INFN (Infinity Systems)    • HRZN (Horizon Commercial Bank)         │
+│  • BZR-V (Bazaar Ventures)    • GOLDCORE (Reserve Safe Haven)          │
+│  • PULSE (High-Beta Digital Asset)                                     │
 │                                                                        │
-│  [ LIVE COUNTDOWN: 300s ] ─────────────── [ REGIME: LOW VOLATILITY ]  │
+│  ─── MACRO BACKDROP (BETWEEN THE LINES) ────────────────────────────── │
+│  • MCB Policy Rate: 4.00% (Neutral)    • CPI Inflation: 4.1% (Tame)   │
+│  • GDP Growth: 7.0% (Robust)           • Bank Credit Growth: 14%      │
+│  • Oil Index: 100 (Baseline)                                           │
 │                                                                        │
-│  MID-SESSION CATALYSTS TO MONITOR:                                     │
-│  • t = 120s: Central Bank Rate Decision Announcement                   │
-│  • t = 200s: Social Media Chatter Surge on BZR-V                       │
+│  MARKET CLIMATE: Stable economic expansion. Credit is accessible and   │
+│  interbank borrowing is frictionless. Equities are finding their       │
+│  baseline trading ranges. No immediate storm clouds on the horizon.   │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
 #### 📺 Big Screen Shows:
-- Big 300-second live countdown timer.
-- Macro indicators: `MCB Policy Rate: 4.00%` | `CPI Inflation: 4.1%` | `Bank Credit Growth: 14%`.
-- Live scrolling news ticker.
+- Live 300-second session countdown clock.
+- Macro Dashboard: `Policy Rate: 4.00%` · `CPI: 4.1%` · `GDP: 7.0%` · `Oil: 100`.
+- The 7 live starting tickers with sector tags.
 
 #### 🎙️ Anchor Speaks (Session Start):
-> *"We are live in Session 1! Central Bank policy is steady at 4.00%. Equities are floating on easy liquidity. Watch how Infinity Systems (`INFN`) and Horizon Bank (`HRZN`) form their opening trends! Watch Tyrell Autoworks (`TYRL`) as it oscillates around its moving averages!"*
+> *"Desks, welcome to the floor! The Meridian Central Bank meets today with policy rates steady at 4.00%. Inflation is tame at 4.1%, and bank credit is expanding at a healthy 14%.*
+>
+> *Seven assets are live on your terminals. Look for baseline trends in tech and commercial banking. Watch how Tyrell Autoworks (`TYRL`) oscillates around its moving averages. Keep an eye on the news wire.*
+>
+> *Session 1 is LIVE in 3... 2... 1... **RING THE OPENING BELL!**"*
 
-#### ⚡ Mid-Session Calls:
-- **At t = 120s (Rate Decision):**  
-  > *"Attention floor! Central bank announces policy rate held at 4.00%! It's priced in! Check your bank stocks!"*
-- **At t = 200s (Finfluencer Pump):**  
-  > *"Urgent chatter hitting social feeds! @BullRunBhai is hyping Bazaar Ventures (`BZR-V`)! Is it a genuine breakout or a liquidity trap? Watch the order book!"*
+#### ⚡ Mid-Session Anchor Cues (Reactive to live news):
+- **Around t = 120s (Central Bank Decision):**  
+  > *"Central Bank statement is crossing the wires! Policy rates held steady at 4.00%! Watch how the banks react to the confirmation!"*
+- **Around t = 200s (Social Chatter Alert):**  
+  > *"Heavy retail chatter hitting social media feeds regarding Bazaar Ventures (`BZR-V`)! Check your order books before chasing unverified volume!"*
 
-#### 🔔 Post-Session Anchor Wrap-up (Bell Rings):
-> *"And that is the closing bell for Session 1! Orders frozen!*
-> *Desks, check your portfolios. If you chased the BZR-V pump when the finfluencer tweeted, you just watched it fade −1.5% and give back your money. Those who rode the clean trend on INFN and scalped TYRL's swings are sitting in profit. Take a breath — Session 2 begins shortly."*
+#### 🔔 Post-Session Anchor Wrap-Up (After 300s Bell):
+> *"Closing bell for Session 1! Drop your hands!*
+> *Desks, review your portfolios. Notice how `BZR-V` pumped on social chatter and then immediately faded? Meanwhile, steady trends in Infinity Systems and range trading on Tyrell delivered clean returns. Take 2 minutes to review your trade log — Session 2 begins shortly."*
 
 ---
 
-### SLIDE 9: SESSION 2 (R1S2) — "CHEAP MONEY"
+### SLIDE 7: SESSION 2 (R1S2) — "CHEAP MONEY"
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │  SESSION 2 (R1S2) · CHEAP MONEY                                        │
 ├────────────────────────────────────────────────────────────────────────┤
-│  MACRO REGIME: Bank Credit Growth Surges to 16% · Tech Euphoria        │
-│  NEW ASSET UNLOCKED: NIMBUS (Nimbus Datacenters)                       │
+│  OPENING INSTRUMENTS (8 LIVE):                                         │
+│  • PREVIOUS 7 ASSETS + ⚡ NEW UNLOCK: NIMBUS (Nimbus Datacenters)       │
 │                                                                        │
-│  KEY MARKET THEME:                                                     │
-│  • Post-Earnings Announcement Drift (PEAD): Tech momentum drifts.     │
-│  • PULSE begins its first high-beta speculative rally.                 │
+│  ─── MACRO BACKDROP (BETWEEN THE LINES) ────────────────────────────── │
+│  • MCB Policy Rate: 4.00% (Steady)     • CPI Inflation: 4.2%          │
+│  • GDP Growth: 7.2% (Accelerating)     • Bank Credit Growth: 16% (⚡) │
+│  • Oil Index: 101                                                      │
+│                                                                        │
+│  MARKET CLIMATE: Liquidity is overflowing. Commercial lending has      │
+│  accelerated to 16% annualized growth. Enterprise software and cloud   │
+│  infrastructure are seeing massive institutional capital inflows.      │
+│  Speculative risk appetite is spreading across retail circles.         │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
 #### 📺 Big Screen Shows:
-- Asset Unlock Alert: `NIMBUS` (Nimbus Datacenters) live.
-- Macro indicator: `Bank Credit Growth: 16%` (Surging).
-- Educational callout: "Post-News Momentum vs Flash Reversals."
+- New Asset Unlock Banner: `NIMBUS` (Nimbus Datacenters · Cloud & AI Infrastructure).
+- Macro Dashboard: `Bank Credit Growth: 16%` (Highlighted in green).
+- Live 300s countdown timer.
 
 #### 🎙️ Anchor Speaks (Session Start):
-> *"Desks, welcome to Session 2: 'Cheap Money'! Credit growth has surged to 16%! Liquidity is pouring into technology. We have unlocked a new asset: **NIMBUS Datacenters!***
+> *"Trading floor, we are entering Session 2: 'Cheap Money'.*
 >
-> *Watch how enterprise IT and cloud names behave when institutional contracts land. Trading is live in 3... 2... 1... GO!"*
+> *Commercial bank lending has surged to an extraordinary 16% annual rate! Corporate balance sheets are flush with liquidity, and enterprise tech is booming. We have unlocked **NIMBUS Datacenters (`NIMBUS`)** on your terminals.*
+>
+> *Watch how enterprise IT names move when institutional contract beats cross the wire. Do not assume moves end on the first tick.*
+>
+> *Session 2 is LIVE! TRADE!"*
 
-#### ⚡ Mid-Session Calls:
-- **At t = 110s (Infinity Contract Beat):**  
-  > *"Breaking wire on Calder & Wyn! Infinity Systems (`INFN`) secures a massive logistics cloud contract! Price is moving, but don't panic-sell — watch if the drift continues!"*
-- **At t = 230s (Nimbus Earnings Print):**  
-  > *"Nimbus Datacenters beats earnings! Cloud tech is catching a massive bid across the room!"*
+#### ⚡ Mid-Session Anchor Cues:
+- **Around t = 110s (Infinity Logistics Contract):**  
+  > *"Major corporate contract announced for Infinity Systems (`INFN`)! Institutional volume is stepping into tech!"*
+- **Around t = 230s (Nimbus Earnings Print):**  
+  > *"Nimbus Datacenters reporting quarterly earnings! Watch the price drift across the cloud sector!"*
 
-#### 🔔 Post-Session Anchor Wrap-up:
-> *"Closing bell Session 2! Notice how tech earnings didn't just spike and die in 2 seconds? In real markets, institutional reallocation creates a 40-second drift. Those who bought the confirmation and held printed alpha."*
+#### 🔔 Post-Session Anchor Wrap-Up:
+> *"Closing bell Session 2! Notice how tech earnings didn't just flash and stop? When institutional funds accumulate on strong prints, prices drift upward over 30 to 40 seconds. Desks that bought the confirmation and held the drift captured significant alpha."*
 
 ---
 
-### SLIDE 10: SESSION 3 (R1S3) — "A SMALL COUGH"
+### SLIDE 8: SESSION 3 (R1S3) — "A SMALL COUGH"
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │  SESSION 3 (R1S3) · A SMALL COUGH                                      │
 ├────────────────────────────────────────────────────────────────────────┤
-│  MACRO REGIME: CPI Inflation Ticks Up to 4.5% · Chatroom Noise Surges  │
-│  NEW ASSET UNLOCKED: STAPLE (Staple Agro Foods)                        │
+│  OPENING INSTRUMENTS (9 LIVE):                                         │
+│  • PREVIOUS 8 ASSETS + ⚡ NEW UNLOCK: STAPLE (Staple Agro Foods)        │
 │                                                                        │
-│  CORE LESSON:                                                          │
-│  • Silent Events: Not every price spike has a real headline.           │
-│  • Defensive rotation: Safe Havens and Consumer Staples matter.        │
+│  ─── MACRO BACKDROP (BETWEEN THE LINES) ────────────────────────────── │
+│  • MCB Policy Rate: 4.00%              • CPI Inflation: 4.5% (Ticking)│
+│  • GDP Growth: 7.1%                    • Bank Credit Growth: 17%      │
+│  • Oil Index: 102                                                      │
+│                                                                        │
+│  MARKET CLIMATE: Consumer price inflation has quietly ticked up to     │
+│  4.5%. Central bankers insist the pressure is temporary. Chatrooms     │
+│  are active with rumors, but seasoned desks are quietly rotating       │
+│  capital toward defensive cash-flow generators.                        │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
 #### 📺 Big Screen Shows:
-- Asset Unlock Alert: `STAPLE` (Staple Agro Foods).
-- Macro indicator: `CPI Inflation: 4.5%` (Yellow warning).
-- Tip: "Do not chase unverified spikes without institutional confirmation."
+- New Asset Unlock Banner: `STAPLE` (Staple Agro Foods · Consumer Defensive).
+- Macro Dashboard: `CPI Inflation: 4.5%` (Yellow caution indicator).
+- Live 300s countdown timer.
 
 #### 🎙️ Anchor Speaks (Session Start):
-> *"Session 3 is live! A small cough in the economy — CPI inflation has quietly ticked up to 4.5%. Consumer defensive stock **STAPLE Agro** is now unlocked.*
+> *"Session 3 is opening: 'A Small Cough'.*
 >
-> *Warning to all desks: Chatrooms are buzzing with noise. Remember, not every green candle is backed by reality. Protect your cash!"*
+> *Consumer price inflation has ticked up from 4.2% to 4.5%. Central bank spokespeople are reassuring markets that price pressures are transitory, but bond yields are twitching. We have unlocked **STAPLE Agro Foods (`STAPLE`)** — a defensive consumer goods anchor.*
+>
+> *A word of caution to all desks: When macro uncertainty creeps in, social media chatrooms get noisy. Not every candle has a real corporate catalyst behind it. Trade what you can verify.*
+>
+> *Session 3 is LIVE!"*
 
-#### ⚡ Mid-Session Calls:
-- **At t = 70s (Inflation Tick):**  
-  > *"Headline from The Meridian Standard: Inflation ticks up, but newspaper calls it 'transitory'. Is it really transitory? Watch bank margins!"*
-- **At t = 200s (Silent Spike on BZR-V):**  
-  > *"Look at Bazaar Ventures (`BZR-V`)! It's spiking +7% out of nowhere! No news on the wire! Is it real or a liquidity trap? Desks that chase without news are taking serious risk!"*
+#### ⚡ Mid-Session Anchor Cues:
+- **Around t = 70s (Inflation Discussion):**  
+  > *"Headline from The Meridian Standard claiming inflation pressures are entirely temporary. Watch how commercial bank margins respond!"*
+- **Around t = 200s (Unverified Price Movement):**  
+  > *"Bazaar Ventures (`BZR-V`) is showing extreme volume spikes without a single headline on the institutional wire! Desks chasing green candles without confirmation — watch your downside!"*
 
-#### 🔔 Post-Session Anchor Wrap-up:
-> *"Bell rings for Session 3! BZR-V just completely retraced that +7% unbacked spike. In trading, silence is often a trap. If there is no real corporate catalyst, you are trading against someone else's exit order."*
+#### 🔔 Post-Session Anchor Wrap-Up:
+> *"Bell rings for Session 3! And there is the lesson: `BZR-V` spiked +7% purely on unverified rumor, and then fully retraced back to where it started. Those who chased got trapped; those who held disciplined trends or took shelter in defensive names preserved their equity."*
 
 ---
 
-### SLIDE 11: SESSION 4 (R1S4) — "THE CORRIDOR CLOSES (THE WAR SHOCK)"
+### SLIDE 9: SESSION 4 (R1S4) — "THE CORRIDOR CLOSES (THE WAR SHOCK)"
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │  SESSION 4 (R1S4) · THE CORRIDOR CLOSES (WAR SHOCK)                    │
 ├────────────────────────────────────────────────────────────────────────┤
-│  MACRO CRISIS: Maritime Oil Corridor Severed · Oil Index Spikes +38%   │
-│  NEW ASSET UNLOCKED: VOLTAGE (Voltage Power Utilities)                 │
+│  OPENING INSTRUMENTS (10 LIVE):                                        │
+│  • PREVIOUS 9 ASSETS + ⚡ NEW UNLOCK: VOLTAGE (Voltage Power Utilities) │
 │                                                                        │
-│  MAJOR DYNAMICS:                                                       │
-│  • Broad market equity correlations jump toward 1.0.                   │
-│  • Asset Decoupling: RLNT (Producer) vs VOLTAGE (Feedstock victim).   │
-│  • Safe Haven Inflows: GOLDCORE catches defensive bids.               │
+│  ─── MACRO BACKDROP (BETWEEN THE LINES) ────────────────────────────── │
+│  • MCB Policy Rate: 4.00%              • CPI Inflation: 5.4% (Surge)  │
+│  • GDP Growth: 6.2% (Slowing)          • Bank Credit Growth: 17%      │
+│  • Oil Index: 138 (CRUDE SHOCK: +38%)                                  │
+│                                                                        │
+│  MARKET CLIMATE: Geopolitical tensions along the eastern maritime oil  │
+│  transit corridor have escalated into acute conflict. Shipping lanes   │
+│  are severed. Insurance rates on crude tankers have gone vertical.    │
+│  Global supply shocks are rippling through corporate balance sheets.   │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
 #### 📺 Big Screen Shows:
-- Red emergency banner: **GEOPOLITICAL CRISIS · MARITIME CORRIDOR CLOSED**.
-- Crude Oil Index: `100 → 138` (+38% Spike).
-- Asset Unlock: `VOLTAGE` (Voltage Power Utilities).
+- Emergency Headline Banner: **GEOPOLITICAL ESCALATION · MARITIME OIL CORRIDOR SEVERED**.
+- Macro Dashboard: `Oil Index: 102 → 138` (Red alert +38% surge) · `CPI: 5.4%`.
+- New Asset Unlock: `VOLTAGE` (Voltage Power Utilities).
+- Live 300s countdown timer.
 
 #### 🎙️ Anchor Speaks (Session Start — Tense, Urgent Tone):
-> *"Trading floor, attention! Red alert on all terminals!*
+> *"Attention all trading desks! Red alert on all terminals!*
 >
-> *Breaking geopolitical wire: Regional conflict has severed the primary maritime oil transit corridor! Crude oil has exploded 38%! Broad equity correlations are jumping toward 1!*
+> *Geopolitical conflict has broken out along the maritime oil transit corridor. Tanker transit has ground to a halt, and crude oil prices have spiked an astonishing 38%! CPI inflation has broken out to 5.4%.*
 >
-> *Voltage Power (`VOLTAGE`) is now live. Every desk must decide right now: Where do you put your capital when war strikes? Session 4 is LIVE!"*
+> *We have unlocked utility producer **VOLTAGE Power Utilities**. Broad equity correlations are jumping toward 1.0. Every desk manager in this room must make an immediate decision: How do you protect your portfolio when energy shocks hit the world?*
+>
+> *Session 4 is LIVE! EXECUTE!"*
 
-#### ⚡ Mid-Session Calls:
-- **At t = 30s (Initial Shockwave):**  
-  > *"Energy stocks surging! Reliant Energy (`RLNT`) up +5%! GOLDCORE catching safe-haven inflows! Equities sinking across the board!"*
-- **At t = 100s (Voltage Feedstock Warning):**  
-  > *"Calder & Wyn wire drops! Warning on Voltage Power! They don't produce crude — their imported feedstock has been cut off! VOLTAGE is plunging −12%!"*
+#### ⚡ Mid-Session Anchor Cues:
+- **Around t = 30s (Initial Shockwave):**  
+  > *"Crude oil producer Reliant Energy (`RLNT`) surging! Safe haven inflows flooding into GOLDCORE! Equities tumbling across the board!"*
+- **Around t = 100s (Analyst Decoupling Warning):**  
+  > *"Analyst wire dropping from Calder & Wyn on Voltage Power! Read the fine print! Does Voltage produce oil, or do they import expensive fuel? Look at the chart!"*
 
-#### 🔔 Post-Session Anchor Wrap-up:
-> *"Closing bell Session 4! That was our first major stress test. Many retail traders bought VOLTAGE thinking 'all energy stocks go up in war'. But institutional analysts read the footnote: VOLTAGE was an importer whose fuel was cut, while RLNT was the pure producer. Sector is not destiny — details matter!"*
+#### 🔔 Post-Session Anchor Wrap-Up:
+> *"Closing bell Session 4! What a session! Many retail traders saw 'energy crisis' and blindly bought VOLTAGE, only to watch it collapse −12% because its feedstock was cut off! Meanwhile, pure producer Reliant Energy surged +5% and GOLDCORE sheltered defensive portfolios. Sector is not destiny — details matter!"*
 
 ---
 
-### SLIDE 12: SESSION 5 (R1S5) — "STIMULUS WHISPERS"
+### SLIDE 10: SESSION 5 (R1S5) — "STIMULUS WHISPERS"
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │  SESSION 5 (R1S5) · STIMULUS WHISPERS                                  │
 ├────────────────────────────────────────────────────────────────────────┤
-│  MACRO PIVOT: State Signals Maritime Infrastructure Stimulus Package   │
-│  NEW ASSET UNLOCKED: CRANE (Crane Maritime Infrastructure)             │
+│  OPENING INSTRUMENTS (11 LIVE):                                        │
+│  • PREVIOUS 10 ASSETS + ⚡ NEW UNLOCK: CRANE (Crane Maritime Infra)    │
 │                                                                        │
-│  TACTICAL PLAYBOOK:                                                    │
-│  • Sector Rotation: Capital exits expensive energy into stimulus names.│
-│  • Mean Reversion on Panic: Buying the TYRL earnings dip.              │
+│  ─── MACRO BACKDROP (BETWEEN THE LINES) ────────────────────────────── │
+│  • MCB Policy Rate: 4.00%              • CPI Inflation: 5.6%          │
+│  • GDP Growth: 6.3%                    • Bank Credit Growth: 16%      │
+│  • Oil Index: 134 (Plateauing)                                         │
+│                                                                        │
+│  MARKET CLIMATE: With the primary transit corridor severed, state      │
+│  officials are drafting emergency bypass infrastructure legislation.   │
+│  Capital is beginning to rotate out of expensive crude energy and into │
+│  domestic maritime logistics, dredging, and port construction.         │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
 #### 📺 Big Screen Shows:
-- Macro indicator: Government Stimulus Package Announced.
-- Asset Unlock: `CRANE` (Crane Maritime Infrastructure).
-- Rotation Map: Crude Energy → Heavy Infrastructure & Logistics.
+- Macro Update: State Infrastructure Reconstruction Package in draft.
+- New Asset Unlock: `CRANE` (Crane Maritime Infrastructure).
+- Rotation Flow Graphic: Expensive Crude Energy → Heavy Infrastructure.
+- Live 300s countdown timer.
 
 #### 🎙️ Anchor Speaks (Session Start):
-> *"Session 5: 'Stimulus Whispers'. The government has stepped in to bypass the closed maritime corridor with emergency infrastructure contracts!*
+> *"Desks, welcome to Session 5: 'Stimulus Whispers'.*
 >
-> *We have unlocked **CRANE Maritime Infrastructure**. Watch capital rotate out of high-flying energy into state-backed construction. Session 5 is LIVE!"*
+> *With the oil corridor closed, the government cannot sit idle. Whispers of a massive emergency maritime infrastructure stimulus are circulating through the capital to build overland bypass routes. We have unlocked **CRANE Maritime Infrastructure (`CRANE`)**.*
+>
+> *Watch for capital rotation. When high-flying energy names get expensive, institutional money rotates into the beneficiaries of state spending.*
+>
+> *Session 5 is LIVE!"*
 
-#### ⚡ Mid-Session Calls:
-- **At t = 40s (Stimulus Confirmation):**  
-  > *"CRANE jumping +4% on the infrastructure wire! Capital rotating out of Reliant Energy!"*
-- **At t = 150s (Tyrell Misses Targets):**  
-  > *"Tyrell Autoworks (`TYRL`) dips −2.5% on delivery targets! But look at the moving average support — is this a panic sell or a dip-buying opportunity?"*
+#### ⚡ Mid-Session Anchor Cues:
+- **Around t = 40s (Stimulus Signals):**  
+  > *"State infrastructure stimulus signaled! CRANE catching instant institutional bids across the floor!"*
+- **Around t = 150s (Tyrell Delivery Numbers):**  
+  > *"Tyrell Autoworks misses quarterly delivery targets and dips −2.5%! Look at historical support — is this an exit or an oversold mean-reversion opportunity?"*
 
-#### 🔔 Post-Session Anchor Wrap-up:
-> *"Bell rings! Notice how TYRL immediately mean-reverted from its −2.5% low back to green. In heavy industrials backed by state stimulus, earnings panics are often golden dip-buying entries."*
+#### 🔔 Post-Session Anchor Wrap-Up:
+> *"Closing bell Session 5! Tyrell Autoworks dipped −2.5% on the headline and immediately mean-reverted right back to green. In heavy industrial cycles supported by state spending, algorithmic dip-buyers step in when retail traders panic."*
 
 ---
 
-### SLIDE 13: SESSION 6 (R1S6) — "LAST DANCE OF THE BOOM"
+### SLIDE 11: SESSION 6 (R1S6) — "LAST DANCE OF THE BOOM"
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │  SESSION 6 (R1S6) · LAST DANCE OF THE BOOM                             │
 ├────────────────────────────────────────────────────────────────────────┤
-│  MACRO CLIMAX: Consumer Confidence Hits 18-Month Peak · Valuations Rich│
-│  NEW ASSET UNLOCKED: MERX50 (Meridian 50 Broad Market Index)           │
+│  OPENING INSTRUMENTS (12 LIVE):                                        │
+│  • PREVIOUS 11 ASSETS + ⚡ NEW UNLOCK: MERX50 (Meridian 50 Broad Index) │
 │                                                                        │
-│  CRITICAL WARNING:                                                     │
-│  • PULSE experiencing a massive retail blow-off top (+14%).            │
-│  • Horizon Bank (`HRZN`) Gross NPAs creeping up in the background.    │
-│  • ROUND 1 TERMINATES AT THE CLOSING BELL. PREPARE FOR THE RESET!      │
+│  ─── MACRO BACKDROP (BETWEEN THE LINES) ────────────────────────────── │
+│  • MCB Policy Rate: 4.00%              • CPI Inflation: 5.5% (Elevated)│
+│  • GDP Growth: 6.4%                    • Bank Credit Growth: 15%      │
+│  • Consumer Confidence: 18-MONTH PEAK (Euphoria)                       │
+│                                                                        │
+│  MARKET CLIMATE: Consumer optimism has touched multi-year highs.       │
+│  Retail participation in speculative assets is at fever pitch.         │
+│  Valuations across equities are stretched to perfection. However, bank │
+│  regulatory filings quietly show non-performing loans creeping upward. │
+│  THIS IS THE FINAL SESSION OF ROUND 1. THE GREAT RESET FOLLOWS!        │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
 #### 📺 Big Screen Shows:
-- Warning banner: **FINAL SESSION OF ROUND 1 · THE GREAT RESET FOLLOWS**.
-- Asset Unlock: `MERX50` (Broad Market Index).
-- Consumer Confidence: 18-Month High (Euphoria peak).
+- Big Alert Banner: **FINAL SESSION OF ROUND 1 · THE GREAT RESET IMMINENT**.
+- New Asset Unlock: `MERX50` (Meridian 50 Broad Market Index).
+- Macro Dashboard: `Consumer Confidence: 18-Month High` · `CPI Inflation: 5.5%`.
+- Live 300s countdown timer.
 
 #### 🎙️ Anchor Speaks (Session Start):
-> *"Trading floor, this is Session 6 — the final session of Round 1! 'The Last Dance of the Boom'.*
+> *"Trading floor, attention! This is Session 6 — 'The Last Dance of the Boom'. The final session of Round 1!*
 >
-> *Consumer confidence has hit an 18-month high. Valuations are stretched to perfection. PULSE is going parabolic. The broad market index **MERX50** is now live.*
+> *Consumer confidence has touched an 18-month high. Valuations are stretched to perfection. Speculative high-beta tokens are going parabolic. The broad benchmark index **MERX50** is now live.*
 >
-> *Remember: When everyone in the market is euphoric, the smart money is looking for the exit door. Session 6 is LIVE!"*
+> *Remember the oldest rule in finance: When the public is euphoric and everyone believes markets only go up, institutional money is quietly preparing for the turn. Protect your gains.*
+>
+> *Round 1 final session is LIVE in 3... 2... 1... TRADE!"*
 
-#### ⚡ Mid-Session Calls:
-- **At t = 180s (Horizon Bank Warning):**  
-  > *"Analyst wire: Calder & Wyn notes Horizon Bank's provisioning ratio is slipping. Fundamentals tab shows Gross NPAs creeping up!"*
-- **At t = 230s (PULSE Mania):**  
-  > *"PULSE explodes +14%! Finfluencers are shouting 'to the moon!' Lock in profits before the music stops!"*
+#### ⚡ Mid-Session Anchor Cues:
+- **Around t = 180s (Banking Disclosure Footnote):**  
+  > *"Analyst note on Horizon Bank: Provisioning ratios slipping below sector norms. Look at the fundamentals tab — Gross NPAs creeping from 2.1% to 2.3%!"*
+- **Around t = 230s (PULSE Euphoria Climax):**  
+  > *"PULSE surging +14% in a massive retail blow-off top! Finfluencers screaming 'generational wealth'! Lock in your cash before the bell rings!"*
 
-#### 🔔 Post-Session Anchor Wrap-up:
-> *"AND THAT IS THE CLOSING BELL FOR ROUND 1! DROP YOUR PHONES! ALL TRADING IS FROZEN!*
+#### 🔔 Post-Session Anchor Wrap-Up:
+> *"AND THAT IS THE CLOSING BELL FOR ROUND 1! STEP AWAY FROM YOUR SCREENS! ALL TRADING IS FROZEN!*
 >
-> *Congratulations, desks, you have survived the Retail Credit Boom! Take your hands off the keyboard. We now enter **THE GREAT RESET**."*
+> *Congratulations, desks, you have completed the Retail Credit Boom! Take your hands off your keyboards. We now enter **THE GREAT RESET**!"*
 
 ---
 
-# PART 3: THE GREAT RESET & INTERMISSION (SLIDES 14 – 15)
+# PART 3: THE GREAT RESET & INTERMISSION (SLIDE 12)
 
 ---
 
-### SLIDE 14: THE GREAT RESET — ₹1 CRORE RESET & STAT SHOP
+### SLIDE 12: THE GREAT RESET — ₹1 CRORE CASH & STAT SHOP
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │                                                                        │
 │                         ⚡ THE GREAT RESET ⚡                          │
 │                                                                        │
-│  • Round 1 is locked. All open equity and shares are settled.          │
-│  • Every trading desk is credited with: ₹1,00,00,000 (1 CRORE CASH)   │
-│  • THE STAT SHOP IS NOW UNLOCKED ON YOUR TERMINALS.                    │
+│  1. ROUND 1 IS OFFICIALLY LOCKED AND ARCHIVED.                         │
+│  2. ALL OPEN POSITIONS HAVE BEEN SETTLED.                              │
+│  3. EVERY DESK IS CREDITED WITH: ₹1,00,00,000 (1 CRORE CASH)!          │
 │                                                                        │
-│  UPGRADE YOUR DESK BEFORE SESSION 7 COMMENCES:                         │
-│  1. RESEARCH LEVEL → News Arrival Speed (15s → 10s → 7s → 3s)          │
-│                      (Level 2 unlocks 90% accurate Desk Insider Leaks) │
-│  2. CAPITAL LEVEL  → Unlocks Short Selling & Leverage                  │
-│  3. SPEED LEVEL    → Reduces Order Execution Delay                     │
+│  THE STAT SHOP IS NOW UNLOCKED ON YOUR TERMINALS:                      │
+│                                                                        │
+│  📊 RESEARCH LEVEL (News Arrival Latency)                              │
+│     • Level 0: 15s delay      • Level 1: 10s delay                     │
+│     • Level 2: 7s delay + ⚡ UNLOCKS 90% ACCURATE DESK INSIDER LEAKS    │
+│     • Level 3: 3s delay (Ultra-low latency institutional feed)         │
+│                                                                        │
+│  💼 CAPITAL LEVEL (Leverage & Short Selling)                           │
+│     • Level 0: Long-only      • Level 1: ⚡ UNLOCKS SHORT SELLING       │
+│     • Level 2: 2× Gross Leverage Capacity                              │
+│                                                                        │
+│  ⚡ SPEED LEVEL (Order Execution Latency)                              │
+│     • Reduces execution latency against the algorithmic bots.          │
 │                                                                        │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
 #### 📺 Big Screen Shows:
-- Big visual: ₹10,00,000 → **₹1,00,00,000 (1 CRORE)**.
-- Screenshot of the Stat Shop tab on mobile.
-- Stat upgrade cards: Research, Capital, Speed.
+- Graphic transition: ₹10,00,000 → **₹1,00,00,000 (1 CRORE CASH)**.
+- Screenshot of the unlocked **Stat Shop** tab with upgrade cards.
+- 5-minute intermission timer for team strategy.
 
 #### 🎙️ Anchor Speaks:
-> *"Attention all desks! Welcome to the intermission.*
+> *"Attention all trading desks! Welcome to the intermission.*
 >
-> *Here is what just happened on the server: Every single position in Round 1 has been liquidated at the closing price. Your Round 1 score is locked.*
+> *Here is what just happened on the server: Every single position from Round 1 has been liquidated at the closing price. Your Round 1 performance is permanently archived.*
 >
-> *Every team in this room now has **₹1,00,00,000 — One Crore Rupees in cold cash.** Look at your screens: The **STAT SHOP** tab is now unlocked!*
+> *Every team in this room now holds **₹1,00,00,000 — One Crore Rupees in cold cash.** Open your terminals right now and click the **STAT SHOP** tab!*
 >
-> *Before Round 2 begins, you must spend your capital to build your institutional infrastructure:*
+> *Before Round 2 begins, you must invest your capital into quantitative infrastructure:*
 >
-> *First: **RESEARCH.** In Round 2, news has latency. At Level 0, you get headlines 15 seconds late. Level 1 gets it in 10s. Level 2 gets it in 7s **AND unlocks exclusive Desk Insider Leaks** with a 90% accuracy rate! Level 3 gets it in 3 seconds.*
+> *First: **RESEARCH.** In Round 2, news has real latency. At Level 0, you get headlines 15 seconds late. Level 1 gets them in 10s. **Level 2 gets them in 7s AND unlocks exclusive Desk Insider Leaks with a 90% accuracy rate!** Level 3 drops delay to 3 seconds.*
 >
-> *Second: **CAPITAL.** If you want to **SHORT SELL** falling stocks in Round 2, you MUST unlock Capital Level 1.*
+> *Second: **CAPITAL.** If you want to **SHORT SELL** crashing stocks in Round 2, you MUST purchase Capital Level 1.*
 >
-> *Third: **SPEED.** Reduces order execution latency against the bots.*
+> *Third: **SPEED.** Reduces order execution latency against the bot swarms.*
 >
-> *You have 3 minutes to strategize with your team and purchase your upgrades before Session 7 begins!"*
+> *Also note: In Round 2, you trade on **one shared order book**. Large blind market orders will cause severe slippage because algorithmic market makers defend fair value.*
+>
+> *You have 4 minutes to strategize with your team and purchase your upgrades before Session 7 opens!"*
 
 ---
 
-### SLIDE 15: ROUND 2 RULES — THE INSTITUTIONAL SHIFT
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│  ROUND 2: THE INSTITUTIONAL RECKONING                                  │
-├────────────────────────────────────────────────────────────────────────┤
-│  THE RULES HAVE CHANGED:                                               │
-│  1. SHARED ORDER BOOK → Every team trades against one collective book. │
-│  2. ALGORITHMIC BOTS  → Market makers defend fair value. Pushing price │
-│                         blindly causes severe slippage and penalty.    │
-│  3. SHORT SELLING     → Capital ≥ 1 allows you to profit from crashes. │
-│  4. NEWS LATENCY      → Fast research desks trade before public news.  │
-└────────────────────────────────────────────────────────────────────────┘
-```
-
-#### 📺 Big Screen Shows:
-- Graphic comparing Round 1 (Smooth, isolated price paths) vs Round 2 (Order Book depth, bots, shorting).
-- Big warning: "Do not market-buy full size. Use limit orders or scale in."
-
-#### 🎙️ Anchor Speaks:
-> *"Desks, listen closely to how Round 2 works:*
->
-> *In Round 1, prices were deterministic. In Round 2, you are in a **live reactive market with algorithmic bot swarms.** When you dump or buy 50,000 shares with a market order, you will move the price against yourself! The market maker bots will pull the price back over 10 to 15 seconds.*
->
-> *If you short without reading the news, you can get squeezed. If you buy without size discipline, you will suffer brutal slippage.*
->
-> *Round 2 is about to begin. Prepare for Session 7!"*
+# PART 4: ROUND 2 SESSIONS (SLIDES 13 – 17)
 
 ---
 
-# PART 4: ROUND 2 SESSIONS (SLIDES 16 – 20)
-
----
-
-### SLIDE 16: SESSION 7 (R2S1) — "THE HIKE"
+### SLIDE 13: SESSION 7 (R2S1) — "THE HIKE"
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │  SESSION 7 (R2S1) · THE HIKE · THE SHARED ORDER BOOK                   │
 ├────────────────────────────────────────────────────────────────────────┤
-│  MACRO SHOCK: Emergency 75bps Rate Hike (MCB: 4.00% → 4.75%)           │
-│  SYSTEMS ONLINE: Algorithmic Market-Making Bots Active                 │
+│  OPENING INSTRUMENTS (12 LIVE):                                        │
+│  • ALL 12 ROUND 1 ASSETS ARE LIVE AT S6 CLOSING PRICES                 │
 │                                                                        │
-│  MARKET IMPLICATIONS:                                                  │
-│  • Cheap money era ends. Equities face immediate valuation pressure.   │
-│  • Flight to Safety: GOLDCORE becomes the premier safe haven.          │
-│  • Speculative liquidity collapses (PULSE dumps).                      │
+│  ─── MACRO BACKDROP (BETWEEN THE LINES) ────────────────────────────── │
+│  • MCB Policy Rate: Emergency Meeting in progress (Inflation: 6.2%)    │
+│  • GDP Growth: 5.4% (Decelerating)     • Bank Credit Growth: 11%       │
+│  • Oil Index: 129                                                      │
+│                                                                        │
+│  MARKET CLIMATE: Persistent commodity inflation has forced the Central │
+│  Bank into an unscheduled emergency policy session. Market participants│
+│  are bracing for aggressive monetary tightening. The shared order book │
+│  is active; algorithmic market-making bots are quoting liquidity.      │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
 #### 📺 Big Screen Shows:
-- Macro indicator: `MCB Policy Rate: 4.00% → 4.75%` (+75bps Emergency Hike).
-- Inflation: `6.2%` | GDP Growth slowing: `5.4%`.
-- Live Level 2 Order Depth graphic showing bot liquidity.
+- Macro Dashboard: `Emergency Monetary Policy Meeting in Progress` · `CPI Inflation: 6.2%`.
+- Shared Order Book indicator: "Algorithmic Bot Swarms Online".
+- Live 300s countdown timer.
 
 #### 🎙️ Anchor Speaks (Session Start):
-> *"Opening bell for Session 7! The bill has arrived!*
+> *"Desks, welcome to Round 2! The bill has arrived.*
 >
-> *War inflation has forced the Central Bank into an **EMERGENCY 75 BASIS POINT RATE HIKE** — rates jump from 4.00% to 4.75%! The shared order book is live! Algorithmic bots are running!*
+> *With CPI inflation running hot at 6.2%, the Meridian Central Bank has convened an emergency policy meeting. Commercial credit is tightening. The shared order book is live, and algorithmic bots are quoting both sides of the spread.*
+>
+> *Watch out for price impact on large market orders. Protect your capital.*
 >
 > *Round 2 is officially LIVE! TRADE!"*
 
-#### ⚡ Mid-Session Calls:
-- **At t = 45s (Rate Shockwave):**  
-  > *"Equities tumbling across the board! Banks, tech, and speculative media dropping −3%! GOLDCORE catches an immediate flight to safety bid!"*
-- **At t = 200s (Finfluencer Trap on PULSE):**  
-  > *"@BullRunBhai tweets: 'PULSE is a digital hedge against inflation! Buy now!' Watch out — is crypto really an inflation hedge when rates rise? PULSE dumps −4%!"*
+#### ⚡ Mid-Session Anchor Cues:
+- **Around t = 45s (Rate Shock):**  
+  > *"BREAKING WIRE: Meridian Central Bank announces an EMERGENCY 75 BASIS POINT RATE HIKE — rates jump from 4.00% to 4.75%! Equities tumbling! Safe haven flight to GOLDCORE!"*
+- **Around t = 200s (Finfluencer Trap):**  
+  > *"@BullRunBhai shouting that PULSE is an inflation hedge! Remember the 65% inverse rule — look at what institutional bots are doing to the order book!"*
 
-#### 🔔 Post-Session Anchor Wrap-up:
-> *"Closing bell Session 7! Notice how different Round 2 feels? If you tried to market-buy, the bots defended the spread and pulled the price back. In Round 2, discipline is everything."*
+#### 🔔 Post-Session Anchor Wrap-Up:
+> *"Closing bell Session 7! Notice how different the market feels? When you fire a market order, the price moves against you, and market maker bots gradually pull it back. In Round 2, execution discipline is your edge."*
 
 ---
 
-### SLIDE 17: SESSION 8 (R2S2) — "APEX FALLS (THE VALUE TRAP)"
+### SLIDE 14: SESSION 8 (R2S2) — "APEX FALLS (THE VALUE TRAP)"
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │  SESSION 8 (R2S2) · APEX FALLS                                         │
 ├────────────────────────────────────────────────────────────────────────┤
-│  BANKING CRISIS: Apex Capital Bank Discloses Catastrophic Bad Loans    │
-│  NEW ASSET UNLOCKED: APEX (Apex Capital Bank)                          │
+│  OPENING INSTRUMENTS (13 LIVE):                                        │
+│  • PREVIOUS 12 ASSETS + ⚡ NEW UNLOCK: APEX (Apex Capital Bank)         │
 │                                                                        │
-│  CRITICAL INTEL:                                                       │
-│  • Gross NPAs jump from 3.1% → 8.9%!                                   │
-│  • The Value Trap: Initial P/E of 12 looks cheap, but earnings are fake│
-│  • High-Conviction Play: Shorting APEX and HRZN with Capital ≥ 1.      │
+│  ─── MACRO BACKDROP (BETWEEN THE LINES) ────────────────────────────── │
+│  • MCB Policy Rate: 4.75%              • CPI Inflation: 6.4% (Peak)   │
+│  • GDP Growth: 4.1%                    • Bank Credit Growth: 3% (Crash)│
+│  • Oil Index: 124                                                      │
+│                                                                        │
+│  MARKET CLIMATE: High borrowing costs are exposing bad underwriting   │
+│  from the credit boom. Interbank lending margins are collapsing.       │
+│  Commercial bank quarterly disclosure statements are landing today.    │
+│  Apex Capital Bank unlocks with an apparent P/E of 12, but analysts    │
+│  are questioning the health of its underlying loan book.               │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
 #### 📺 Big Screen Shows:
-- Asset Unlock: `APEX` (Apex Capital Bank).
-- Banking Crisis Alert: `Gross NPA: 3.1% → 8.9%`.
-- Graphic: "The Value Trap — Cheap P/E on Broken Balance Sheets."
+- New Asset Unlock: `APEX` (Apex Capital Bank · High-Beta Commercial Lender).
+- Macro Dashboard: `Bank Credit Growth: 3%` (Severe collapse from 17%) · `Policy Rate: 4.75%`.
+- Live 300s countdown timer.
 
 #### 🎙️ Anchor Speaks (Session Start):
-> *"Session 8: 'Apex Falls'. Commercial banking is facing a credit reckoning. We have unlocked **Apex Capital Bank (`APEX`)**.*
+> *"Session 8: 'Apex Falls'. Commercial banking is facing its reckoning.*
 >
-> *Apex appears to trade at a modest P/E of 12. Retail traders think it's a bargain. But look at the disclosures! Session 8 is LIVE!"*
+> *Following the 75bps rate hike, bank credit expansion has collapsed to just 3%. Borrowers are defaulting on unsecured retail loans. We have unlocked **Apex Capital Bank (`APEX`)**.*
+>
+> *Apex appears to trade at a modest P/E of 12. Uninformed traders might think it looks like a bargain. But look closely at the balance sheet disclosures. Desks with Capital Level 1 have short selling enabled.*
+>
+> *Session 8 is LIVE!"*
 
-#### ⚡ Mid-Session Calls:
-- **At t = 40s (Bad Debt Disclosure):**  
-  > *"Catastrophe in banking! Apex Capital disclosures reveal Gross Bad Loans surged to 8.9%! APEX is crashing −14%! Horizon Bank dragged down −9%! Desks with Capital Level 1 are printing massive short alpha!"*
-- **At t = 180s (PULSE Herd Divergence):**  
-  > *"Retail herd fleeing banks and blindly pumping PULSE! Watch the distribution pattern!"*
+#### ⚡ Mid-Session Anchor Cues:
+- **Around t = 40s (Bad Debt Revelation):**  
+  > *"CATASTROPHE IN COMMERCIAL BANKING! Apex Capital regulatory disclosures reveal Gross Bad Loans surged from 3.1% to 8.9%! APEX is collapsing! Horizon Bank falling in sympathy! Desks that shorted early are printing massive gains!"*
+- **Around t = 180s (PULSE Herd Divergence):**  
+  > *"Retail traders fleeing banks and desperately pumping PULSE! Watch the order book depth for institutional distribution!"*
 
-#### 🔔 Post-Session Anchor Wrap-up:
-> *"Closing bell Session 8! If you bought APEX because it dropped 10% and looked cheap, you just fell into the classic Wall Street 'Value Trap'. Cheap banks during a credit crunch go to zero. Those who unlocked Capital 1 and shorted banking balance sheets captured the biggest move of the tournament!"*
+#### 🔔 Post-Session Anchor Wrap-Up:
+> *"Bell rings for Session 8! If you bought APEX because it fell 10% and looked cheap, you just experienced the classic Wall Street 'Value Trap'. A low P/E ratio is meaningless if the 'E' — earnings — is based on bad loans. Desks that unlocked short selling captured the trade of the tournament."*
 
 ---
 
-### SLIDE 18: SESSION 9 (R2S3) — "CONTAGION"
+### SLIDE 15: SESSION 9 (R2S3) — "CONTAGION"
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │  SESSION 9 (R2S3) · CONTAGION · FLIGHT TO QUALITY                      │
 ├────────────────────────────────────────────────────────────────────────┤
-│  SYSTEMIC STRAIN: Interbank Lending Freezes · Collateral Liquidations │
-│  NEW ASSET UNLOCKED: LEDGER (Ledger FinTech Cloud)                     │
+│  OPENING INSTRUMENTS (14 LIVE):                                        │
+│  • PREVIOUS 13 ASSETS + ⚡ NEW UNLOCK: LEDGER (Ledger FinTech Cloud)   │
 │                                                                        │
-│  MARKET DYNAMICS:                                                      │
-│  • High-flying tech dumped to cover banking margin calls.              │
-│  • Flight to Quality: LEDGER gains on enterprise recurring cash flows. │
-│  • PULSE Crash (−16%) on smart-contract protocol exploit.              │
+│  ─── MACRO BACKDROP (BETWEEN THE LINES) ────────────────────────────── │
+│  • MCB Policy Rate: 4.75%              • CPI Inflation: 6.1%          │
+│  • GDP Growth: 3.0% (Near Stall)       • Bank Credit Growth: −2% (⚡) │
+│  • Oil Index: 120                                                      │
+│                                                                        │
+│  MARKET CLIMATE: The fallout from bad banking loans is freezing the    │
+│  interbank repo window. Institutional lenders are demanding cash       │
+│  collateral. Liquid growth assets are being sold to cover margin calls.│
+│  Speculative digital asset protocols are facing severe scrutiny.       │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
 #### 📺 Big Screen Shows:
-- Macro indicator: Interbank Credit Frozen · Bank Credit Growth −2%.
-- Asset Unlock: `LEDGER` (Enterprise Cloud FinTech).
-- Warning: Protocol Exploit on Speculative Crypto.
+- Macro Warning: `Interbank Lending Frozen` · `Bank Credit Growth: −2% (Contraction)`.
+- New Asset Unlock: `LEDGER` (Enterprise Cloud FinTech).
+- Live 300s countdown timer.
 
 #### 🎙️ Anchor Speaks (Session Start):
-> *"Session 9: 'Contagion'. The failure of Apex has frozen interbank credit lines. Lenders are demanding cash collateral. Growth tech is being liquidated to pay banking margin calls.*
+> *"Session 9: 'Contagion'. The distress in banking has frozen interbank lending lines.*
 >
-> *We have unlocked **LEDGER FinTech Cloud**. Where does capital run when liquidity evaporates? Session 9 is LIVE!"*
+> *Bank credit growth has contracted to negative 2%. Lenders are calling in loans, and institutional funds are being forced to liquidate liquid tech holdings to raise cash collateral. We have unlocked **LEDGER FinTech Cloud (`LEDGER`)**.*
+>
+> *Watch where capital flows when liquidity freezes. Do you chase high-beta assets, or do you seek recurring enterprise cash flows?*
+>
+> *Session 9 is LIVE!"*
 
-#### ⚡ Mid-Session Calls:
-- **At t = 40s (Tech Margin Dump vs Ledger):**  
-  > *"Tech names INFN and NIMBUS dumped for margin liquidity! But LEDGER is holding green on enterprise software cash flows!"*
-- **At t = 200s (PULSE Protocol Exploit):**  
-  > *"BREAKING WIRE! Security exploit reported in PULSE protocol! Regulatory investigation launched! PULSE is in a freefall waterfall −16%! Do not catch the falling knife!"*
+#### ⚡ Mid-Session Anchor Cues:
+- **Around t = 40s (Tech Margin Liquidation vs Ledger):**  
+  > *"Growth tech names INFN and NIMBUS being sold off for liquidity! But look at LEDGER — enterprise recurring revenues are catching a flight-to-quality bid!"*
+- **Around t = 200s (PULSE Protocol Exploit):**  
+  > *"BREAKING SECURITY ALERT: Major protocol exploit and regulatory investigation announced for PULSE! Price is in freefall! Do not catch falling knives!"*
 
-#### 🔔 Post-Session Anchor Wrap-up:
-> *"Bell rings for Session 9! Speculative high-beta tokens can crash −16% in seconds when smart contracts break. Meanwhile, enterprise recurring revenues in LEDGER and safe-haven reserves in GOLDCORE protected top portfolios."*
+#### 🔔 Post-Session Anchor Wrap-Up:
+> *"Closing bell Session 9! When systemic contagion hits, high-beta speculative tokens can plunge −16% on protocol vulnerabilities. Enterprise balance sheets in LEDGER and gold reserves in GOLDCORE proved their worth."*
 
 ---
 
-### SLIDE 19: SESSION 10 (R2S4) — "THE TURN"
+### SLIDE 16: SESSION 10 (R2S4) — "THE TURN (THE BAILOUT & SHORT SQUEEZE)"
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │  SESSION 10 (R2S4) · THE TURN · THE BAILOUT & SHORT SQUEEZE           │
 ├────────────────────────────────────────────────────────────────────────┤
-│  STATE INTERVENTION: Emergency Liquidity Facility & Reconstruction     │
-│  NEW ASSET UNLOCKED: FORGE (Forge Steel Industries)                    │
+│  OPENING INSTRUMENTS (15 LIVE — FULL UNIVERSE):                        │
+│  • PREVIOUS 14 ASSETS + ⚡ NEW UNLOCK: FORGE (Forge Steel Industries)   │
 │                                                                        │
-│  THE DANGER ZONE:                                                      │
-│  • The Short Squeeze: Crowded retail bank shorts get violently trapped.│
-│  • FORGE surges +9% on massive government reconstruction contracts.    │
-│  • Rule: NEVER fight central bank emergency liquidity backstops!       │
+│  ─── MACRO BACKDROP (BETWEEN THE LINES) ────────────────────────────── │
+│  • MCB Policy Rate: 4.75%              • CPI Inflation: 5.6% (Cooling)│
+│  • GDP Growth: 3.4%                    • Bank Credit Growth: 0%       │
+│  • Oil Index: 114                                                      │
+│                                                                        │
+│  MARKET CLIMATE: The economic stall has prompted emergency cabinet     │
+│  deliberations. Ministry officials and central bankers have been in    │
+│  all-night sessions. Rumors of a massive state reconstruction backstop │
+│  are circulating. The market is overwhelmingly net short.              │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
 #### 📺 Big Screen Shows:
-- State Intervention Banner: **GOVERNMENT EMERGENCY LIQUIDITY BACKSTOP ANNOUNCED**.
-- Asset Unlock: `FORGE` (Forge Steel Industries).
-- Warning: "Aggressive Short Squeeze in Progress."
+- Breaking Macro Banner: **GOVERNMENT EMERGENCY STABILIZATION FACILITY ANNOUNCED**.
+- New Asset Unlock: `FORGE` (Forge Steel Industries · Heavy Infrastructure).
+- Live 300s countdown timer.
 
 #### 🎙️ Anchor Speaks (Session Start — High Energy):
-> *"Session 10: 'The Turn'. Just when everyone on the floor went max short, the government stepped in!*
+> *"Session 10: 'The Turn'. Just when every trader in the room went max short, the government stepped in!*
 >
-> *The Ministry of Finance has announced an emergency bank liquidity backstop and massive reconstruction contracts! We have unlocked **FORGE Steel Industries**.*
+> *The Ministry of Finance has announced an emergency liquidity backstop and massive state reconstruction contracts! We have unlocked the 15th and final asset: **FORGE Steel Industries (`FORGE`)**.*
 >
-> *Desks that are still holding short positions: BE CAREFUL. When central banks inject liquidity, short squeezes are violent! Session 10 is LIVE!"*
+> *Desks holding short positions: BE CAREFUL. When central banks inject emergency liquidity, short squeezes are violent!*
+>
+> *Session 10 is LIVE!"*
 
-#### ⚡ Mid-Session Calls:
-- **At t = 30s (State Contract Surge & Squeeze):**  
-  > *"FORGE exploding +9%! CRANE surging +6%! And look at the banks — Horizon Bank and Apex are squeezing short sellers +4%! Cover your shorts or face margin liquidation!"*
-- **At t = 100s (Forge Named Lead Contractor):**  
-  > *"FORGE spikes further on lead contractor headlines! Watch out for 'sell the news' profit taking!"*
+#### ⚡ Mid-Session Anchor Cues:
+- **Around t = 30s (Reconstruction Announcement & Squeeze):**  
+  > *"FORGE exploding +9%! CRANE surging +6%! And look at the banks — Horizon Bank and Apex are violently squeezing short sellers +4%! Cover your shorts or face liquidation!"*
+- **Around t = 100s (Forge Named Lead Contractor):**  
+  > *"FORGE named lead contractor on state reconstruction! Momentum is peaking — watch for profit taking!"*
 
-#### 🔔 Post-Session Anchor Wrap-up:
-> *"Closing bell Session 10! The classic Wall Street short squeeze. Desks that stayed stubbornly short into government emergency backstops got slaughtered. When liquidity reverses, you must pivot immediately."*
+#### 🔔 Post-Session Anchor Wrap-Up:
+> *"Bell rings for Session 10! The classic institutional short squeeze. Desks that stayed stubbornly short into emergency government liquidity got caught in the squeeze. In trading, you must be flexible enough to reverse your thesis when central bank liquidity arrives."*
 
 ---
 
-### SLIDE 20: SESSION 11 (R2S5) — "NEW NORMAL · CLOSING BELL"
+### SLIDE 17: SESSION 11 (R2S5) — "NEW NORMAL · THE FINAL RESOLUTION"
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│  SESSION 11 (R2S5) · NEW NORMAL · THE FINAL RESOLUTION                 │
+│  SESSION 11 (R2S5) · NEW NORMAL · THE CLOSING BELL                     │
 ├────────────────────────────────────────────────────────────────────────┤
-│  MACRO STATUS: Central Bank Signals Peak Policy Rates · Uneven Recovery│
-│  ALL 15 INSTRUMENTS LIVE · THE CLOSING BELL APPROACHES                 │
+│  OPENING INSTRUMENTS (ALL 15 ASSETS LIVE):                             │
+│  • RLNT · TYRL · INFN · HRZN · BZR-V · GOLDCORE · PULSE · NIMBUS       │
+│  • STAPLE · VOLTAGE · CRANE · MERX50 · APEX · LEDGER · FORGE           │
 │                                                                        │
-│  FINAL DIRECTIVES:                                                     │
-│  • Volatility is stabilizing into terminal equilibrium.                │
-│  • Churn and execution fees are the primary destroyers of rank.        │
-│  • Close out high-risk speculative exposure before the terminal tick.  │
+│  ─── MACRO BACKDROP (BETWEEN THE LINES) ────────────────────────────── │
+│  • MCB Policy Rate: 4.75% (Terminal Rate Reached)                      │
+│  • CPI Inflation: 5.1% (Stabilizing)   • GDP Growth: 4.0%             │
+│  • Bank Credit Growth: 2%              • Oil Index: 108                │
 │                                                                        │
+│  MARKET CLIMATE: The Central Bank has formally indicated policy rates  │
+│  have peaked. The financial system is stabilizing into an uneven,      │
+│  selective recovery. Panic has subsided, but the economic landscape   │
+│  has been permanently transformed.                                     │
 │                 [ THIS IS THE FINAL SESSION OF BAZAAR ]                │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
 #### 📺 Big Screen Shows:
-- Final Session Countdown: `300s`.
-- Central Bank statement: "Policy rates have peaked at 4.75%."
-- Big banner: **ALL 15 INSTRUMENTS ACTIVE · TERMINAL SETTLEMENT AT 00:00**.
+- Big Banner: **FINAL SESSION OF THE TOURNAMENT · 300 SECONDS REMAINING**.
+- Macro Dashboard: `Central Bank: Policy Rates Have Peaked at 4.75%` · `CPI: 5.1%`.
+- Terminal countdown clock.
 
 #### 🎙️ Anchor Speaks (Session Start):
-> *"Trading desks... this is it. Session 11 — 'The New Normal'. The final session of Bazaar.*
+> *"Trading floor... this is it. Session 11 — 'The New Normal'. The final session of Bazaar.*
 >
-> *The Central Bank has officially signaled that interest rates have peaked. The crisis has passed into a selective recovery. All 15 assets are active on your board.*
+> *The Central Bank has officially confirmed policy rates have peaked. The acute crisis has passed into a selective recovery. All 15 assets are live on your screens.*
 >
-> *Every tick counts. Minimize fees, hold your highest-conviction positions, and lock in your terminal equity.*
+> *Every tick counts. Minimize unnecessary churning, hold your highest-conviction positions, and lock in your terminal equity.*
 >
-> *For the final time today... 3... 2... 1... **TRADE FOR THE CHAMPIONSHIP!**"*
+> *For the championship... 3... 2... 1... **RING THE FINAL OPENING BELL!**"*
 
-#### ⚡ Mid-Session Calls:
-- **At t = 100s (Apex Capital Raise):**  
-  > *"Apex Capital announces oversubscribed capital raise! Distressed recovery bid incoming!"*
-- **At t = 220s (Finfluencer Final Trap):**  
-  > *"@BullRunBhai shouts: 'We are going back to all-time highs!' Don't fall for it on the final session! The post-war economy has permanently changed!"*
+#### ⚡ Mid-Session Anchor Cues:
+- **Around t = 100s (Apex Capital Raise):**  
+  > *"Apex Capital announces its recovery capital raise is fully subscribed! Selective recovery bid taking place!"*
+- **Around t = 220s (Finfluencer Final Call):**  
+  > *"@BullRunBhai shouting that we are heading to new all-time highs! Remember: The post-war economy has permanently changed!"*
 - **At t = 280s (Final 20-Second Countdown):**  
-  > *"20 SECONDS LEFT ON THE TOURNAMENT CLOCK! CLOSE YOUR RISK! 10... 9... 8... 7... 6... 5... 4... 3... 2... 1...*
+  > *"20 SECONDS LEFT ON THE TOURNAMENT CLOCK! CLOSE YOUR OPEN RISK! 10... 9... 8... 7... 6... 5... 4... 3... 2... 1...*
   >
-  > *(GONG / CLOSING SOUND PLAYS)*
+  > *(GONG / CLOSING BELL SOUND PLAYS)*
   >
   > ***THE CLOSING BELL HAS RUNG! BAZAAR IS OFFICIALLY CLOSED!***"*
 
 ---
 
-# PART 5: POST-EVENT DEBRIEF & PODIUM (SLIDE 21)
+# PART 5: POST-EVENT WRAP-UP & DEBRIEF (SLIDE 18)
 
 ---
 
-### SLIDE 21: THE TERMINAL DEBRIEF & SCORES
+### SLIDE 18: THE TERMINAL DEBRIEF & STORY REVEAL
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │                                                                        │
@@ -786,17 +816,3 @@
 > *Take a few minutes to explore your results and debrief with your teammates.*
 >
 > *On behalf of E-Summit, PEC, and the entire Bazaar engineering team — congratulations on completing the simulation, and thank you for trading! Give yourselves a massive round of applause!"*
-
----
-
-## Technical Checklist for AV Operator & Stage Manager
-
-| Timing | Action Required | Audio Cue / Visual Asset |
-| :--- | :--- | :--- |
-| **T − 15 Min** | Display Slide 1 (Title / Login info) | Ambient electronic background audio |
-| **T − 5 Min** | Briefing presentation (Slides 2 – 7) | Mic active, slide deck on projector |
-| **T − 30 Sec** | Slide 7 (Opening Countdown) | High-tempo heartbeat countdown sound |
-| **S1 – S6** | Display corresponding Session Slide | Live 300s timer + Session Macro Card |
-| **Post-S6** | Trigger "Unlock Round 2" in Admin Panel | Slide 14 & 15 (The Great Reset & Stat Shop) |
-| **S7 – S11** | Display Round 2 Session Slides | Tense electronic trading floor ambience |
-| **S11 at 00:00**| Admin closes market; WebSocket redirects to `/podium` | Closing Bell Gong (`sound.mp3`), Slide 21 |
