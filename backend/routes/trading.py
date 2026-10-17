@@ -256,6 +256,7 @@ async def get_final_leaderboard(team: Team = Depends(get_current_team), db: Asyn
             
         results.append({
             "team_id": t.id,
+            "team_name": t.name or t.id,
             "equity_paise": equity,
             "eliminated": t.eliminated
         })
