@@ -46,8 +46,12 @@ interface DrawingItem {
   item: any;
 }
 
-// BULLETPROOF DATA SANITIZER
-function processData(data: any[]) {
+// 18-MONTH TIMELINE MATHEMATICS:
+// The 12-session curriculum spans an 18-month economic timeline (Jan 1, 2025 to Jun 30, 2026).
+// Each session represents 1.5 months (45 days = 3,888,000 seconds).
+// In each 200-tick session, each tick advances 19,440 seconds (~5.4 hours).
+// This cleanly projects realistic calendar dates (e.g. Jan 15, Feb 01) across the 18-month journey.
+function processData(data: any[], session: number = 1) {
   if (!data || data.length === 0) return [];
 
   const validData = data.filter((d) => d !== null && d !== undefined);
@@ -65,15 +69,17 @@ function processData(data: any[]) {
     return { time: t, value: val };
   });
 
-  // Deduplicate and strictly sort ascending
   const uniqueMap = new Map();
   processed.forEach((d) => uniqueMap.set(d.time, d));
   const sorted = Array.from(uniqueMap.values()).sort((a, b) => a.time - b.time);
 
-  // Anchor to a valid UNIX base epoch so the chart engine never rejects small integers
-  const BASE_EPOCH = 1700000000;
+  const BASE_EPOCH = 1735689600; // Jan 1, 2025, 00:00:00 UTC
+  const SESSION_SECONDS = 45 * 86400; // 45 days per session (~1.5 months)
+  const sessionStartEpoch = BASE_EPOCH + (Math.max(1, session) - 1) * SESSION_SECONDS;
+  const SECONDS_PER_TICK = 19440; // 45 days / 200 ticks = 5.4 hours per tick
+
   return sorted.map((d) => ({
-    time: (BASE_EPOCH + d.time * 60) as UTCTimestamp,
+    time: (sessionStartEpoch + d.time * SECONDS_PER_TICK) as UTCTimestamp,
     value: d.value,
   }));
 }
@@ -103,9 +109,10 @@ export default function LiveChart({
   const sma9Ref = useRef<ISeriesApi<"Line"> | null>(null);
   const sma20Ref = useRef<ISeriesApi<"Line"> | null>(null);
 
-  // Global Fullscreen state in store
+  // Global store
   const isChartFullscreen = useMarketStore((s) => s.isChartFullscreen);
   const setChartFullscreen = useMarketStore((s) => s.setChartFullscreen);
+  const currentSession = useMarketStore((s) => s.currentSession);
   const marketPricePaise = useMarketStore((s) => s.prices[stockId]?.[0] || 0);
   const effectivePricePaise = currentPricePaise ?? marketPricePaise;
 
@@ -114,12 +121,51 @@ export default function LiveChart({
   const [pointerPrice, setPointerPrice] = useState<number | null>(null);
   const [, setDrawingsCount] = useState<number>(0);
 
+  // Refs to eliminate stale closures in crosshair listeners
+  const drawModeRef = useRef<DrawMode>("none");
+  const trendlineStartRef = useRef<{ time: UTCTimestamp; price: number } | null>(null);
   const linesRef = useRef<ISeriesApi<"Line">[]>([]);
   const priceLinesRef = useRef<any[]>([]);
   const drawingsOrderRef = useRef<DrawingItem[]>([]);
   const previewLineRef = useRef<ISeriesApi<"Line"> | null>(null);
 
-  // Native Fullscreen API integration (hides browser search/URL bar like YouTube video)
+  // Keep refs synchronized
+  useEffect(() => {
+    drawModeRef.current = drawMode;
+    trendlineStartRef.current = trendlineStart;
+  }, [drawMode, trendlineStart]);
+
+  // Mobile Visual Viewport Handling:
+  // When mobile keyboard opens, window.visualViewport shrinks.
+  // We dynamically adjust the wrapper's height and top so the bottom trading dock
+  // rides above the keyboard and is never obscured!
+  useEffect(() => {
+    if (!isChartFullscreen) return;
+    const vv = typeof window !== "undefined" ? window.visualViewport : null;
+    if (!vv) return;
+
+    const onVisualViewportChange = () => {
+      if (chartWrapperRef.current) {
+        chartWrapperRef.current.style.height = `${vv.height}px`;
+        chartWrapperRef.current.style.top = `${vv.offsetTop}px`;
+      }
+    };
+
+    vv.addEventListener("resize", onVisualViewportChange);
+    vv.addEventListener("scroll", onVisualViewportChange);
+    onVisualViewportChange();
+
+    return () => {
+      vv.removeEventListener("resize", onVisualViewportChange);
+      vv.removeEventListener("scroll", onVisualViewportChange);
+      if (chartWrapperRef.current) {
+        chartWrapperRef.current.style.height = "";
+        chartWrapperRef.current.style.top = "";
+      }
+    };
+  }, [isChartFullscreen]);
+
+  // Native Fullscreen API integration (removes browser URL/search bar like YouTube video)
   const handleEnterFullscreen = async () => {
     try {
       const elem = chartWrapperRef.current || document.documentElement;
@@ -148,7 +194,7 @@ export default function LiveChart({
     if (onBack) onBack();
   };
 
-  // Sync state with native browser fullscreen changes (e.g. mobile back gesture)
+  // Sync state with native browser fullscreen changes
   useEffect(() => {
     const onFsChange = () => {
       const isNativeFs = Boolean(document.fullscreenElement || (document as any).webkitFullscreenElement);
@@ -164,7 +210,7 @@ export default function LiveChart({
     };
   }, [isChartFullscreen, setChartFullscreen]);
 
-  // Keyboard shortcut: Escape exits fullscreen
+  // Escape key exits fullscreen
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isChartFullscreen) {
@@ -177,13 +223,29 @@ export default function LiveChart({
 
   // Handle pointer tracking directly on container for touch & mouse
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!mainRef.current || !containerRef.current) return;
+    if (!mainRef.current || !containerRef.current || !chartRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
     const y = e.clientY - rect.top;
+    const x = e.clientX - rect.left;
     if (y >= 0 && y <= rect.height) {
       const p = mainRef.current.coordinateToPrice(y);
       if (p !== null && p !== undefined && !isNaN(p)) {
         setPointerPrice(Number(p.toFixed(2)));
+
+        // Live Trendline Preview on container pointer move
+        if (drawModeRef.current === "trendline" && trendlineStartRef.current && previewLineRef.current) {
+          const timeAtX = chartRef.current.timeScale().coordinateToTime(x) as number | null;
+          if (timeAtX && timeAtX !== (trendlineStartRef.current.time as number)) {
+            const t1 = trendlineStartRef.current.time as number;
+            const t2 = timeAtX;
+            const data = t1 < t2
+              ? [{ time: t1 as UTCTimestamp, value: trendlineStartRef.current.price }, { time: t2 as UTCTimestamp, value: p }]
+              : [{ time: t2 as UTCTimestamp, value: p }, { time: t1 as UTCTimestamp, value: trendlineStartRef.current.price }];
+            try {
+              previewLineRef.current.setData(data);
+            } catch (err) {}
+          }
+        }
       }
     }
   };
@@ -192,7 +254,7 @@ export default function LiveChart({
     setPointerPrice(null);
   };
 
-  // Create chart instance
+  // Create Chart
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -208,10 +270,8 @@ export default function LiveChart({
         vertLines: { color: "rgba(255,255,255,0.05)" },
         horzLines: { color: "rgba(255,255,255,0.05)" },
       },
-      // CrosshairMode.Normal (0): crosshair horizontal line and right price badge
-      // freely follow pointer coordinate rather than sticking only to candle lines!
       crosshair: {
-        mode: CrosshairMode.Normal,
+        mode: CrosshairMode.Normal, // 0: Freely tracks cursor coordinate
         vertLine: {
           visible: true,
           labelVisible: true,
@@ -232,6 +292,9 @@ export default function LiveChart({
       trackingMode: {
         exitMode: TrackingModeExitMode.OnTouchEnd,
       },
+      localization: {
+        dateFormat: "dd MMM yyyy",
+      },
       rightPriceScale: {
         borderColor: "rgba(255,255,255,0.1)",
         scaleMargins: { top: 0.08, bottom: 0.22 },
@@ -241,7 +304,7 @@ export default function LiveChart({
         timeVisible: true,
         secondsVisible: false,
         borderColor: "rgba(255,255,255,0.1)",
-        barSpacing: 7,
+        barSpacing: 8,
         minBarSpacing: 3,
         rightOffset: 6,
       },
@@ -249,7 +312,6 @@ export default function LiveChart({
       handleScale: true,
     });
 
-    // Main Price Line
     const mainSeries = chart.addSeries(AreaSeries, {
       lineColor: accentColor,
       topColor: accentColor + "60",
@@ -259,7 +321,6 @@ export default function LiveChart({
       lastValueVisible: true,
     });
 
-    // Volume Series
     const volumeSeries = chart.addSeries(HistogramSeries, {
       color: "rgba(255, 255, 255, 0.1)",
       priceFormat: { type: "volume" },
@@ -287,7 +348,7 @@ export default function LiveChart({
       visible: showSma20,
     });
 
-    // Crosshair move listener: pointer price level calculation & trendline preview
+    // Crosshair move listener: uses fresh refs to guarantee real-time trendline preview
     chart.subscribeCrosshairMove((param) => {
       if (!param.point || param.point.x < 0 || param.point.y < 0) {
         setPointerPrice(null);
@@ -298,14 +359,16 @@ export default function LiveChart({
         setPointerPrice(Number(price.toFixed(2)));
 
         // Live trendline drawing preview: stretch line from 1st point to cursor
-        if (previewLineRef.current && trendlineStart && param.time) {
-          const t1 = trendlineStart.time as number;
+        if (drawModeRef.current === "trendline" && trendlineStartRef.current && previewLineRef.current && param.time) {
+          const t1 = trendlineStartRef.current.time as number;
           const t2 = param.time as number;
           if (t1 !== t2) {
             const data = t1 < t2
-              ? [{ time: t1 as UTCTimestamp, value: trendlineStart.price }, { time: t2 as UTCTimestamp, value: price }]
-              : [{ time: t2 as UTCTimestamp, value: price }, { time: t1 as UTCTimestamp, value: trendlineStart.price }];
-            previewLineRef.current.setData(data);
+              ? [{ time: t1 as UTCTimestamp, value: trendlineStartRef.current.price }, { time: t2 as UTCTimestamp, value: price }]
+              : [{ time: t2 as UTCTimestamp, value: price }, { time: t1 as UTCTimestamp, value: trendlineStartRef.current.price }];
+            try {
+              previewLineRef.current.setData(data);
+            } catch (err) {}
           }
         }
       } else {
@@ -335,7 +398,7 @@ export default function LiveChart({
     };
   }, [height, accentColor]);
 
-  // Trigger chart resize immediately upon entering/exiting fullscreen
+  // Resize when fullscreen state changes
   useEffect(() => {
     const handleResize = () => {
       if (containerRef.current && chartRef.current) {
@@ -354,31 +417,12 @@ export default function LiveChart({
     const chart = chartRef.current;
     if (!chart || !mainRef.current) return;
 
-    // Manage preview line series
-    if (drawMode === "trendline" && trendlineStart) {
-      if (!previewLineRef.current) {
-        previewLineRef.current = chart.addSeries(LineSeries, {
-          color: "rgba(255, 255, 255, 0.75)",
-          lineWidth: 2,
-          lineStyle: 2, // Dashed preview line
-          lastValueVisible: false,
-          priceLineVisible: false,
-          crosshairMarkerVisible: false,
-        });
-      }
-    } else {
-      if (previewLineRef.current) {
-        chart.removeSeries(previewLineRef.current);
-        previewLineRef.current = null;
-      }
-    }
-
     const clickHandler = (param: any) => {
       if (!param.point) return;
       const price = mainRef.current?.coordinateToPrice(param.point.y);
       if (price === null || price === undefined || isNaN(price)) return;
 
-      if (drawMode === "level") {
+      if (drawModeRef.current === "level") {
         const formattedPrice = Number(price.toFixed(2));
         const line = mainRef.current?.createPriceLine({
           price: formattedPrice,
@@ -393,20 +437,34 @@ export default function LiveChart({
           drawingsOrderRef.current.push({ type: "level", item: line });
           setDrawingsCount((c) => c + 1);
         }
+        drawModeRef.current = "none";
         setDrawMode("none");
-      } else if (drawMode === "trendline") {
+      } else if (drawModeRef.current === "trendline") {
         if (!param.time) return;
-        if (!trendlineStart) {
-          // Set point 1: preview line will now track cursor until point 2 is clicked
-          setTrendlineStart({ time: param.time, price });
+        if (!trendlineStartRef.current) {
+          // Fix point 1
+          const startPoint = { time: param.time, price };
+          trendlineStartRef.current = startPoint;
+          setTrendlineStart(startPoint);
+
+          // Immediately create the preview line series so it is ready right now
+          if (!previewLineRef.current && chartRef.current) {
+            previewLineRef.current = chartRef.current.addSeries(LineSeries, {
+              color: "rgba(255, 255, 255, 0.85)",
+              lineWidth: 2,
+              lineStyle: 2,
+              lastValueVisible: false,
+              priceLineVisible: false,
+              crosshairMarkerVisible: false,
+            });
+          }
         } else {
-          // Remove preview series before committing permanent white trendline
+          // Fix point 2: Remove preview and create permanent white trendline (#ffffff)
           if (previewLineRef.current) {
             chart.removeSeries(previewLineRef.current);
             previewLineRef.current = null;
           }
 
-          // Permanent trendline series in pure white (#ffffff)
           const lineSeries = chart.addSeries(LineSeries, {
             color: "#ffffff",
             lineWidth: 2,
@@ -415,13 +473,16 @@ export default function LiveChart({
             crosshairMarkerVisible: false,
           });
           lineSeries.setData([
-            { time: trendlineStart.time, value: trendlineStart.price },
+            { time: trendlineStartRef.current.time, value: trendlineStartRef.current.price },
             { time: param.time, value: price },
           ].sort((a, b) => (a.time as number) - (b.time as number)));
           linesRef.current.push(lineSeries);
           drawingsOrderRef.current.push({ type: "trendline", item: lineSeries });
           setDrawingsCount((c) => c + 1);
+
+          trendlineStartRef.current = null;
           setTrendlineStart(null);
+          drawModeRef.current = "none";
           setDrawMode("none");
         }
       }
@@ -431,7 +492,7 @@ export default function LiveChart({
     return () => {
       chart.unsubscribeClick(clickHandler);
     };
-  }, [drawMode, trendlineStart]);
+  }, []);
 
   // Toggle series visibility
   useEffect(() => {
@@ -439,16 +500,16 @@ export default function LiveChart({
     if (sma20Ref.current) sma20Ref.current.applyOptions({ visible: showSma20 });
   }, [showSma9, showSma20]);
 
-  // Update data safely
+  // Update data safely with 18-month session timeline
   useEffect(() => {
     if (!mainRef.current || priceHistory.length === 0) return;
 
     try {
-      const cleanPrice = processData(priceHistory);
+      const cleanPrice = processData(priceHistory, currentSession);
       mainRef.current.setData(cleanPrice);
 
       if (volumeRef.current && volumeHistory.length > 0) {
-        const cleanVolume = processData(volumeHistory);
+        const cleanVolume = processData(volumeHistory, currentSession);
 
         const coloredVolume = cleanVolume.map((v) => {
           const priceMatchIdx = cleanPrice.findIndex((p) => p.time === v.time);
@@ -464,21 +525,23 @@ export default function LiveChart({
         volumeRef.current.setData(coloredVolume);
       }
 
-      if (sma9Ref.current) sma9Ref.current.setData(processData(sma9History));
-      if (sma20Ref.current) sma20Ref.current.setData(processData(sma20History));
+      if (sma9Ref.current) sma9Ref.current.setData(processData(sma9History, currentSession));
+      if (sma20Ref.current) sma20Ref.current.setData(processData(sma20History, currentSession));
 
     } catch (err) {
       console.error("LW Charts SetData Error gracefully caught:", err);
     }
-  }, [priceHistory, volumeHistory, sma9History, sma20History]);
+  }, [priceHistory, volumeHistory, sma9History, sma20History, currentSession]);
 
   const undoLastDrawing = () => {
     if (previewLineRef.current) {
       chartRef.current?.removeSeries(previewLineRef.current);
       previewLineRef.current = null;
     }
-    if (trendlineStart) {
+    if (trendlineStartRef.current) {
+      trendlineStartRef.current = null;
       setTrendlineStart(null);
+      drawModeRef.current = "none";
       setDrawMode("none");
       return;
     }
@@ -504,7 +567,9 @@ export default function LiveChart({
     priceLinesRef.current.forEach((line) => mainRef.current?.removePriceLine(line));
     priceLinesRef.current = [];
     drawingsOrderRef.current = [];
+    trendlineStartRef.current = null;
     setTrendlineStart(null);
+    drawModeRef.current = "none";
     setDrawMode("none");
     setDrawingsCount(0);
   };
@@ -585,7 +650,11 @@ export default function LiveChart({
 
             {/* Level Marking Tool (Icon only) */}
             <button
-              onClick={() => setDrawMode(drawMode === "level" ? "none" : "level")}
+              onClick={() => {
+                const next = drawMode === "level" ? "none" : "level";
+                drawModeRef.current = next;
+                setDrawMode(next);
+              }}
               className={clsx(
                 "p-1.5 sm:p-2 rounded-lg border transition-colors cursor-pointer",
                 drawMode === "level"
@@ -601,8 +670,15 @@ export default function LiveChart({
             {/* Trendline Tool (Icon only) */}
             <button
               onClick={() => {
-                setDrawMode(drawMode === "trendline" ? "none" : "trendline");
+                const next = drawMode === "trendline" ? "none" : "trendline";
+                drawModeRef.current = next;
+                setDrawMode(next);
+                trendlineStartRef.current = null;
                 setTrendlineStart(null);
+                if (previewLineRef.current && chartRef.current) {
+                  chartRef.current.removeSeries(previewLineRef.current);
+                  previewLineRef.current = null;
+                }
               }}
               className={clsx(
                 "p-1.5 sm:p-2 rounded-lg border transition-colors cursor-pointer",
@@ -664,7 +740,11 @@ export default function LiveChart({
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button
-              onClick={() => setDrawMode(drawMode === "level" ? "none" : "level")}
+              onClick={() => {
+                const next = drawMode === "level" ? "none" : "level";
+                drawModeRef.current = next;
+                setDrawMode(next);
+              }}
               className={clsx(
                 "p-1.5 rounded-lg border transition-colors cursor-pointer",
                 drawMode === "level"
@@ -677,8 +757,15 @@ export default function LiveChart({
             </button>
             <button
               onClick={() => {
-                setDrawMode(drawMode === "trendline" ? "none" : "trendline");
+                const next = drawMode === "trendline" ? "none" : "trendline";
+                drawModeRef.current = next;
+                setDrawMode(next);
+                trendlineStartRef.current = null;
                 setTrendlineStart(null);
+                if (previewLineRef.current && chartRef.current) {
+                  chartRef.current.removeSeries(previewLineRef.current);
+                  previewLineRef.current = null;
+                }
               }}
               className={clsx(
                 "p-1.5 rounded-lg border transition-colors cursor-pointer",

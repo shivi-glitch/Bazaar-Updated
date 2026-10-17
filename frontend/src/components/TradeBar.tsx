@@ -114,11 +114,12 @@ export function TradeBar({ ticker, currentPricePaise, variant = "bar", className
           </div>
         )}
 
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-2 sm:gap-3 relative z-10">
-          {/* Controls Bar: Position, Lots Stepper, and Presets */}
-          <div className="flex items-center justify-between md:justify-start gap-1.5 sm:gap-3 w-full md:w-auto">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 relative z-10">
+          {/* Left: Position & Lots Stepper (Presets removed for clean UI) */}
+          <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-4 w-full sm:w-auto">
             {/* Position Chip */}
-            <div className="flex items-center gap-1 shrink-0">
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span className="text-[10px] font-mono uppercase text-tx-muted font-bold">Position</span>
               {currentPos > 0 ? (
                 <span className="font-mono font-bold text-[11px] sm:text-[12px] text-gain bg-gain-dim border border-gain-border px-2 py-0.5 rounded inline-flex items-center gap-1 shadow-xs">
                   <span className="w-1.5 h-1.5 rounded-full bg-gain animate-pulse" />
@@ -137,63 +138,53 @@ export function TradeBar({ ticker, currentPricePaise, variant = "bar", className
             </div>
 
             {/* Lots Stepper */}
-            <div className="flex items-center bg-bg-void border border-bd-subtle rounded-lg h-[34px] sm:h-[36px] overflow-hidden shrink-0">
+            <div className="flex items-center bg-bg-void border border-bd-subtle rounded-lg h-[36px] overflow-hidden shrink-0">
               <button
                 type="button"
                 onClick={() => setQty(Math.max(1, numericQty - 1))}
-                className="w-7 sm:w-8 h-full text-tx-secondary hover:text-tx-primary hover:bg-bg-raised active:bg-bg-overlay font-bold text-[15px] sm:text-[16px] transition-colors flex items-center justify-center cursor-pointer"
+                className="w-8 sm:w-9 h-full text-tx-secondary hover:text-tx-primary hover:bg-bg-raised active:bg-bg-overlay font-bold text-[16px] transition-colors flex items-center justify-center cursor-pointer"
                 aria-label="Decrease quantity"
               >-</button>
               <input
-                type="number"
-                min="1"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={qty}
-                onChange={(e) => setQty(e.target.value === "" ? "" : parseInt(e.target.value, 10))}
-                className="w-10 sm:w-14 h-full text-center font-mono font-bold text-[13px] sm:text-[14px] bg-transparent text-tx-primary outline-none focus:bg-bg-raised transition-colors"
+                onFocus={(e) => {
+                  setTimeout(() => {
+                    e.target.scrollIntoView({ block: "center", behavior: "smooth" });
+                  }, 200);
+                }}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, "");
+                  setQty(val === "" ? "" : Math.max(1, parseInt(val, 10)));
+                }}
+                className="w-12 sm:w-16 h-full text-center font-mono font-bold text-[14px] bg-transparent text-tx-primary outline-none focus:bg-bg-raised transition-colors"
                 aria-label="Trade quantity"
               />
               <button
                 type="button"
                 onClick={() => setQty(numericQty + 1)}
-                className="w-7 sm:w-8 h-full text-tx-secondary hover:text-tx-primary hover:bg-bg-raised active:bg-bg-overlay font-bold text-[15px] sm:text-[16px] transition-colors flex items-center justify-center cursor-pointer"
+                className="w-8 sm:w-9 h-full text-tx-secondary hover:text-tx-primary hover:bg-bg-raised active:bg-bg-overlay font-bold text-[16px] transition-colors flex items-center justify-center cursor-pointer"
                 aria-label="Increase quantity"
               >+</button>
             </div>
 
-            {/* Presets */}
-            <div className="flex items-center gap-1 shrink-0">
-              {[1, 5, 10, 25].map((preset) => (
-                <button
-                  key={preset}
-                  type="button"
-                  onClick={() => setQty(preset)}
-                  className={clsx(
-                    "px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-[11px] font-mono font-bold rounded border transition-colors cursor-pointer",
-                    numericQty === preset
-                      ? "bg-accent-dim border-accent-border text-accent"
-                      : "bg-bg-void border-bd-subtle text-tx-muted hover:text-tx-primary hover:border-bd-strong"
-                  )}
-                >
-                  +{preset}
-                </button>
-              ))}
-            </div>
-
-            {/* Estimated Outlay Value (desktop/landscape only) */}
-            <div className="hidden lg:flex items-center gap-1 text-[11px] font-mono text-tx-muted pl-2 border-l border-white/10">
-              <span>Est:</span>
+            {/* Estimated Outlay Value */}
+            <div className="flex items-center gap-1 text-[11px] font-mono text-tx-muted">
+              <span className="hidden xs:inline">Est:</span>
               <span className="font-bold text-tx-primary">₹{notionalValue}</span>
             </div>
           </div>
 
-          {/* Action Buttons: 50/50 full-width grid on mobile, inline on desktop */}
-          <div className="grid grid-cols-2 gap-2 w-full md:w-auto md:flex md:items-center">
+          {/* Right: Buy & Sell Action Buttons */}
+          <div className="grid grid-cols-2 gap-2 w-full sm:w-auto sm:flex sm:items-center">
             <Button
               variant="sell"
               size="sm"
               isLoading={loading}
               onClick={() => executeTrade("SELL")}
-              className="font-mono font-bold tracking-wider py-2.5 md:py-2 md:min-w-[100px] cursor-pointer shadow-sm text-[12px] sm:text-[13px] rounded-lg"
+              className="font-mono font-bold tracking-wider py-2.5 sm:py-2 sm:min-w-[105px] cursor-pointer shadow-sm text-[13px] rounded-lg"
             >
               {leftLabel}
             </Button>
@@ -202,7 +193,7 @@ export function TradeBar({ ticker, currentPricePaise, variant = "bar", className
               size="sm"
               isLoading={loading}
               onClick={() => executeTrade("BUY")}
-              className="font-mono font-bold tracking-wider py-2.5 md:py-2 md:min-w-[100px] cursor-pointer shadow-sm text-[12px] sm:text-[13px] rounded-lg"
+              className="font-mono font-bold tracking-wider py-2.5 sm:py-2 sm:min-w-[105px] cursor-pointer shadow-sm text-[13px] rounded-lg"
             >
               {rightLabel}
             </Button>
