@@ -38,6 +38,8 @@ interface MarketState {
   updateSessionFromPoll: (sessionData: { state: string; g: number; n?: number; is_frozen?: boolean }) => void;
   setPriceHistory: (history: Record<string, HistoryPoint[]>) => void;
   clearPriceHistory: () => void;
+  isChartFullscreen: boolean;
+  setChartFullscreen: (isFullscreen: boolean) => void;
 }
 
 const DEFAULT_R1_PRICES: Record<string, [number, number]> = {
@@ -62,6 +64,8 @@ export const useMarketStore = create<MarketState>((set) => ({
   news: [],
   latestToast: null,
   portfolioData: null,
+  isChartFullscreen: false,
+  setChartFullscreen: (isFullscreen) => set({ isChartFullscreen: isFullscreen }),
   setConnected: (status) => set({ connected: status }),
   clearToast: () => set({ latestToast: null }),
   setPortfolioData: (data) => set({ portfolioData: data }),

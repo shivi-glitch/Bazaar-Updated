@@ -295,10 +295,18 @@ export function AssetDetailTab({ ticker, onBack }: { ticker: string, onBack: () 
   
   const currentSession = useMarketStore(s => s.currentSession);
   const orderBook = useMarketStore(s => s.orderBooks[ticker]);
+  const isChartFullscreen = useMarketStore(s => s.isChartFullscreen);
   const isRound2 = currentSession >= 7;
   
   const [showSma9, setShowSma9] = useState(true);
   const [showSma20, setShowSma20] = useState(true);
+
+  // Clean up fullscreen state on unmount
+  useEffect(() => {
+    return () => {
+      useMarketStore.getState().setChartFullscreen(false);
+    };
+  }, []);
 
   const meta = ASSET_META[ticker] || { name: "Unknown", sector: "General", cap: "-", pe: "-", high: "-", low: "-" };
   const currentPricePaise = prices[ticker]?.[0] || 0;
@@ -372,12 +380,15 @@ export function AssetDetailTab({ ticker, onBack }: { ticker: string, onBack: () 
             <div className="bg-bg-raised/70 border border-bd-subtle rounded-xl p-3 sm:p-5 shadow-card">
               <LiveChart 
                 stockId={ticker} 
+                currentPricePaise={currentPricePaise}
                 priceHistory={chartData} 
                 volumeHistory={volumeData}
                 sma9History={sma9Data} 
                 sma20History={sma20Data} 
                 showSma9={showSma9} 
                 showSma20={showSma20}
+                onToggleSma9={() => setShowSma9(!showSma9)}
+                onToggleSma20={() => setShowSma20(!showSma20)}
                 accentColor="#00D4AA"
                 className="h-[290px] xs:h-[320px] sm:h-[360px] lg:h-[410px]"
               />
@@ -502,8 +513,8 @@ export function AssetDetailTab({ ticker, onBack }: { ticker: string, onBack: () 
           </div>
         </div>
 
-        {/* Mobile-Only Bottom Fixed Bar (hidden on desktop) */}
-        <TradeBar ticker={ticker} currentPricePaise={currentPricePaise} variant="bar" className="lg:hidden" />
+        {/* Mobile-Only Bottom Fixed Bar (hidden on desktop or when chart is in fullscreen) */}
+        <TradeBar ticker={ticker} currentPricePaise={currentPricePaise} variant="bar" className={clsx("lg:hidden", isChartFullscreen && "!hidden")} />
       </div>
   );
 }
