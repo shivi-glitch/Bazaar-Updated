@@ -2,11 +2,8 @@
 
 import Link from "next/link";
 import { Button } from "../ui/Button";
-import { useTheme } from "../ThemeProvider";
-import { Sun, Moon } from "lucide-react";
 
 export function LandingNav() {
-  const { resolvedTheme, setTheme } = useTheme();
 
   const scrollTo = (id: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -57,16 +54,6 @@ export function LandingNav() {
           >
             Leaderboard
           </a>
-
-          {/* Theme Mode Toggle Button */}
-          <button
-            onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-            className="p-2 rounded-md bg-bg-raised hover:bg-bg-overlay border border-bd-subtle text-tx-secondary hover:text-tx-primary transition-colors cursor-pointer"
-            aria-label="Toggle theme mode"
-            title={resolvedTheme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
-          >
-            {resolvedTheme === "dark" ? <Sun className="w-4 h-4 text-warn" /> : <Moon className="w-4 h-4 text-accent" />}
-          </button>
 
           <Link href="/login" tabIndex={-1}>
             <Button
