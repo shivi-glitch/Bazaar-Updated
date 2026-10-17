@@ -1,7 +1,7 @@
 "use client";
 
-import { LineChart, Briefcase, Newspaper, Shield, Moon, Sun, Clock, Zap, LogOut, Menu, X } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { LineChart, Briefcase, Newspaper, Shield, Moon, Sun, Clock, Zap, LogOut, Menu, X, Settings } from "lucide-react";
+import { useRouter, usePathname } from "next/navigation";
 import { useTheme } from "@/components/ThemeProvider";
 import { useMarketStore } from "@/store/marketStore";
 import { useEffect, useState } from "react";
@@ -13,14 +13,18 @@ import Link from "next/link";
 export function DashboardShell({ 
   children, 
   activeTab = "chart", 
-  onTabChange = () => {} 
+  onTabChange = () => {},
+  isViewingStock = false
 }: { 
   children: React.ReactNode; 
   activeTab?: string; 
-  onTabChange?: (tab: string) => void 
+  onTabChange?: (tab: string) => void;
+  isViewingStock?: boolean;
 }) {
   const { resolvedTheme, setTheme } = useTheme();
   const router = useRouter();
+  const pathname = usePathname();
+  const isStockViewing = isViewingStock || (pathname?.startsWith("/market/") && pathname !== "/market");
   
   const sessionState = useMarketStore((s) => s.sessionState);
   const currentSession = useMarketStore((s) => s.currentSession);
@@ -31,6 +35,7 @@ export function DashboardShell({
 
   const [teamId, setTeamId] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("merx_token");
@@ -138,24 +143,17 @@ export function DashboardShell({
                 S{currentSession} · {isRound2 ? "R2" : "R1"}
               </span>
 
-              {/* State indicator */}
-              <span className={clsx(
-                "text-[10px] font-mono font-bold px-2 py-0.5 rounded border flex items-center gap-1.5 shrink-0",
-                sessionState === "RUNNING" ? "text-gain bg-gain-dim border-gain-border" :
-                sessionState === "STARTING" ? "text-accent bg-accent-dim border-accent-border animate-pulse" :
-                sessionState === "PAUSED" ? "text-warn bg-warn-dim border-warn-border" :
-                sessionState === "FINISHED" ? "text-tx-muted bg-bg-raised border-bd-subtle" :
-                "text-tx-secondary bg-bg-raised border-bd-subtle"
-              )}>
-                <span className={clsx(
-                  "w-1.5 h-1.5 rounded-full",
+              {/* Minimal Green Ticker Indicator (no text) */}
+              <span 
+                className={clsx(
+                  "w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full shrink-0 shadow-xs",
                   !connected ? 'bg-loss' :
-                  sessionState === 'RUNNING' ? 'bg-gain animate-pulse' :
+                  sessionState === 'RUNNING' ? 'bg-gain animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.7)]' :
                   sessionState === 'STARTING' ? 'bg-accent animate-ping' :
                   sessionState === 'PAUSED' ? 'bg-warn' : 'bg-tx-muted'
-                )} />
-                <span>{sessionState}</span>
-              </span>
+                )} 
+                title={`Status: ${sessionState}`} 
+              />
 
               {/* Clock (Pure White per specification) */}
               <span className="text-[10px] sm:text-[11px] font-mono font-bold text-white bg-bg-raised px-2 py-0.5 rounded border border-bd-subtle flex items-center gap-1.5 shrink-0 shadow-xs">
@@ -165,39 +163,61 @@ export function DashboardShell({
             </div>
           </div>
           
-          {/* Right: Theme Toggle & Logout (Reddish) */}
-          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-            {/* Color Mode Toggle Button */}
-            <button 
-              onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')} 
-              className="p-1.5 sm:px-2.5 sm:py-1.5 text-tx-secondary hover:text-tx-primary bg-bg-raised hover:bg-bg-overlay rounded-md border border-bd-subtle transition-colors flex items-center gap-1.5 text-[11px] font-mono cursor-pointer"
-              aria-label="Toggle color mode"
-              title={resolvedTheme === 'dark' ? "Switch to Light Mode" : "Switch to Dark Mode"}
-            >
-              {resolvedTheme === 'dark' ? (
+          {/* Right: Consolidated Settings Menu (Theme & Logout) - Only visible when not viewing a stock */}
+          {!isStockViewing ? (
+            <div className="relative shrink-0">
+              <button 
+                onClick={() => setSettingsOpen(!settingsOpen)} 
+                className="p-1.5 sm:px-2.5 sm:py-1.5 text-tx-secondary hover:text-tx-primary bg-bg-raised hover:bg-bg-overlay rounded-md border border-bd-subtle transition-colors flex items-center gap-1.5 text-[11px] font-mono cursor-pointer"
+                aria-label="Open settings"
+                title="Settings"
+              >
+                <Settings className="w-3.5 h-3.5 text-tx-secondary" />
+                <span className="hidden sm:inline text-tx-muted">Settings</span>
+              </button>
+
+              {settingsOpen && (
                 <>
-                  <Sun className="w-3.5 h-3.5 text-warn" />
-                  <span className="hidden md:inline text-tx-muted">Light</span>
-                </>
-              ) : (
-                <>
-                  <Moon className="w-3.5 h-3.5 text-accent" />
-                  <span className="hidden md:inline text-tx-muted">Dark</span>
+                  <div 
+                    className="fixed inset-0 z-40" 
+                    onClick={() => setSettingsOpen(false)} 
+                  />
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-bg-base border border-bd-subtle rounded-xl shadow-modal p-2 z-50 flex flex-col gap-1 text-[12px] font-mono animate-in fade-in slide-in-from-top-2 duration-150">
+                    <div className="px-2 py-1 text-[10px] uppercase font-bold text-tx-muted tracking-wider border-b border-bd-hairline">
+                      User Settings
+                    </div>
+                    
+                    {/* Theme Toggle Button */}
+                    <button
+                      onClick={() => {
+                        setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
+                        setSettingsOpen(false);
+                      }}
+                      className="flex items-center justify-between w-full px-2.5 py-2 rounded-md hover:bg-bg-raised text-tx-secondary hover:text-tx-primary transition-colors cursor-pointer"
+                    >
+                      <span className="flex items-center gap-2">
+                        {resolvedTheme === 'dark' ? <Sun className="w-3.5 h-3.5 text-warn" /> : <Moon className="w-3.5 h-3.5 text-accent" />}
+                        <span>Mode</span>
+                      </span>
+                      <span className="text-[10px] text-tx-muted uppercase font-bold">{resolvedTheme === 'dark' ? 'Dark' : 'Light'}</span>
+                    </button>
+
+                    {/* Logout Button */}
+                    <button
+                      onClick={() => {
+                        setSettingsOpen(false);
+                        handleLogout();
+                      }}
+                      className="flex items-center gap-2 w-full px-2.5 py-2 rounded-md text-loss hover:bg-loss-dim transition-colors cursor-pointer font-bold"
+                    >
+                      <LogOut className="w-3.5 h-3.5 text-loss" />
+                      <span>Logout</span>
+                    </button>
+                  </div>
                 </>
               )}
-            </button>
-
-            {/* Logout button (Reddish styling) */}
-            <button 
-              onClick={handleLogout} 
-              className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-loss-dim hover:bg-loss/20 border border-loss-border/70 hover:border-loss text-loss text-[11px] font-mono font-bold uppercase tracking-wider rounded-md transition-colors cursor-pointer"
-              aria-label="Log out"
-              title="Sign out of trading session"
-            >
-              <LogOut className="w-3.5 h-3.5 text-loss" />
-              <span className="hidden xs:inline">Logout</span>
-            </button>
-          </div>
+            </div>
+          ) : <div className="w-1" />}
         </header>
       )}
 

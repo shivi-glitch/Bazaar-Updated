@@ -116,6 +116,7 @@ export default function MarketSPA() {
         setActiveTab(tab);
         setSelectedTicker(null);
       }}
+      isViewingStock={selectedTicker !== null}
     >
       {renderContent()}
     </DashboardShell>

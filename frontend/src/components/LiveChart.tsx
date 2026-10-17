@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   createChart,
   IChartApi,
@@ -53,7 +53,7 @@ function processData(data: any[]) {
   const validData = data.filter((d) => d !== null && d !== undefined);
 
   const processed = validData.map((d, i) => {
-    let t = i; // Fallback to index if time is corrupt
+    let t = i;
     if (typeof d.time === "number" && !isNaN(d.time)) {
       t = d.time;
     } else if (typeof d.time === "string") {
@@ -73,7 +73,7 @@ function processData(data: any[]) {
   // Anchor to a valid UNIX base epoch so the chart engine never rejects small integers
   const BASE_EPOCH = 1700000000;
   return sorted.map((d) => ({
-    time: (BASE_EPOCH + d.time * 60) as UTCTimestamp, // *60 creates distinct clean intervals
+    time: (BASE_EPOCH + d.time * 60) as UTCTimestamp,
     value: d.value,
   }));
 }
@@ -108,7 +108,6 @@ export default function LiveChart({
   const setChartFullscreen = useMarketStore((s) => s.setChartFullscreen);
   const marketPricePaise = useMarketStore((s) => s.prices[stockId]?.[0] || 0);
   const effectivePricePaise = currentPricePaise ?? marketPricePaise;
-  const livePrice = (effectivePricePaise / 100).toFixed(2);
 
   const [drawMode, setDrawMode] = useState<DrawMode>("none");
   const [trendlineStart, setTrendlineStart] = useState<{ time: UTCTimestamp; price: number } | null>(null);
@@ -118,17 +117,63 @@ export default function LiveChart({
   const linesRef = useRef<ISeriesApi<"Line">[]>([]);
   const priceLinesRef = useRef<any[]>([]);
   const drawingsOrderRef = useRef<DrawingItem[]>([]);
+  const previewLineRef = useRef<ISeriesApi<"Line"> | null>(null);
+
+  // Native Fullscreen API integration (hides browser search/URL bar like YouTube video)
+  const handleEnterFullscreen = async () => {
+    try {
+      const elem = chartWrapperRef.current || document.documentElement;
+      if (elem.requestFullscreen) {
+        await elem.requestFullscreen();
+      } else if ((elem as any).webkitRequestFullscreen) {
+        await (elem as any).webkitRequestFullscreen();
+      } else if ((elem as any).mozRequestFullScreen) {
+        await (elem as any).mozRequestFullScreen();
+      }
+    } catch (err) {}
+    setChartFullscreen(true);
+  };
+
+  const handleExitFullscreen = async () => {
+    try {
+      if (document.fullscreenElement || (document as any).webkitFullscreenElement) {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if ((document as any).webkitExitFullscreen) {
+          await (document as any).webkitExitFullscreen();
+        }
+      }
+    } catch (err) {}
+    setChartFullscreen(false);
+    if (onBack) onBack();
+  };
+
+  // Sync state with native browser fullscreen changes (e.g. mobile back gesture)
+  useEffect(() => {
+    const onFsChange = () => {
+      const isNativeFs = Boolean(document.fullscreenElement || (document as any).webkitFullscreenElement);
+      if (!isNativeFs && isChartFullscreen) {
+        setChartFullscreen(false);
+      }
+    };
+    document.addEventListener("fullscreenchange", onFsChange);
+    document.addEventListener("webkitfullscreenchange", onFsChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", onFsChange);
+      document.removeEventListener("webkitfullscreenchange", onFsChange);
+    };
+  }, [isChartFullscreen, setChartFullscreen]);
 
   // Keyboard shortcut: Escape exits fullscreen
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isChartFullscreen) {
-        setChartFullscreen(false);
+        handleExitFullscreen();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isChartFullscreen, setChartFullscreen]);
+  }, [isChartFullscreen]);
 
   // Handle pointer tracking directly on container for touch & mouse
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -178,7 +223,7 @@ export default function LiveChart({
         horzLine: {
           visible: true,
           labelVisible: true,
-          color: "rgba(0, 212, 170, 0.5)",
+          color: "rgba(255, 255, 255, 0.5)",
           width: 1,
           style: 3,
           labelBackgroundColor: "#00D4AA",
@@ -204,17 +249,17 @@ export default function LiveChart({
       handleScale: true,
     });
 
-    // Main Price Line (Area Gradient for Premium Look)
+    // Main Price Line
     const mainSeries = chart.addSeries(AreaSeries, {
       lineColor: accentColor,
-      topColor: accentColor + "60", // Adds 60 hex opacity
-      bottomColor: accentColor + "00", // Transparent
+      topColor: accentColor + "60",
+      bottomColor: accentColor + "00",
       lineWidth: 2,
       priceLineVisible: false,
       lastValueVisible: true,
     });
 
-    // Volume Series (Isolated to the bottom with breathing room from time axis)
+    // Volume Series
     const volumeSeries = chart.addSeries(HistogramSeries, {
       color: "rgba(255, 255, 255, 0.1)",
       priceFormat: { type: "volume" },
@@ -242,8 +287,7 @@ export default function LiveChart({
       visible: showSma20,
     });
 
-    // Crosshair move listener to calculate and display the exact price level
-    // wherever the mouse cursor or touch pointer is pointing
+    // Crosshair move listener: pointer price level calculation & trendline preview
     chart.subscribeCrosshairMove((param) => {
       if (!param.point || param.point.x < 0 || param.point.y < 0) {
         setPointerPrice(null);
@@ -252,6 +296,18 @@ export default function LiveChart({
       const price = mainSeries.coordinateToPrice(param.point.y);
       if (price !== null && price !== undefined && !isNaN(price)) {
         setPointerPrice(Number(price.toFixed(2)));
+
+        // Live trendline drawing preview: stretch line from 1st point to cursor
+        if (previewLineRef.current && trendlineStart && param.time) {
+          const t1 = trendlineStart.time as number;
+          const t2 = param.time as number;
+          if (t1 !== t2) {
+            const data = t1 < t2
+              ? [{ time: t1 as UTCTimestamp, value: trendlineStart.price }, { time: t2 as UTCTimestamp, value: price }]
+              : [{ time: t2 as UTCTimestamp, value: price }, { time: t1 as UTCTimestamp, value: trendlineStart.price }];
+            previewLineRef.current.setData(data);
+          }
+        }
       } else {
         setPointerPrice(null);
       }
@@ -293,10 +349,29 @@ export default function LiveChart({
     return () => clearTimeout(t);
   }, [isChartFullscreen, height]);
 
-  // Chart interactivity (Drawings: Level Marking and Trendlines)
+  // Interactive Drawings: Level Marking and Live-Preview White Trendlines
   useEffect(() => {
     const chart = chartRef.current;
     if (!chart || !mainRef.current) return;
+
+    // Manage preview line series
+    if (drawMode === "trendline" && trendlineStart) {
+      if (!previewLineRef.current) {
+        previewLineRef.current = chart.addSeries(LineSeries, {
+          color: "rgba(255, 255, 255, 0.75)",
+          lineWidth: 2,
+          lineStyle: 2, // Dashed preview line
+          lastValueVisible: false,
+          priceLineVisible: false,
+          crosshairMarkerVisible: false,
+        });
+      }
+    } else {
+      if (previewLineRef.current) {
+        chart.removeSeries(previewLineRef.current);
+        previewLineRef.current = null;
+      }
+    }
 
     const clickHandler = (param: any) => {
       if (!param.point) return;
@@ -307,9 +382,9 @@ export default function LiveChart({
         const formattedPrice = Number(price.toFixed(2));
         const line = mainRef.current?.createPriceLine({
           price: formattedPrice,
-          color: "#38bdf8", // Sky blue for high contrast
+          color: "#38bdf8",
           lineWidth: 2,
-          lineStyle: 2, // Dashed
+          lineStyle: 2,
           axisLabelVisible: true,
           title: `Lvl ₹${formattedPrice.toFixed(2)}`,
         });
@@ -322,10 +397,18 @@ export default function LiveChart({
       } else if (drawMode === "trendline") {
         if (!param.time) return;
         if (!trendlineStart) {
+          // Set point 1: preview line will now track cursor until point 2 is clicked
           setTrendlineStart({ time: param.time, price });
         } else {
+          // Remove preview series before committing permanent white trendline
+          if (previewLineRef.current) {
+            chart.removeSeries(previewLineRef.current);
+            previewLineRef.current = null;
+          }
+
+          // Permanent trendline series in pure white (#ffffff)
           const lineSeries = chart.addSeries(LineSeries, {
-            color: "#00D4AA",
+            color: "#ffffff",
             lineWidth: 2,
             lastValueVisible: false,
             priceLineVisible: false,
@@ -345,7 +428,9 @@ export default function LiveChart({
     };
 
     chart.subscribeClick(clickHandler);
-    return () => chart.unsubscribeClick(clickHandler);
+    return () => {
+      chart.unsubscribeClick(clickHandler);
+    };
   }, [drawMode, trendlineStart]);
 
   // Toggle series visibility
@@ -354,7 +439,7 @@ export default function LiveChart({
     if (sma20Ref.current) sma20Ref.current.applyOptions({ visible: showSma20 });
   }, [showSma9, showSma20]);
 
-  // UPDATE DATA SAFELY
+  // Update data safely
   useEffect(() => {
     if (!mainRef.current || priceHistory.length === 0) return;
 
@@ -365,7 +450,6 @@ export default function LiveChart({
       if (volumeRef.current && volumeHistory.length > 0) {
         const cleanVolume = processData(volumeHistory);
 
-        // Color volume based on safely processed price data
         const coloredVolume = cleanVolume.map((v) => {
           const priceMatchIdx = cleanPrice.findIndex((p) => p.time === v.time);
           let isUp = true;
@@ -388,9 +472,11 @@ export default function LiveChart({
     }
   }, [priceHistory, volumeHistory, sma9History, sma20History]);
 
-  const toggleFullscreen = () => setChartFullscreen(!isChartFullscreen);
-
   const undoLastDrawing = () => {
+    if (previewLineRef.current) {
+      chartRef.current?.removeSeries(previewLineRef.current);
+      previewLineRef.current = null;
+    }
     if (trendlineStart) {
       setTrendlineStart(null);
       setDrawMode("none");
@@ -409,6 +495,10 @@ export default function LiveChart({
   };
 
   const clearDrawings = () => {
+    if (previewLineRef.current) {
+      chartRef.current?.removeSeries(previewLineRef.current);
+      previewLineRef.current = null;
+    }
     linesRef.current.forEach((series) => chartRef.current?.removeSeries(series));
     linesRef.current = [];
     priceLinesRef.current.forEach((line) => mainRef.current?.removePriceLine(line));
@@ -431,133 +521,131 @@ export default function LiveChart({
           : "relative w-full gap-2"
       )}
     >
-      {/* ─── FULLSCREEN HEADER (Only visible in Fullscreen Mode) ─── */}
+      {/* ─── FULLSCREEN HEADER (Minimal, Icon-only, No clumsy text) ─── */}
       {isChartFullscreen ? (
-        <div className="h-13 sm:h-14 border-b border-white/10 px-3 sm:px-6 flex items-center justify-between shrink-0 bg-[#0B1120]/95 backdrop-blur-md z-30">
-          {/* Left: Back button to that specific stock + Stock Identity & Live Price */}
-          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+        <div className="h-11 sm:h-12 border-b border-white/10 px-3 sm:px-4 flex items-center justify-between shrink-0 bg-[#0B1120]/95 backdrop-blur-md z-30">
+          {/* Left: Just the Back Icon Button (NO text!) */}
+          <div className="flex items-center gap-2 shrink-0">
             <button
-              onClick={() => {
-                setChartFullscreen(false);
-                if (onBack) onBack();
-              }}
-              className="flex items-center gap-2 px-3 py-1.5 bg-bg-raised hover:bg-bg-overlay border border-bd-subtle hover:border-bd-strong rounded-md text-tx-secondary hover:text-tx-primary transition-colors text-[12px] font-mono font-bold uppercase tracking-wider cursor-pointer shrink-0 shadow-xs"
+              onClick={handleExitFullscreen}
+              className="p-1.5 sm:p-2 rounded-lg bg-[#111827] hover:bg-[#1f293d] border border-white/10 text-slate-300 hover:text-white transition-colors cursor-pointer shadow-xs"
+              aria-label="Back"
               title={`Exit fullscreen and return to ${stockId}`}
             >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to {stockId}</span>
+              <ArrowLeft size={17} />
             </button>
+          </div>
 
-            <div className="h-5 w-px bg-white/10 hidden sm:block shrink-0" />
-
-            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-              <span className="text-[16px] sm:text-[18px] font-bold text-tx-primary font-mono tracking-tight shrink-0">{stockId}</span>
-              <span className="text-[16px] sm:text-[18px] font-mono font-bold text-accent shrink-0">₹{livePrice}</span>
-            </div>
-
-            {/* Real-time Pointer Price Level Readout */}
-            {pointerPrice !== null && (
-              <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded bg-bg-void border border-accent/40 text-accent text-[12px] font-mono shadow-xs shrink-0">
-                <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-                <span>Pointer: <span className="font-bold text-tx-primary">₹{pointerPrice.toFixed(2)}</span></span>
-              </div>
+          {/* Middle: Subtle Drawing Guidance Pill if active */}
+          <div className="flex-1 flex justify-center px-2 min-w-0">
+            {drawMode !== "none" && (
+              <span className="text-[11px] font-mono text-accent truncate bg-accent-dim border border-accent-border px-2.5 py-0.5 rounded-full animate-pulse shadow-xs">
+                {drawMode === "level"
+                  ? "Tap to place level"
+                  : trendlineStart
+                  ? "Tap 2nd point to finish"
+                  : "Tap 1st point"}
+              </span>
             )}
           </div>
 
-          {/* Right: Technical Tools, Indicator Toggles, & Minimize */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            {/* SMA Toggles in Fullscreen */}
+          {/* Right: Technical Tools (Icon-only, No Text!) */}
+          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+            {/* SMA 9 / SMA 20 compact tags */}
             {onToggleSma9 && (
               <button
                 onClick={onToggleSma9}
                 className={clsx(
-                  "px-2.5 py-1 text-[11px] font-mono font-bold uppercase tracking-wider rounded border transition-colors cursor-pointer hidden md:inline-flex",
+                  "px-2 py-1 text-[10px] font-mono font-bold uppercase rounded border transition-colors cursor-pointer",
                   showSma9
                     ? "bg-accent-dim border-accent-border text-accent"
                     : "bg-[#111827] border-white/10 text-slate-400 hover:text-white"
                 )}
-                title="Toggle 9-period Simple Moving Average"
+                title="Toggle SMA 9"
               >
-                SMA 9
+                9
               </button>
             )}
             {onToggleSma20 && (
               <button
                 onClick={onToggleSma20}
                 className={clsx(
-                  "px-2.5 py-1 text-[11px] font-mono font-bold uppercase tracking-wider rounded border transition-colors cursor-pointer hidden md:inline-flex",
+                  "px-2 py-1 text-[10px] font-mono font-bold uppercase rounded border transition-colors cursor-pointer",
                   showSma20
                     ? "bg-cyan-500/15 border-cyan-500/30 text-cyan-400"
                     : "bg-[#111827] border-white/10 text-slate-400 hover:text-white"
                 )}
-                title="Toggle 20-period Simple Moving Average"
+                title="Toggle SMA 20"
               >
-                SMA 20
+                20
               </button>
             )}
 
-            <div className="h-5 w-px bg-white/10 mx-1 hidden md:block" />
+            <div className="h-4 w-px bg-white/10 mx-0.5" />
 
-            {/* Level Marking Tool */}
+            {/* Level Marking Tool (Icon only) */}
             <button
               onClick={() => setDrawMode(drawMode === "level" ? "none" : "level")}
               className={clsx(
-                "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-mono font-bold uppercase transition-colors cursor-pointer",
+                "p-1.5 sm:p-2 rounded-lg border transition-colors cursor-pointer",
                 drawMode === "level"
                   ? "bg-sky-500/20 border-sky-500/40 text-sky-400"
                   : "bg-[#111827] border-white/10 text-slate-400 hover:text-white"
               )}
-              title="Mark Horizontal Price Level"
+              title="Mark Level"
+              aria-label="Mark Level"
             >
-              <Minus size={15} />
-              <span className="hidden sm:inline">Level</span>
+              <Minus size={16} />
             </button>
 
-            {/* Trendline Tool */}
+            {/* Trendline Tool (Icon only) */}
             <button
               onClick={() => {
                 setDrawMode(drawMode === "trendline" ? "none" : "trendline");
                 setTrendlineStart(null);
               }}
               className={clsx(
-                "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-mono font-bold uppercase transition-colors cursor-pointer",
+                "p-1.5 sm:p-2 rounded-lg border transition-colors cursor-pointer",
                 drawMode === "trendline"
                   ? "bg-accent-dim border-accent-border text-accent"
                   : "bg-[#111827] border-white/10 text-slate-400 hover:text-white"
               )}
               title="Draw Trendline"
+              aria-label="Draw Trendline"
             >
-              <TrendingUp size={15} />
-              <span className="hidden sm:inline">Trendline</span>
+              <TrendingUp size={16} />
             </button>
 
             {/* Undo Last Drawing */}
             <button
               onClick={undoLastDrawing}
               disabled={!hasDrawings}
-              className="p-1.5 rounded-lg border bg-[#111827] border-white/10 text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
-              title="Undo Last Drawing"
+              className="p-1.5 sm:p-2 rounded-lg border bg-[#111827] border-white/10 text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              title="Undo"
+              aria-label="Undo"
             >
-              <Undo2 size={15} />
+              <Undo2 size={16} />
             </button>
 
             {/* Clear All Drawings */}
             <button
               onClick={clearDrawings}
               disabled={!hasDrawings}
-              className="p-1.5 rounded-lg border bg-[#111827] border-white/10 text-slate-400 hover:text-red-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
-              title="Clear All Drawings"
+              className="p-1.5 sm:p-2 rounded-lg border bg-[#111827] border-white/10 text-slate-400 hover:text-red-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              title="Clear All"
+              aria-label="Clear All"
             >
-              <Trash2 size={15} />
+              <Trash2 size={16} />
             </button>
 
-            <div className="h-5 w-px bg-white/10 mx-1" />
+            <div className="h-4 w-px bg-white/10 mx-0.5" />
 
             {/* Minimize / Exit Fullscreen Button */}
             <button
-              onClick={() => setChartFullscreen(false)}
-              className="p-1.5 rounded-lg border bg-[#111827] border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title="Exit Fullscreen (Esc)"
+              onClick={handleExitFullscreen}
+              className="p-1.5 sm:p-2 rounded-lg border bg-[#111827] border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+              title="Exit Fullscreen"
+              aria-label="Exit Fullscreen"
             >
               <Minimize2 size={16} />
             </button>
@@ -622,7 +710,7 @@ export default function LiveChart({
             <div className="w-px h-5 bg-white/10 mx-1" />
 
             <button
-              onClick={toggleFullscreen}
+              onClick={handleEnterFullscreen}
               className="p-1.5 rounded-lg border bg-[#111827] border-white/10 text-slate-500 hover:text-white transition-colors cursor-pointer"
               title="Open Fullscreen Chart"
             >
@@ -646,19 +734,7 @@ export default function LiveChart({
         style={{ height: isChartFullscreen ? undefined : (className ? undefined : height) }}
       />
 
-      {/* Drawing mode interactive prompt */}
-      {drawMode !== "none" && (
-        <div className="absolute top-16 left-1/2 -translate-x-1/2 bg-accent-dim border border-accent-border text-accent text-xs font-mono font-bold px-3 py-1.5 rounded-full pointer-events-none animate-pulse shadow-lg z-30">
-          {drawMode === "level"
-            ? "Click anywhere on chart to place price level"
-            : trendlineStart
-            ? "Click 2nd point to complete trendline"
-            : "Click 1st point to start trendline"}
-        </div>
-      )}
-
       {/* ─── FULLSCREEN BOTTOM TRADING DOCK ─── */}
-      {/* Position Sizing and Buy / Sell controls inside fullscreen mode */}
       {isChartFullscreen && (
         <TradeBar
           ticker={stockId}

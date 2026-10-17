@@ -525,7 +525,7 @@ export default function StockDetailPage() {
   const ticker = (params?.ticker as string) || "RLNT";
 
   return (
-    <DashboardShell activeTab="chart">
+    <DashboardShell activeTab="chart" isViewingStock={true}>
       <AssetDetailTab ticker={ticker} onBack={() => router.push("/market")} />
     </DashboardShell>
   );
