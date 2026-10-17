@@ -17,9 +17,14 @@ from backend.core.liquidity import LiquidityBots
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), '..', '..', 'data')
 
+# Multi-wave price shock discovery profile (24 steps / 36 seconds):
+# 1. Initial Impulse: 0.0 -> 0.72 (fast reaction to breaking headline)
+# 2. Counter-Trend Relief / Retracement: 0.72 -> 0.58 (short-covering / dip-buying creates higher-low or lower-high)
+# 3. Secondary Extension: 0.58 -> 1.05 (continuation momentum with brief overshoot)
+# 4. Organic Stabilization: 1.05 -> 1.00 (settles to true intrinsic valuation base)
 WAVE_PROFILE_24 = [
-    0.0, 0.12, 0.25, 0.37, 0.50, 0.59, 0.60, 0.56, 0.51, 0.50,
-    0.56, 0.65, 0.73, 0.81, 0.89, 0.98, 1.04, 1.05, 1.03, 1.02,
+    0.00, 0.14, 0.28, 0.44, 0.58, 0.67, 0.72, 0.70, 0.64, 0.59,
+    0.58, 0.63, 0.72, 0.82, 0.92, 1.00, 1.04, 1.05, 1.03, 1.02,
     1.01, 1.00, 1.00, 1.00
 ]
 
@@ -141,6 +146,22 @@ class MarketEngine:
             "TYRL": [98000, 1500]
         }
 
+    def get_last_close_for_ticker(self, ticker: str, default_p: float) -> float:
+        """Finds the most recent closing price for a ticker across live prices or prior session price tables."""
+        if ticker in self.current_prices and self.current_prices[ticker][0] > 0:
+            return self.current_prices[ticker][0] / 100.0
+        
+        # Search backwards through prior session price_tables (S6, S5, ...)
+        for prior_g in range(self.current_g - 1, 0, -1):
+            g_data = self.price_table.get(prior_g, {})
+            if g_data:
+                ticks = [k for k in g_data.keys() if isinstance(k, int)]
+                if ticks:
+                    max_t = max(ticks)
+                    if ticker in g_data[max_t] and g_data[max_t][ticker][0] > 0:
+                        return g_data[max_t][ticker][0] / 100.0
+        return default_p
+
     def get_current_session_state(self, g: Optional[int] = None) -> str:
         target_g = g if g is not None else self.current_g
         return self.session_states.get(target_g, "LOCKED")
@@ -189,8 +210,8 @@ class MarketEngine:
             if not self.r2_states:
                 base_prices = {"RLNT": 2450.0, "TYRL": 880.0, "INFN": 1520.0, "HRZN": 1640.0, "BZR-V": 640.0, "GOLDCORE": 6200.0, "PULSE": 850.0, "NIMBUS": 410.0, "STAPLE": 1180.0, "VOLTAGE": 310.0, "CRANE": 520.0}
                 for t, def_p in base_prices.items():
-                    # Inherit prior session close if available, else fallback to baseline
-                    p = (self.current_prices[t][0] / 100.0) if t in self.current_prices else def_p
+                    # Inherit prior session close strictly with zero artificial baseline drops
+                    p = self.get_last_close_for_ticker(t, def_p)
                     self.r2_states[t] = R2InstrumentState(t, p)
                     self.r2_f_values[t] = p
                     self.flow_buffer[t] = 0.0
@@ -549,7 +570,7 @@ class MarketEngine:
                     if not self.r2_states:
                         base_prices = {"RLNT": 2450.0, "TYRL": 880.0, "INFN": 1520.0, "HRZN": 1640.0, "BZR-V": 640.0, "GOLDCORE": 6200.0, "PULSE": 850.0, "NIMBUS": 410.0, "STAPLE": 1180.0, "VOLTAGE": 310.0, "CRANE": 520.0}
                         for t, def_p in base_prices.items():
-                            p = (self.current_prices[t][0] / 100.0) if t in self.current_prices else def_p
+                            p = self.get_last_close_for_ticker(t, def_p)
                             self.r2_states[t] = R2InstrumentState(t, p)
                             self.r2_f_values[t] = p
                             self.flow_buffer[t] = 0.0
@@ -573,6 +594,8 @@ class MarketEngine:
                         net_flow = self.flow_buffer.get(ticker, 0.0)
                         self.flow_buffer[ticker] = 0.0 
                         
+                        old_p = (self.current_prices[ticker][0] / 100.0) if ticker in self.current_prices else state.current_price
+
                         new_p = state.tick(
                             F_current=self.r2_f_values[ticker],
                             A_net_notional=net_flow,
@@ -580,17 +603,21 @@ class MarketEngine:
                             mood=current_mood,
                             dt=1.5
                         )
-                        base_vol = random.randint(200, 800)
-                        if abs(net_flow) > 0:
-                            base_vol += int(abs(net_flow) / max(1.0, new_p * 10))
                         
+                        # Dynamic, realistic volume reflecting price velocity and flow
+                        price_delta_pct = abs(new_p - old_p) / max(1.0, old_p)
+                        base_vol = random.randint(180, 420)
+                        vol_surge = int(price_delta_pct * 120_000)
+                        flow_vol = int(abs(net_flow) / max(1.0, new_p * 5)) if abs(net_flow) > 0 else 0
+                        total_vol = base_vol + vol_surge + flow_vol
+
                         # Volume boost if news shock is active
                         for shock in self.active_shocks:
-                            if shock["ticker"] == ticker:
-                                base_vol = int(base_vol * shock.get("volume_boost", 2.5))
+                            if shock["ticker"] in [ticker, "GLOBAL"]:
+                                total_vol = int(total_vol * shock.get("volume_boost", 2.8))
                                 break
 
-                        self.current_prices[ticker] = [int(new_p * 100), base_vol]
+                        self.current_prices[ticker] = [int(new_p * 100), total_vol]
 
                 # 5. Broadcast prices via websocket
                 prices_payload = {}
