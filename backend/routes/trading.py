@@ -10,10 +10,10 @@ from sqlalchemy import select, func
 from sqlalchemy.exc import IntegrityError
 
 from backend.database import AsyncSessionLocal
-from backend.models import Team, TeamLedger, Position, Order
+from backend.models import Team, TeamLedger, Position, Order, LeaderboardSnapshot
 from backend.core.trading import calculate_fee, check_rate_limit
 from backend.core.engine import engine_app
-from backend.core.scoring import calculate_equity_paise
+from backend.core.scoring import calculate_equity_paise, calculate_return_pct
 from backend.core.security import SECRET_KEY, ALGORITHM
 
 router = APIRouter(tags=["trading"])
@@ -224,12 +224,8 @@ async def get_current_session_info():
 
 @router.get("/leaderboard")
 async def get_final_leaderboard(team: Team = Depends(get_current_team), db: AsyncSession = Depends(get_db)):
-    """Public leaderboard for the end-of-event podium."""
-    # 1. Get all teams
-    teams_res = await db.execute(select(Team))
-    all_teams = teams_res.scalars().all()
-    
-    # 2. Get all ledgers & positions
+    """Public score and debrief endpoint for the authenticated team."""
+    # 1. Fetch ledgers & positions
     ledgers_res = await db.execute(select(TeamLedger))
     ledgers = {l.team_id: l.cash_paise for l in ledgers_res.scalars().all()}
     
@@ -238,41 +234,84 @@ async def get_final_leaderboard(team: Team = Depends(get_current_team), db: Asyn
     
     team_positions = {}
     for p in positions:
-        if p.team_id not in team_positions:
-            team_positions[p.team_id] = []
-        team_positions[p.team_id].append(p)
+        team_positions.setdefault(p.team_id, []).append(p)
         
-    # 3. Calculate Equity
     live_prices = {t: d[0] for t, d in engine_app.current_prices.items()}
-    results = []
     
-    for t in all_teams:
-        cash = ledgers.get(t.id, 100000000)
-        pos = team_positions.get(t.id, [])
-        if t.eliminated:
-            equity = 0
+    # 2. Determine Round 1 and Round 2 specific performance
+    is_r2 = engine_app.r2_unlocked
+    r1_start_capital = 100000000    # 10 Lakhs INR (100,000,000 paise)
+    r2_start_capital = 1000000000   # 1 Crore INR (1,000,000,000 paise)
+    
+    # Query Round 1 final snapshot if available
+    r1_snapshot_res = await db.execute(
+        select(LeaderboardSnapshot)
+        .where(LeaderboardSnapshot.round_num == 1)
+        .order_by(LeaderboardSnapshot.id.desc())
+    )
+    r1_snapshot = r1_snapshot_res.scalars().first()
+    
+    r1_equity = None
+    r1_return_pct = None
+    if r1_snapshot and isinstance(r1_snapshot.rows, list):
+        for r in r1_snapshot.rows:
+            if r.get("team_id") == team.id:
+                r1_equity = r.get("equity_paise")
+                r1_return_pct = r.get("return_pct")
+                break
+                
+    if is_r2:
+        # In Round 2
+        user_cash = ledgers.get(team.id, r2_start_capital)
+        user_pos = team_positions.get(team.id, [])
+        if team.eliminated:
+            r2_equity = 0
+            r2_return_pct = -100.0
         else:
-            equity = calculate_equity_paise(cash, pos, live_prices)
+            r2_equity = calculate_equity_paise(user_cash, user_pos, live_prices)
+            r2_return_pct = calculate_return_pct(r2_equity, r2_start_capital)
             
-        results.append({
-            "team_id": t.id,
-            "team_name": t.name or t.id,
-            "equity_paise": equity,
-            "eliminated": t.eliminated
-        })
+        if r1_equity is None:
+            r1_equity = r1_start_capital
+            r1_return_pct = 0.0
+    else:
+        # In Round 1
+        user_cash = ledgers.get(team.id, r1_start_capital)
+        user_pos = team_positions.get(team.id, [])
+        if team.eliminated:
+            r1_equity = 0
+            r1_return_pct = -100.0
+        else:
+            r1_equity = calculate_equity_paise(user_cash, user_pos, live_prices)
+            r1_return_pct = calculate_return_pct(r1_equity, r1_start_capital)
+        r2_equity = None
+        r2_return_pct = None
         
-    # 4. Sort and Rank
-    results.sort(key=lambda x: x["equity_paise"], reverse=True)
-    
-    for idx, r in enumerate(results):
-        r["rank"] = idx + 1
+    total_pnl = 0
+    if r1_equity is not None:
+        total_pnl += (r1_equity - r1_start_capital)
+    if r2_equity is not None:
+        total_pnl += (r2_equity - r2_start_capital)
         
-    # Find current user's rank
-    user_result = next((r for r in results if r["team_id"] == team.id), None)
-    
     return {
-        "top_10": results[:10],
-        "my_result": user_result
+        "team_id": team.id,
+        "team_name": team.name or team.id,
+        "eliminated": team.eliminated,
+        "is_r2": is_r2,
+        "r1_start_capital_paise": r1_start_capital,
+        "r1_equity_paise": r1_equity,
+        "r1_return_pct": round(r1_return_pct, 2) if r1_return_pct is not None else None,
+        "r2_start_capital_paise": r2_start_capital,
+        "r2_equity_paise": r2_equity,
+        "r2_return_pct": round(r2_return_pct, 2) if r2_return_pct is not None else None,
+        "total_pnl_paise": total_pnl,
+        "top_10": [],
+        "my_result": {
+            "team_id": team.id,
+            "team_name": team.name or team.id,
+            "equity_paise": r2_equity if is_r2 else r1_equity,
+            "eliminated": team.eliminated
+        }
     }
 
 @router.get("/news")

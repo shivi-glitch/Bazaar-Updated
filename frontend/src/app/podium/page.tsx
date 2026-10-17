@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import {
-  Trophy, BookOpen, Radio, Sparkles,
+  BookOpen, Radio, Sparkles,
   ArrowLeft, Sun, Moon, Home, Clock,
   CheckCircle2, AlertTriangle, ChevronDown,
-  ChevronUp, Compass, LogOut, Award,
-  Users, DollarSign, Activity, Percent
+  ChevronUp, Compass, LogOut, Activity,
+  Wallet, TrendingUp, TrendingDown, Shield
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -15,17 +15,24 @@ import { useTheme } from "@/components/ThemeProvider";
 import clsx from "clsx";
 
 // ── TYPES ──────────────────────────────────────────────────────────
-interface LeaderboardRow {
+interface TeamScoreData {
   team_id: string;
   team_name?: string;
-  equity_paise: number;
   eliminated?: boolean;
-  rank: number;
-}
-
-interface LeaderboardData {
-  top_10: LeaderboardRow[];
-  my_result?: LeaderboardRow;
+  is_r2?: boolean;
+  r1_start_capital_paise?: number;
+  r1_equity_paise?: number;
+  r1_return_pct?: number;
+  r2_start_capital_paise?: number;
+  r2_equity_paise?: number;
+  r2_return_pct?: number;
+  total_pnl_paise?: number;
+  my_result?: {
+    team_id: string;
+    team_name?: string;
+    equity_paise: number;
+    eliminated?: boolean;
+  };
 }
 
 interface SessionGuide {
@@ -50,9 +57,9 @@ const SESSION_GUIDES: SessionGuide[] = [
     round: "Round 1",
     title: "Opening Bell · The Credit Foundation",
     subtitle: "Calm regime · Stable credit · Baseline trend discovery",
-    world: "Stable growth and cheap credit. The Meridian Central Bank (MCB) held rates at 4.00%. GOLDCORE barely moved, while broad equities enjoyed calm liquidity.",
-    theEdge: "INFN (+3.0%) and HRZN (+2.5%) were established as steady trend names. TYRL swung ±1.8% around its mean—the first recurring range-bound oscillator.",
-    winningPlay: "Buy the trend on INFN / HRZN; scalp TYRL's swings using SMA20; minimize churn.",
+    world: "Stable economic growth and cheap credit. The Meridian Central Bank (MCB) held benchmark interest rates at 4.00%. GOLDCORE was dead quiet, while broad equities enjoyed calm liquidity.",
+    theEdge: "INFN (+3.0%) and HRZN (+2.5%) were established as steady trend names. TYRL swung ±1.8% cleanly around its mean—the first recurring range-bound oscillator.",
+    winningPlay: "Buy the trend on INFN / HRZN; scalp TYRL's swings using SMA20; minimize churn and transaction fees.",
     trapToAvoid: "@BullRunBhai pumped BZR-V with urgent tweets. Chasing the pump resulted in immediate losses when it faded −1.5%. Over-trading also drained capital through fees.",
     keyAssets: ["INFN", "HRZN", "TYRL", "BZR-V"]
   },
@@ -63,7 +70,7 @@ const SESSION_GUIDES: SessionGuide[] = [
     title: "Cheap Money · Post-News Drift",
     subtitle: "Euphoric growth names · Nimbus Datacenters unlocks",
     world: "Bank credit growth surged to 16%. Euphoria spread through tech and speculative high-beta names. PULSE caught its first retail rally.",
-    theEdge: "The Post-Earnings Announcement Drift (PEAD): When INFN and NIMBUS beat estimates, their price didn't jump instantly—it drifted upward for 40+ seconds.",
+    theEdge: "The Post-Earnings Announcement Drift (PEAD): When INFN and NIMBUS beat estimates, their prices didn't jump instantly—they drifted upward steadily for 40+ seconds.",
     winningPlay: "Buy INFN and NIMBUS the moment analyst wires confirmed earnings, then patiently hold the drift. Ride PULSE and take profit into the rally.",
     trapToAvoid: "Selling tech the instant the headline hit. The move had prolonged momentum after the print.",
     keyAssets: ["NIMBUS", "INFN", "PULSE"]
@@ -74,7 +81,7 @@ const SESSION_GUIDES: SessionGuide[] = [
     round: "Round 1",
     title: "A Small Cough · Silent Events & Noise",
     subtitle: "Inflation ticks up · Staple Agro unlocks",
-    world: "CPI inflation ticked up to 4.5%. Central bank soothing was contradicted by bank margins. Chatrooms buzzed with rumors.",
+    world: "CPI inflation ticked up to 4.5%. Central bank soothing was contradicted by narrowing bank margins. Chatrooms buzzed with unverified rumors.",
     theEdge: "Silent Events: BZR-V spiked +7% purely on chatroom speculation without a single news item, then fully retraced. Not every move has a legitimate catalyst.",
     winningPlay: "Do not chase unverified spikes. Fade BZR-V at resistance. Hold disciplined long trends or take refuge in STAPLE and GOLDCORE.",
     trapToAvoid: "Assuming every rapid price movement has an underlying corporate announcement. Chatroom FOMO is designed to trap liquidity.",
@@ -113,7 +120,7 @@ const SESSION_GUIDES: SessionGuide[] = [
     world: "Consumer confidence hit an 18-month high. Valuations were stretched to perfection. PULSE experienced a massive blow-off top (+14%).",
     theEdge: "The Fundamentals Clue: Looking at Horizon Bank (HRZN)'s fundamentals tab revealed Gross NPAs quietly creeping from 2.1% → 2.3%, foreshadowing future distress.",
     winningPlay: "Ride PULSE early then aggressively exit near the top; lighten exposure to banks; stash capital in GOLDCORE or cash before the Round 2 reset.",
-    trapToAvoid: "Holding speculative bags into the end of Round 1. Taking profits and observing was optimal.",
+    trapToAvoid: "Holding speculative bags into the end of Round 1. Taking profits and holding capital was optimal.",
     keyAssets: ["PULSE", "HRZN", "MERX50"]
   },
 
@@ -283,9 +290,9 @@ const ASSET_ARCHETYPES = [
 ];
 
 export default function PodiumPage() {
-  const [data, setData] = useState<LeaderboardData | null>(null);
+  const [data, setData] = useState<TeamScoreData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [activeTab, setActiveTab] = useState<"STANDINGS" | "STORY" | "NEWS" | "ASSETS">("STANDINGS");
+  const [activeTab, setActiveTab] = useState<"STORY" | "NEWS" | "ASSETS">("STORY");
   const [selectedRoundFilter, setSelectedRoundFilter] = useState<"ALL" | "R1" | "R2">("ALL");
   const [expandedSession, setExpandedSession] = useState<number | null>(7); // Default to R2S1 for immediate insight
 
@@ -318,26 +325,25 @@ export default function PodiumPage() {
     return true;
   });
 
-  const formatMoney = (paise: number) =>
-    `₹${(paise / 100).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
-
-  const calculateReturn = (equityPaise: number) => {
-    // Starting capital: 1 Crore (100,000,000 paise)
-    const diff = equityPaise - 100000000;
-    const pct = (diff / 100000000) * 100;
-    return {
-      diffPaise: diff,
-      pct: pct,
-      isPositive: diff >= 0
-    };
+  const formatMoney = (paise?: number | null) => {
+    if (paise === undefined || paise === null) return "—";
+    return `₹${(paise / 100).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
   };
 
-  const top10 = data?.top_10 || [];
-  const myResult = data?.my_result;
+  const r1Start = data?.r1_start_capital_paise ?? 100000000; // 10 Lakhs
+  const r2Start = data?.r2_start_capital_paise ?? 1000000000; // 1 Crore
 
-  const firstPlace = top10.length > 0 ? top10[0] : null;
-  const secondPlace = top10.length > 1 ? top10[1] : null;
-  const thirdPlace = top10.length > 2 ? top10[2] : null;
+  const r1Equity = data?.r1_equity_paise;
+  const r1Pnl = r1Equity !== undefined && r1Equity !== null ? r1Equity - r1Start : null;
+  const r1Ret = data?.r1_return_pct;
+
+  const r2Equity = data?.r2_equity_paise;
+  const r2Pnl = r2Equity !== undefined && r2Equity !== null ? r2Equity - r2Start : null;
+  const r2Ret = data?.r2_return_pct;
+
+  const totalPnl = data?.total_pnl_paise ?? (
+    (r1Pnl ?? 0) + (r2Pnl ?? 0)
+  );
 
   return (
     <div className="min-h-screen bg-bg-void text-tx-primary flex flex-col items-center pt-5 pb-20 px-4 sm:px-6 md:px-8 font-sans selection:bg-accent-dim selection:text-accent">
@@ -380,37 +386,194 @@ export default function PodiumPage() {
         </div>
       </header>
 
-      {/* ── HEADER BANNER: CLEAN & DIGNIFIED ──────────────────────── */}
-      <div className="w-full max-w-5xl text-center mb-8">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-dim border border-accent-border font-mono text-[11px] uppercase tracking-wider text-accent font-semibold mb-3">
-          <Trophy className="w-3.5 h-3.5" />
-          <span>Official Results & Strategy Playbook</span>
-        </div>
+      {/* ── TITLE & TEAM IDENTIFIER ───────────────────────────────── */}
+      <div className="w-full max-w-5xl text-left mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-dim border border-accent-border font-mono text-[11px] uppercase tracking-wider text-accent font-semibold mb-2">
+              <Shield className="w-3.5 h-3.5" />
+              <span>Team Performance & Tournament Debrief</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-tx-primary">
+              {data?.team_name || data?.team_id || "Your Trading Desk"}
+            </h1>
+            <p className="text-tx-secondary text-xs sm:text-sm font-mono mt-0.5">
+              Team Identifier: <span className="text-tx-primary font-bold">{data?.team_id || "—"}</span>
+              {data?.eliminated && (
+                <span className="ml-2 text-[10px] text-loss bg-loss-dim border border-loss-border px-1.5 py-0.2 rounded font-bold">
+                  LIQUIDATED
+                </span>
+              )}
+            </p>
+          </div>
 
-        <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-tx-primary mb-2">
-          The Bazaar Podium
-        </h1>
-        <p className="text-tx-secondary text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
-          The matching engine has settled all positions. Review the final tournament standings, verified returns, and the complete institutional strategy debrief.
-        </p>
+          {/* Cumulative Net P&L Summary */}
+          <div className="bg-bg-raised border border-bd-subtle rounded-xl px-4 py-3 flex items-center gap-4 font-mono">
+            <div>
+              <div className="text-[10px] uppercase font-bold text-tx-muted">Total Net P&L</div>
+              <div className={clsx(
+                "text-lg font-bold",
+                totalPnl >= 0 ? "text-gain" : "text-loss"
+              )}>
+                {totalPnl >= 0 ? "+" : ""}{formatMoney(totalPnl)}
+              </div>
+            </div>
+            <div className="border-l border-bd-hairline pl-4">
+              <div className="text-[10px] uppercase font-bold text-tx-muted">Desk Status</div>
+              <div className="text-xs font-bold text-tx-primary mt-1">
+                {data?.eliminated ? (
+                  <span className="text-loss">Margin Called</span>
+                ) : (
+                  <span className="text-gain">Solvent & Settled</span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* ── NAVIGATION TABS ───────────────────────────────────────── */}
-      <div className="w-full max-w-5xl mb-8">
-        <div className="flex items-center gap-2 border-b border-bd-hairline pb-2.5 overflow-x-auto scrollbar-none font-mono text-xs">
-          <button
-            onClick={() => setActiveTab("STANDINGS")}
-            className={clsx(
-              "px-4 py-2 rounded-lg font-bold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap",
-              activeTab === "STANDINGS"
-                ? "bg-accent text-tx-inverse"
-                : "bg-bg-raised text-tx-secondary hover:text-tx-primary border border-bd-subtle"
-            )}
-          >
-            <Trophy className="w-3.5 h-3.5" />
-            <span>Final Standings</span>
-          </button>
+      {/* ════════════════════════════════════════════════════════════
+          ROUND 1 & ROUND 2 FINAL EQUITY SCORECARDS
+         ════════════════════════════════════════════════════════════ */}
+      <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+        
+        {/* ROUND 1 SCORECARD */}
+        <div className="bg-bg-raised border border-bd-subtle rounded-xl p-5 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded bg-accent-dim border border-accent-border flex items-center justify-center font-mono font-bold text-xs text-accent">
+                  R1
+                </div>
+                <h3 className="font-mono font-bold text-sm text-tx-primary uppercase tracking-wider">
+                  Round 1: Retail Credit Boom
+                </h3>
+              </div>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-bg-base border border-bd-subtle text-tx-muted font-bold">
+                Sessions 1–6
+              </span>
+            </div>
 
+            <p className="text-xs text-tx-secondary mb-4 leading-relaxed">
+              Cheap credit regime, rapid tech momentum, maritime corridor shock, and late-round retail blow-off tops.
+            </p>
+
+            <div className="grid grid-cols-2 gap-3 bg-bg-base rounded-lg p-3.5 border border-bd-hairline font-mono">
+              <div>
+                <div className="text-[10px] uppercase font-bold text-tx-muted">Starting Capital</div>
+                <div className="text-sm font-semibold text-tx-primary mt-0.5">
+                  {formatMoney(r1Start)}
+                </div>
+              </div>
+
+              <div>
+                <div className="text-[10px] uppercase font-bold text-tx-muted">Final Equity</div>
+                <div className="text-base font-bold text-tx-primary mt-0.5">
+                  {formatMoney(r1Equity)}
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-bd-hairline">
+                <div className="text-[10px] uppercase font-bold text-tx-muted">Net Profit / Loss</div>
+                <div className={clsx(
+                  "text-sm font-bold mt-0.5",
+                  (r1Pnl ?? 0) >= 0 ? "text-gain" : "text-loss"
+                )}>
+                  {(r1Pnl ?? 0) >= 0 ? "+" : ""}{formatMoney(r1Pnl)}
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-bd-hairline">
+                <div className="text-[10px] uppercase font-bold text-tx-muted">Round Return</div>
+                <div className={clsx(
+                  "text-sm font-bold mt-0.5",
+                  (r1Ret ?? 0) >= 0 ? "text-gain" : "text-loss"
+                )}>
+                  {r1Ret !== undefined && r1Ret !== null ? (
+                    `${r1Ret >= 0 ? "+" : ""}${r1Ret.toFixed(2)}%`
+                  ) : "—"}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-bd-hairline flex items-center justify-between text-[11px] font-mono text-tx-muted">
+            <span>Baseline: ₹10,00,000 (10 Lakhs)</span>
+            <span className="text-accent font-semibold">Pre-Reset Score</span>
+          </div>
+        </div>
+
+        {/* ROUND 2 SCORECARD */}
+        <div className="bg-bg-raised border border-bd-subtle rounded-xl p-5 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded bg-purple-500/10 border border-purple-500/30 flex items-center justify-center font-mono font-bold text-xs text-purple-300">
+                  R2
+                </div>
+                <h3 className="font-mono font-bold text-sm text-tx-primary uppercase tracking-wider">
+                  Round 2: Institutional Reckoning
+                </h3>
+              </div>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-bg-base border border-bd-subtle text-tx-muted font-bold">
+                Sessions 7–11
+              </span>
+            </div>
+
+            <p className="text-xs text-tx-secondary mb-4 leading-relaxed">
+              Surprise 75bps hike, shared order books, Apex Bank credit collapse, short selling, and state bailout squeeze.
+            </p>
+
+            <div className="grid grid-cols-2 gap-3 bg-bg-base rounded-lg p-3.5 border border-bd-hairline font-mono">
+              <div>
+                <div className="text-[10px] uppercase font-bold text-tx-muted">Starting Capital</div>
+                <div className="text-sm font-semibold text-tx-primary mt-0.5">
+                  {formatMoney(r2Start)}
+                </div>
+              </div>
+
+              <div>
+                <div className="text-[10px] uppercase font-bold text-tx-muted">Final Equity</div>
+                <div className="text-base font-bold text-tx-primary mt-0.5">
+                  {formatMoney(r2Equity)}
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-bd-hairline">
+                <div className="text-[10px] uppercase font-bold text-tx-muted">Net Profit / Loss</div>
+                <div className={clsx(
+                  "text-sm font-bold mt-0.5",
+                  (r2Pnl ?? 0) >= 0 ? "text-gain" : "text-loss"
+                )}>
+                  {(r2Pnl ?? 0) >= 0 ? "+" : ""}{formatMoney(r2Pnl)}
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-bd-hairline">
+                <div className="text-[10px] uppercase font-bold text-tx-muted">Round Return</div>
+                <div className={clsx(
+                  "text-sm font-bold mt-0.5",
+                  (r2Ret ?? 0) >= 0 ? "text-gain" : "text-loss"
+                )}>
+                  {r2Ret !== undefined && r2Ret !== null ? (
+                    `${r2Ret >= 0 ? "+" : ""}${r2Ret.toFixed(2)}%`
+                  ) : "—"}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-bd-hairline flex items-center justify-between text-[11px] font-mono text-tx-muted">
+            <span>Baseline: ₹1,00,00,000 (1 Crore)</span>
+            <span className="text-purple-400 font-semibold">Institutional Settlement</span>
+          </div>
+        </div>
+
+      </div>
+
+      {/* ── NAVIGATION TABS FOR DEBRIEF ───────────────────────────── */}
+      <div className="w-full max-w-5xl mb-6">
+        <div className="flex items-center gap-2 border-b border-bd-hairline pb-2.5 overflow-x-auto scrollbar-none font-mono text-xs">
           <button
             onClick={() => setActiveTab("STORY")}
             className={clsx(
@@ -421,7 +584,7 @@ export default function PodiumPage() {
             )}
           >
             <BookOpen className="w-3.5 h-3.5" />
-            <span>Story & 11 Sessions Arc</span>
+            <span>Story & How to Trade (11 Sessions)</span>
           </button>
 
           <button
@@ -434,7 +597,7 @@ export default function PodiumPage() {
             )}
           >
             <Radio className="w-3.5 h-3.5" />
-            <span>News Sources Matrix</span>
+            <span>News Sources & Truth Matrix</span>
           </button>
 
           <button
@@ -447,276 +610,31 @@ export default function PodiumPage() {
             )}
           >
             <Compass className="w-3.5 h-3.5" />
-            <span>Asset Playbook</span>
+            <span>Asset Trading Playbook</span>
           </button>
         </div>
       </div>
 
       {/* ════════════════════════════════════════════════════════════
-          TAB 1: STANDINGS & PODIUM
-         ════════════════════════════════════════════════════════════ */}
-      {activeTab === "STANDINGS" && (
-        <div className="w-full max-w-5xl space-y-8">
-          
-          {/* Top 3 Podium Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-            
-            {/* 🥈 2nd Place (Silver) */}
-            <div className="order-2 md:order-1 bg-bg-raised border border-bd-subtle rounded-xl p-5 flex flex-col items-center text-center relative overflow-hidden">
-              <div className="w-10 h-10 rounded-full bg-slate-400/10 border border-slate-400/30 flex items-center justify-center text-slate-300 font-mono font-bold text-sm mb-3">
-                🥈 2nd
-              </div>
-              <span className="text-[10px] font-mono uppercase tracking-wider text-tx-muted font-bold mb-1">
-                Runner-Up
-              </span>
-              <div className="text-lg font-bold text-tx-primary truncate max-w-[200px]">
-                {secondPlace ? secondPlace.team_name || secondPlace.team_id : "TBD"}
-              </div>
-              <div className="text-xl font-bold font-mono text-tx-primary mt-2">
-                {secondPlace ? formatMoney(secondPlace.equity_paise) : "—"}
-              </div>
-              {secondPlace && (
-                <div className={clsx(
-                  "text-xs font-mono font-semibold mt-1 px-2 py-0.5 rounded",
-                  calculateReturn(secondPlace.equity_paise).isPositive
-                    ? "text-gain bg-gain-dim"
-                    : "text-loss bg-loss-dim"
-                )}>
-                  {calculateReturn(secondPlace.equity_paise).isPositive ? "+" : ""}
-                  {calculateReturn(secondPlace.equity_paise).pct.toFixed(2)}%
-                </div>
-              )}
-            </div>
-
-            {/* 🥇 1st Place (Gold / Champion) */}
-            <div className="order-1 md:order-2 bg-bg-raised border-2 border-amber-500/40 rounded-xl p-6 flex flex-col items-center text-center relative overflow-hidden shadow-sm md:-translate-y-2">
-              <div className="w-12 h-12 rounded-full bg-amber-500/15 border border-amber-500/40 flex items-center justify-center text-amber-400 font-mono font-bold text-base mb-3">
-                🥇 1st
-              </div>
-              <span className="text-[10px] font-mono uppercase tracking-wider text-amber-400 font-bold mb-1">
-                Simulation Champion
-              </span>
-              <div className="text-xl font-bold text-tx-primary truncate max-w-[240px]">
-                {firstPlace ? firstPlace.team_name || firstPlace.team_id : "TBD"}
-              </div>
-              <div className="text-2xl font-black font-mono text-tx-primary mt-2">
-                {firstPlace ? formatMoney(firstPlace.equity_paise) : "—"}
-              </div>
-              {firstPlace && (
-                <div className={clsx(
-                  "text-xs font-mono font-semibold mt-1 px-2.5 py-0.5 rounded",
-                  calculateReturn(firstPlace.equity_paise).isPositive
-                    ? "text-gain bg-gain-dim"
-                    : "text-loss bg-loss-dim"
-                )}>
-                  {calculateReturn(firstPlace.equity_paise).isPositive ? "+" : ""}
-                  {calculateReturn(firstPlace.equity_paise).pct.toFixed(2)}%
-                </div>
-              )}
-            </div>
-
-            {/* 🥉 3rd Place (Bronze) */}
-            <div className="order-3 bg-bg-raised border border-bd-subtle rounded-xl p-5 flex flex-col items-center text-center relative overflow-hidden">
-              <div className="w-10 h-10 rounded-full bg-amber-700/15 border border-amber-700/30 flex items-center justify-center text-amber-600 font-mono font-bold text-sm mb-3">
-                🥉 3rd
-              </div>
-              <span className="text-[10px] font-mono uppercase tracking-wider text-tx-muted font-bold mb-1">
-                Podium Finish
-              </span>
-              <div className="text-lg font-bold text-tx-primary truncate max-w-[200px]">
-                {thirdPlace ? thirdPlace.team_name || thirdPlace.team_id : "TBD"}
-              </div>
-              <div className="text-xl font-bold font-mono text-tx-primary mt-2">
-                {thirdPlace ? formatMoney(thirdPlace.equity_paise) : "—"}
-              </div>
-              {thirdPlace && (
-                <div className={clsx(
-                  "text-xs font-mono font-semibold mt-1 px-2 py-0.5 rounded",
-                  calculateReturn(thirdPlace.equity_paise).isPositive
-                    ? "text-gain bg-gain-dim"
-                    : "text-loss bg-loss-dim"
-                )}>
-                  {calculateReturn(thirdPlace.equity_paise).isPositive ? "+" : ""}
-                  {calculateReturn(thirdPlace.equity_paise).pct.toFixed(2)}%
-                </div>
-              )}
-            </div>
-
-          </div>
-
-          {/* User's Team Scorecard */}
-          {myResult && (
-            <div className="bg-bg-raised border border-accent-border/50 rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3.5">
-                <div className="w-10 h-10 rounded-lg bg-accent-dim border border-accent-border flex items-center justify-center font-mono font-bold text-sm text-accent shrink-0">
-                  #{myResult.rank}
-                </div>
-                <div>
-                  <div className="text-xs font-mono text-accent font-bold uppercase tracking-wider">
-                    Your Team Scorecard
-                  </div>
-                  <div className="text-base font-bold text-tx-primary flex items-center gap-2">
-                    <span>{myResult.team_name || myResult.team_id}</span>
-                    {myResult.eliminated && (
-                      <span className="text-[10px] font-mono text-loss bg-loss-dim border border-loss-border px-1.5 py-0.2 rounded font-bold">
-                        LIQUIDATED
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-6 font-mono text-right w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-3 sm:pt-0 border-bd-hairline">
-                <div>
-                  <div className="text-[10px] text-tx-muted uppercase font-bold">Portfolio Value</div>
-                  <div className="text-base font-bold text-tx-primary">
-                    {formatMoney(myResult.equity_paise)}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-[10px] text-tx-muted uppercase font-bold">Total Return</div>
-                  <div className={clsx(
-                    "text-base font-bold",
-                    calculateReturn(myResult.equity_paise).isPositive ? "text-gain" : "text-loss"
-                  )}>
-                    {calculateReturn(myResult.equity_paise).isPositive ? "+" : ""}
-                    {calculateReturn(myResult.equity_paise).pct.toFixed(2)}%
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-[10px] text-tx-muted uppercase font-bold">Placement</div>
-                  <div className="text-base font-bold text-accent">
-                    Rank #{myResult.rank}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Leaderboard Table */}
-          <div className="bg-bg-raised border border-bd-subtle rounded-xl overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-bd-subtle flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Award className="w-4 h-4 text-accent" />
-                <h3 className="font-mono font-bold text-xs uppercase tracking-wider text-tx-primary">
-                  Top Standings
-                </h3>
-              </div>
-              <span className="text-xs font-mono text-tx-muted">
-                {top10.length} teams listed
-              </span>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-left font-mono text-xs">
-                <thead>
-                  <tr className="border-b border-bd-hairline bg-bg-base/60 text-tx-muted text-[11px] uppercase tracking-wider">
-                    <th className="py-2.5 px-4 font-bold w-16">Rank</th>
-                    <th className="py-2.5 px-4 font-bold">Team Name</th>
-                    <th className="py-2.5 px-4 font-bold text-right">Terminal Equity</th>
-                    <th className="py-2.5 px-4 font-bold text-right">Net Return</th>
-                    <th className="py-2.5 px-4 font-bold text-center w-24">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-bd-hairline">
-                  {top10.length === 0 ? (
-                    <tr>
-                      <td colSpan={5} className="py-8 text-center text-tx-muted">
-                        No team results recorded yet.
-                      </td>
-                    </tr>
-                  ) : (
-                    top10.map((row) => {
-                      const isMe = myResult && myResult.team_id === row.team_id;
-                      const ret = calculateReturn(row.equity_paise);
-
-                      return (
-                        <tr
-                          key={row.team_id}
-                          className={clsx(
-                            "transition-colors",
-                            isMe ? "bg-accent-dim/20" : "hover:bg-bg-base/40"
-                          )}
-                        >
-                          <td className="py-3 px-4 font-bold">
-                            <span
-                              className={clsx(
-                                "inline-flex items-center justify-center w-6 h-6 rounded text-xs",
-                                row.rank === 1 && "bg-amber-500/20 text-amber-400 font-black",
-                                row.rank === 2 && "bg-slate-400/20 text-slate-300 font-bold",
-                                row.rank === 3 && "bg-amber-700/20 text-amber-600 font-bold",
-                                row.rank > 3 && "text-tx-muted"
-                              )}
-                            >
-                              #{row.rank}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4">
-                            <div className="flex items-center gap-2">
-                              <span className={clsx("font-bold", isMe ? "text-accent" : "text-tx-primary")}>
-                                {row.team_name || row.team_id}
-                              </span>
-                              {isMe && (
-                                <span className="text-[10px] uppercase font-bold px-1.5 py-0.2 rounded bg-accent text-tx-inverse">
-                                  You
-                                </span>
-                              )}
-                            </div>
-                          </td>
-                          <td className="py-3 px-4 text-right font-bold text-tx-primary">
-                            {formatMoney(row.equity_paise)}
-                          </td>
-                          <td className="py-3 px-4 text-right font-semibold">
-                            <span className={ret.isPositive ? "text-gain" : "text-loss"}>
-                              {ret.isPositive ? "+" : ""}
-                              {ret.pct.toFixed(2)}%
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 text-center">
-                            {row.eliminated ? (
-                              <span className="text-[10px] text-loss bg-loss-dim border border-loss-border px-1.5 py-0.5 rounded font-bold">
-                                LIQ
-                              </span>
-                            ) : (
-                              <span className="text-[10px] text-gain bg-gain-dim border border-gain-border px-1.5 py-0.5 rounded font-bold">
-                                ACTIVE
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-        </div>
-      )}
-
-      {/* ════════════════════════════════════════════════════════════
-          TAB 2: STORYLINE & 11 SESSIONS ARC
+          TAB 1: STORY & HOW TO TRADE (11 SESSIONS)
          ════════════════════════════════════════════════════════════ */}
       {activeTab === "STORY" && (
         <div className="w-full max-w-5xl space-y-6">
           
-          {/* Narrative Overview Box */}
-          <div className="bg-bg-raised border border-bd-subtle rounded-xl p-5 text-sm leading-relaxed text-tx-secondary">
+          {/* Narrative Summary Box */}
+          <div className="bg-bg-raised border border-bd-subtle rounded-xl p-5 text-xs sm:text-sm leading-relaxed text-tx-secondary">
             <div className="text-xs font-mono font-bold uppercase tracking-wider text-accent mb-2">
-              The Two-Act Economic Arc
+              The Tournament Narrative Arc
             </div>
             <p className="mb-2">
-              <strong className="text-tx-primary">Round 1 (The Retail Credit Boom):</strong> Cheap money and stable credit fuel euphoric rallies. Even when a geopolitical shock closes the maritime oil corridor, government stimulus temporarily props up sentiment for one final dance.
+              <strong className="text-tx-primary">Round 1 (Retail Credit Boom):</strong> Money is cheap, optimism is high. Even when war closes the maritime oil corridor in S4, government infrastructure whispers sustain sentiment into a blow-off peak in S6.
             </p>
             <p>
-              <strong className="text-tx-primary">Round 2 (The Institutional Reckoning):</strong> The bill arrives. An emergency rate hike, algorithmic market makers, and bad debts trigger bank collapses and margin calls. A state reconstruction bailout fuels a violent short squeeze before the market settles into a selective new normal.
+              <strong className="text-tx-primary">Round 2 (Institutional Reckoning):</strong> The bill arrives. An emergency 75bps rate hike shocks the market, algorithmic bots defend the shared order book, Apex Bank discloses bad debt, interbank lending freezes, and a massive state reconstruction contract sparks a fierce short squeeze before the closing bell.
             </p>
           </div>
 
-          {/* Filter Pills */}
+          {/* Filter Buttons */}
           <div className="flex items-center justify-between gap-3 font-mono text-xs">
             <div className="flex items-center gap-1.5">
               <span className="text-tx-muted uppercase font-bold mr-1">Filter:</span>
@@ -760,7 +678,7 @@ export default function PodiumPage() {
             </span>
           </div>
 
-          {/* Sessions List */}
+          {/* Session Cards List */}
           <div className="space-y-3">
             {filteredSessions.map((guide) => {
               const isExpanded = expandedSession === guide.g;
@@ -827,23 +745,23 @@ export default function PodiumPage() {
                   {isExpanded && (
                     <div className="px-4 sm:px-5 pb-5 pt-1 border-t border-bd-hairline space-y-3.5 text-xs">
                       
-                      {/* Macro Backdrop */}
+                      {/* What Happened (Macro Narrative) */}
                       <div className="bg-bg-base rounded-lg p-3.5 border border-bd-hairline">
                         <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-tx-muted mb-1 flex items-center gap-1.5">
                           <Clock className="w-3 h-3 text-tx-muted" />
-                          <span>Macro Narrative</span>
+                          <span>What Happened (The Macro Event)</span>
                         </div>
                         <p className="text-tx-secondary leading-relaxed">
                           {guide.world}
                         </p>
                       </div>
 
-                      {/* Strategy & Trap Grid */}
+                      {/* How to Trade & Trap to Avoid */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div className="bg-gain-dim/20 border border-gain-border/30 rounded-lg p-3.5">
                           <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-gain mb-1 flex items-center gap-1.5">
                             <CheckCircle2 className="w-3 h-3 text-gain" />
-                            <span>The Winning Play</span>
+                            <span>How You Should Have Traded (Winning Play)</span>
                           </div>
                           <p className="text-tx-primary leading-relaxed">
                             {guide.winningPlay}
@@ -853,7 +771,7 @@ export default function PodiumPage() {
                         <div className="bg-loss-dim/20 border border-loss-border/30 rounded-lg p-3.5">
                           <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-loss mb-1 flex items-center gap-1.5">
                             <AlertTriangle className="w-3 h-3 text-loss" />
-                            <span>The Trap to Avoid</span>
+                            <span>The Retail Trap to Avoid</span>
                           </div>
                           <p className="text-tx-primary leading-relaxed">
                             {guide.trapToAvoid}
@@ -861,11 +779,11 @@ export default function PodiumPage() {
                         </div>
                       </div>
 
-                      {/* Mathematical Market Dynamic */}
+                      {/* The Mathematical Mechanism */}
                       <div className="bg-bg-base rounded-lg p-3 border border-bd-subtle font-mono text-[11px] text-tx-secondary flex items-start gap-2">
                         <Activity className="w-3.5 h-3.5 text-accent shrink-0 mt-0.5" />
                         <div>
-                          <strong className="text-tx-primary mr-1">Market Mechanism:</strong>
+                          <strong className="text-tx-primary mr-1">Underlying Market Dynamic:</strong>
                           <span>{guide.theEdge}</span>
                         </div>
                       </div>
@@ -881,16 +799,16 @@ export default function PodiumPage() {
       )}
 
       {/* ════════════════════════════════════════════════════════════
-          TAB 3: NEWS SOURCES MATRIX
+          TAB 2: NEWS SOURCES & TRUTH MATRIX
          ════════════════════════════════════════════════════════════ */}
       {activeTab === "NEWS" && (
         <div className="w-full max-w-5xl space-y-6">
           <div className="bg-bg-raised border border-bd-subtle rounded-xl p-6">
             <h3 className="text-base sm:text-lg font-bold text-tx-primary mb-1">
-              The Information Hierarchy & Truth Rates
+              The News Hierarchy & Verification Rates
             </h3>
             <p className="text-xs sm:text-sm text-tx-secondary leading-relaxed mb-6">
-              In Bazaar, not all news feeds carry equal truth. Institutional algorithms traded based on the statistical reliability and arrival latency of each wire source.
+              In Bazaar, news feeds possessed strictly calibrated statistical truth rates and delivery latencies. Top trading desks profited by knowing which sources to trust and which to fade:
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -910,7 +828,7 @@ export default function PodiumPage() {
                     </div>
 
                     <div className="text-[11px] font-mono text-tx-muted mb-2 italic">
-                      Voice: &ldquo;{src.voice}&rdquo;
+                      Tone: &ldquo;{src.voice}&rdquo;
                     </div>
 
                     <p className="text-xs text-tx-secondary leading-relaxed">
@@ -919,7 +837,7 @@ export default function PodiumPage() {
                   </div>
 
                   <div className="pt-2.5 border-t border-bd-hairline text-[11px] font-mono text-tx-muted">
-                    <span className="font-bold text-tx-primary">Access: </span>
+                    <span className="font-bold text-tx-primary">Access Requirement: </span>
                     <span>{src.access}</span>
                   </div>
                 </div>
@@ -931,10 +849,10 @@ export default function PodiumPage() {
               <AlertTriangle className="w-4 h-4 text-loss shrink-0 mt-0.5" />
               <div className="text-xs">
                 <div className="font-mono font-bold text-loss uppercase tracking-wider mb-0.5">
-                  The Inverse Finfluencer Strategy
+                  The Inverse Finfluencer Rule (The 65% Edge)
                 </div>
                 <p className="text-tx-primary leading-relaxed">
-                  @BullRunBhai carried a 35% truth rate—making him a <strong>65% reliable inverse indicator</strong>. When he tweeted urgent all-caps buy recommendations, institutional market makers were actively offloading into retail liquidity. Taking the exact opposite side generated consistent alpha.
+                  @BullRunBhai carried a 35% truth rate—which made him a <strong>65% reliable inverse indicator</strong>. Whenever he urged traders to market-buy a stock with urgency words, institutional bots used retail liquidity to dump. Taking the opposite side of his calls was one of the highest expected-value strategies in the simulation.
                 </p>
               </div>
             </div>
@@ -943,7 +861,7 @@ export default function PodiumPage() {
       )}
 
       {/* ════════════════════════════════════════════════════════════
-          TAB 4: ASSET PLAYBOOK
+          TAB 3: ASSET TRADING PLAYBOOK
          ════════════════════════════════════════════════════════════ */}
       {activeTab === "ASSETS" && (
         <div className="w-full max-w-5xl space-y-6">
@@ -987,7 +905,7 @@ export default function PodiumPage() {
       {/* ── FOOTER ACTIONS ────────────────────────────────────────── */}
       <footer className="w-full max-w-5xl mt-12 pt-6 border-t border-bd-hairline flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-tx-muted">
         <div>
-          Bazaar Simulation Terminal · Event Concluded
+          Bazaar Simulation Terminal · Event Debrief Concluded
         </div>
 
         <div className="flex items-center gap-3">
