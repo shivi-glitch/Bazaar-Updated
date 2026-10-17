@@ -356,7 +356,6 @@ export default function LiveChart({
         lineWidth: 2,
         lineStyle: 2,
         axisLabelVisible: true,
-        title: `Lvl ₹${coords.price.toFixed(2)}`,
       });
       if (line) {
         priceLinesRef.current.push(line);
@@ -711,26 +710,8 @@ export default function LiveChart({
             </button>
           </div>
 
-          {/* Middle: Live Drawing Status & Confirm Button */}
-          <div className="flex-1 flex items-center justify-center gap-2 px-2 min-w-0">
-            {drawMode !== "none" && (
-              <>
-                <span className="text-[11px] font-mono text-accent truncate bg-accent-dim border border-accent-border px-2.5 py-0.5 rounded-full animate-pulse shadow-xs">
-                  {drawMode === "level"
-                    ? "Drag pointer & tap to set level"
-                    : trendlineStart
-                    ? "Drag pointer & tap to set Pt 2"
-                    : "Drag pointer & tap to set Pt 1"}
-                </span>
-                <button
-                  onClick={() => confirmPoint()}
-                  className="px-2.5 py-0.5 rounded bg-accent text-[#070b12] font-mono font-bold text-[10px] uppercase tracking-wider hover:bg-accent/90 cursor-pointer shadow-xs shrink-0"
-                >
-                  {drawMode === "level" ? "Set Level" : trendlineStart ? "Set Pt 2" : "Set Pt 1"}
-                </button>
-              </>
-            )}
-          </div>
+          {/* Middle Spacer */}
+          <div className="flex-1" />
 
           {/* Right: Technical Tools (Icon-only, No Text!) */}
           <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
@@ -840,14 +821,6 @@ export default function LiveChart({
                 <span>Pointer: <span className="font-bold text-tx-primary">₹{pointerPrice.toFixed(2)}</span></span>
               </div>
             )}
-            {drawMode !== "none" && (
-              <button
-                onClick={() => confirmPoint()}
-                className="px-2 py-0.5 rounded bg-accent text-[#070b12] font-mono font-bold text-[10px] uppercase tracking-wider hover:bg-accent/90 cursor-pointer shadow-xs"
-              >
-                {drawMode === "level" ? "Set Level" : trendlineStart ? "Set Pt 2" : "Set Pt 1"}
-              </button>
-            )}
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button
@@ -923,7 +896,7 @@ export default function LiveChart({
           touchAction: drawMode !== "none" ? "none" : "auto",
         }}
       >
-        {/* ─── RETICLE & DRAWING OVERLAY ─── */}
+        {/* ─── CLEAN RETICLE & DRAWING OVERLAY ─── */}
         {drawMode !== "none" && reticle && (
           <div className="absolute inset-0 pointer-events-none z-20 overflow-hidden">
             <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ overflow: "visible" }}>
@@ -933,9 +906,9 @@ export default function LiveChart({
                 y1={reticle.y}
                 x2="100%"
                 y2={reticle.y}
-                stroke="rgba(255, 255, 255, 0.45)"
+                stroke="rgba(255, 255, 255, 0.35)"
                 strokeWidth="1"
-                strokeDasharray="4 3"
+                strokeDasharray="3 3"
               />
 
               {/* Vertical Crosshair Line */}
@@ -944,12 +917,12 @@ export default function LiveChart({
                 y1={0}
                 x2={reticle.x}
                 y2="100%"
-                stroke="rgba(255, 255, 255, 0.45)"
+                stroke="rgba(255, 255, 255, 0.35)"
                 strokeWidth="1"
-                strokeDasharray="4 3"
+                strokeDasharray="3 3"
               />
 
-              {/* Live Trendline Stretching between Point 1 and Reticle */}
+              {/* Live Trendline Stretching between Point 1 and Pointer */}
               {drawMode === "trendline" && trendlineStart && (
                 <>
                   {(() => {
@@ -963,25 +936,16 @@ export default function LiveChart({
                           x2={reticle.x}
                           y2={reticle.y}
                           stroke="#ffffff"
-                          strokeWidth="2.5"
+                          strokeWidth="2"
                         />
-                        {/* Glowing Point 1 Anchor Marker */}
+                        {/* Point 1 Clean Anchor Dot */}
                         <circle
                           cx={p1X}
                           cy={p1Y}
-                          r="6.5"
+                          r="4"
                           fill="#ffffff"
-                          stroke="#00D4AA"
-                          strokeWidth="3"
-                        />
-                        <circle
-                          cx={p1X}
-                          cy={p1Y}
-                          r="12"
-                          fill="none"
-                          stroke="#00D4AA"
-                          strokeWidth="1"
-                          strokeDasharray="3 3"
+                          stroke="#070b12"
+                          strokeWidth="1.5"
                         />
                       </>
                     );
@@ -989,20 +953,15 @@ export default function LiveChart({
                 </>
               )}
 
-              {/* Crosshair Pointer Reticle (Targeting Circle + Center Dot + Ticks) */}
-              <g transform={`translate(${reticle.x}, ${reticle.y})`}>
-                <circle
-                  r="15"
-                  fill="rgba(0, 212, 170, 0.15)"
-                  stroke="#00D4AA"
-                  strokeWidth="2"
-                />
-                <circle r="3.5" fill="#ffffff" />
-                <line x1="-20" y1="0" x2="-15" y2="0" stroke="#00D4AA" strokeWidth="2" />
-                <line x1="15" y1="0" x2="20" y2="0" stroke="#00D4AA" strokeWidth="2" />
-                <line x1="0" y1="-20" x2="0" y2="-15" stroke="#00D4AA" strokeWidth="2" />
-                <line x1="0" y1="15" x2="0" y2="20" stroke="#00D4AA" strokeWidth="2" />
-              </g>
+              {/* Minimalist Pointer Dot at Crosshair Junction */}
+              <circle
+                cx={reticle.x}
+                cy={reticle.y}
+                r="3.5"
+                fill="#ffffff"
+                stroke="#070b12"
+                strokeWidth="1"
+              />
             </svg>
 
             {/* Price Tag Badge on Right Axis */}
@@ -1021,21 +980,6 @@ export default function LiveChart({
               }}
             >
               {reticle.formattedDate}
-            </div>
-
-            {/* Floating Instruction Tooltip above Reticle */}
-            <div
-              className="absolute pointer-events-none transform -translate-x-1/2 px-2.5 py-1 rounded-md bg-[#0B1120]/95 border border-white/20 backdrop-blur-md text-[10px] font-mono text-white shadow-xl z-30 whitespace-nowrap"
-              style={{
-                left: Math.max(90, Math.min((containerRef.current?.clientWidth || 300) - 90, reticle.x)),
-                top: Math.max(10, reticle.y - 42),
-              }}
-            >
-              {drawMode === "level"
-                ? "Drag to level • Tap to set"
-                : trendlineStart
-                ? "Drag to end • Tap to set Pt 2"
-                : "Drag to start • Tap to set Pt 1"}
             </div>
           </div>
         )}
