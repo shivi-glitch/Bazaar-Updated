@@ -613,7 +613,7 @@ export default function LiveChart({
     });
 
     const sma9Series = chart.addSeries(LineSeries, {
-      color: "#60a5fa",
+      color: "#F59E0B", // High-contrast Amber / Gold
       lineWidth: 1,
       priceLineVisible: false,
       lastValueVisible: false,
@@ -621,7 +621,7 @@ export default function LiveChart({
     });
 
     const sma20Series = chart.addSeries(LineSeries, {
-      color: "#34d399",
+      color: "#A855F7", // High-contrast Vivid Purple / Violet
       lineWidth: 1,
       priceLineVisible: false,
       lastValueVisible: false,
@@ -784,10 +784,10 @@ export default function LiveChart({
                 className={clsx(
                   "px-2 py-1 text-[10px] font-mono font-bold uppercase rounded border transition-colors cursor-pointer",
                   showSma9
-                    ? "bg-accent-dim border-accent-border text-accent"
+                    ? "bg-amber-500/15 border-amber-500/30 text-amber-400"
                     : "bg-[#111827] border-white/10 text-slate-400 hover:text-white"
                 )}
-                title="Toggle SMA 9"
+                title="Toggle SMA 9 (Amber)"
               >
                 9
               </button>
@@ -798,10 +798,10 @@ export default function LiveChart({
                 className={clsx(
                   "px-2 py-1 text-[10px] font-mono font-bold uppercase rounded border transition-colors cursor-pointer",
                   showSma20
-                    ? "bg-cyan-500/15 border-cyan-500/30 text-cyan-400"
+                    ? "bg-purple-500/15 border-purple-500/30 text-purple-400"
                     : "bg-[#111827] border-white/10 text-slate-400 hover:text-white"
                 )}
-                title="Toggle SMA 20"
+                title="Toggle SMA 20 (Purple)"
               >
                 20
               </button>

@@ -398,7 +398,7 @@ export function AssetDetailTab({ ticker, onBack }: { ticker: string, onBack: () 
                   className={clsx(
                     "px-3 py-1 text-[11px] font-mono font-bold uppercase tracking-wider rounded border transition-colors cursor-pointer", 
                     showSma9 
-                      ? "bg-accent-dim border-accent-border text-accent" 
+                      ? "bg-amber-500/15 border-amber-500/30 text-amber-400" 
                       : "bg-bg-base border-bd-subtle text-tx-muted hover:text-tx-secondary"
                   )}
                 >
@@ -409,7 +409,7 @@ export function AssetDetailTab({ ticker, onBack }: { ticker: string, onBack: () 
                   className={clsx(
                     "px-3 py-1 text-[11px] font-mono font-bold uppercase tracking-wider rounded border transition-colors cursor-pointer", 
                     showSma20 
-                      ? "bg-cyan-500/15 border-cyan-500/30 text-cyan-400" 
+                      ? "bg-purple-500/15 border-purple-500/30 text-purple-400" 
                       : "bg-bg-base border-bd-subtle text-tx-muted hover:text-tx-secondary"
                   )}
                 >
