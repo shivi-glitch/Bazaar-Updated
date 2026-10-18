@@ -155,10 +155,10 @@ export function DashboardShell({
                 title={`Status: ${sessionState}`} 
               />
 
-              {/* Clock (Pure White per specification) */}
-              <span className="text-[10px] sm:text-[11px] font-mono font-bold text-white bg-bg-raised px-2 py-0.5 rounded border border-bd-subtle flex items-center gap-1.5 shrink-0 shadow-xs">
-                <Clock className="w-3 h-3 text-white" />
-                <span className="text-white font-mono font-bold tracking-wider">{formattedTime}</span>
+              {/* Clock */}
+              <span className="text-[10px] sm:text-[11px] font-mono font-bold text-tx-primary bg-bg-raised px-2 py-0.5 rounded border border-bd-subtle flex items-center gap-1.5 shrink-0 shadow-xs">
+                <Clock className="w-3 h-3 text-tx-muted" />
+                <span className="font-mono font-bold tracking-wider">{formattedTime}</span>
               </span>
             </div>
           </div>
