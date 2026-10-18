@@ -168,7 +168,10 @@ export default function LiveChart({
   const linesRef = useRef<ISeriesApi<"Line">[]>([]);
   const priceLinesRef = useRef<any[]>([]);
   const drawingsOrderRef = useRef<DrawingItem[]>([]);
-  const pointerDownPosRef = useRef<{ x: number; y: number } | null>(null);
+  const isPointerDownRef = useRef(false);
+  const pointerStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
+  const pointerLastRef = useRef<{ x: number; y: number } | null>(null);
+  const hasMovedRef = useRef(false);
 
   useEffect(() => {
     drawModeRef.current = drawMode;
@@ -408,38 +411,79 @@ export default function LiveChart({
     }
   };
 
-  // Pointer event handlers for crosshair reticle dragging
-  const updateReticlePosition = (clientX: number, clientY: number) => {
-    if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = Math.max(0, Math.min(rect.width, clientX - rect.left));
-    const y = Math.max(0, Math.min(rect.height, clientY - rect.top));
-
-    const coords = getCoordinatesFromPixel(x, y);
-    if (coords) {
-      const nextReticle: ReticleState = {
-        x,
-        y,
-        price: coords.price,
-        time: coords.time,
-        formattedDate: coords.formattedDate,
-      };
-      setReticle(nextReticle);
-      reticleRef.current = nextReticle;
-      setPointerPrice(coords.price);
-    }
-  };
-
+  // Groww-style touchpad sliding & tap detection
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (drawModeRef.current !== "none") {
-      pointerDownPosRef.current = { x: e.clientX, y: e.clientY };
-      updateReticlePosition(e.clientX, e.clientY);
+      try {
+        (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+      } catch (err) {}
+      isPointerDownRef.current = true;
+      pointerStartRef.current = { x: e.clientX, y: e.clientY, time: Date.now() };
+      pointerLastRef.current = { x: e.clientX, y: e.clientY };
+      hasMovedRef.current = false;
+      // Note: Pointer stays centered/preserved without jumping to touch coordinates!
     }
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (drawModeRef.current !== "none") {
-      updateReticlePosition(e.clientX, e.clientY);
+      if (!isPointerDownRef.current || !pointerLastRef.current) {
+        // Desktop mouse hover when mouse button is not held
+        if (e.pointerType === "mouse" && !isPointerDownRef.current) {
+          if (!containerRef.current) return;
+          const rect = containerRef.current.getBoundingClientRect();
+          const x = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+          const y = Math.max(0, Math.min(rect.height, e.clientY - rect.top));
+          const coords = getCoordinatesFromPixel(x, y);
+          if (coords) {
+            const nextReticle: ReticleState = {
+              x,
+              y,
+              price: coords.price,
+              time: coords.time,
+              formattedDate: coords.formattedDate,
+            };
+            setReticle(nextReticle);
+            reticleRef.current = nextReticle;
+            setPointerPrice(coords.price);
+          }
+        }
+        return;
+      }
+
+      // Dragging / Sliding on screen (Groww-style relative motion)
+      const dx = e.clientX - pointerLastRef.current.x;
+      const dy = e.clientY - pointerLastRef.current.y;
+      pointerLastRef.current = { x: e.clientX, y: e.clientY };
+
+      const totalDist = Math.hypot(
+        e.clientX - (pointerStartRef.current?.x ?? e.clientX),
+        e.clientY - (pointerStartRef.current?.y ?? e.clientY)
+      );
+      if (totalDist > 6) {
+        hasMovedRef.current = true;
+      }
+
+      if (!containerRef.current || !reticleRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+
+      // Displace reticle by finger delta (sliding from anywhere on screen)
+      const newX = Math.max(0, Math.min(rect.width, reticleRef.current.x + dx));
+      const newY = Math.max(0, Math.min(rect.height, reticleRef.current.y + dy));
+
+      const coords = getCoordinatesFromPixel(newX, newY);
+      if (coords) {
+        const nextReticle: ReticleState = {
+          x: newX,
+          y: newY,
+          price: coords.price,
+          time: coords.time,
+          formattedDate: coords.formattedDate,
+        };
+        setReticle(nextReticle);
+        reticleRef.current = nextReticle;
+        setPointerPrice(coords.price);
+      }
     } else {
       if (!mainRef.current || !containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
@@ -453,20 +497,39 @@ export default function LiveChart({
     }
   };
 
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (drawModeRef.current !== "none") {
+      try {
+        (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+      } catch (err) {}
+
+      const wasDown = isPointerDownRef.current;
+      isPointerDownRef.current = false;
+
+      if (!wasDown || !pointerStartRef.current) return;
+
+      const duration = Date.now() - pointerStartRef.current.time;
+      const dist = Math.hypot(
+        e.clientX - pointerStartRef.current.x,
+        e.clientY - pointerStartRef.current.y
+      );
+
+      // Tap detection:
+      // If user tapped on screen (short tap < 350ms or minimal movement < 12px)
+      if (!hasMovedRef.current || (duration < 350 && dist < 12)) {
+        confirmPoint();
+      }
+    }
+  };
+
+  const handlePointerCancel = () => {
+    isPointerDownRef.current = false;
+  };
+
   const handlePointerLeave = () => {
     if (drawModeRef.current === "none") {
       setPointerPrice(null);
     }
-  };
-
-  const handleCanvasClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (drawModeRef.current === "none") return;
-    if (pointerDownPosRef.current) {
-      const dx = Math.abs(e.clientX - pointerDownPosRef.current.x);
-      const dy = Math.abs(e.clientY - pointerDownPosRef.current.y);
-      if (dx > 12 || dy > 12) return; // Ignore drag release
-    }
-    confirmPoint(reticleRef.current?.x, reticleRef.current?.y);
   };
 
   // Initialize Lightweight Charts
@@ -882,8 +945,9 @@ export default function LiveChart({
         ref={containerRef}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerCancel}
         onPointerLeave={handlePointerLeave}
-        onClick={handleCanvasClick}
         className={clsx(
           "w-full transition-all duration-200 relative overflow-hidden select-none",
           drawMode !== "none" ? "cursor-crosshair" : "cursor-default",
