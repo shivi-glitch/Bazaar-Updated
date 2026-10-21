@@ -44,12 +44,12 @@ interface MarketState {
 
 const DEFAULT_R1_PRICES: Record<string, [number, number]> = {
   "RLNT": [245000, 1000],
+  "TYRL": [88000, 1500],
   "INFN": [152000, 1200],
-  "HRZN": [168000, 1100],
-  "BZR-V": [32000, 2500],
-  "PULSE": [11500, 3000],
+  "HRZN": [164000, 1100],
+  "BZR-V": [64000, 2500],
   "GOLDCORE": [620000, 500],
-  "TYRL": [98000, 1500]
+  "PULSE": [85000, 3000]
 };
 
 export const useMarketStore = create<MarketState>((set) => ({
@@ -94,7 +94,7 @@ export const useMarketStore = create<MarketState>((set) => ({
         return { 
           sessionState: msg.state, 
           serverTime: msg.server_time, 
-          currentSession: msg.g || state.currentSession,
+          currentSession: msg.g !== undefined ? msg.g : state.currentSession,
           globalTick: typeof msg.n === 'number' ? msg.n : state.globalTick,
           priceHistory: state.priceHistory,
           prices: initialPrices
@@ -103,7 +103,7 @@ export const useMarketStore = create<MarketState>((set) => ({
     } else if (msg.type === "session") {
       set((state) => {
         const updatedPrices = (msg.prices && Object.keys(msg.prices).length > 0)
-          ? { ...state.prices, ...msg.prices }
+          ? msg.prices
           : state.prices;
         return { 
           sessionState: msg.state, 
@@ -116,7 +116,7 @@ export const useMarketStore = create<MarketState>((set) => ({
     } else if (msg.type === "reset") {
       set(() => ({
         sessionState: msg.state || "READY",
-        currentSession: 1,
+        currentSession: msg.g !== undefined ? msg.g : 1,
         globalTick: 0,
         priceHistory: {},
         prices: msg.prices || DEFAULT_R1_PRICES,

@@ -117,6 +117,45 @@ async def unlock_round2_route(db: AsyncSession = Depends(get_db)):
     except ValueError as e:
         raise HTTPException(status_code=409, detail=str(e))
 
+@router.post("/demo/unlock", dependencies=[Depends(verify_admin)])
+async def unlock_demo_route(db: AsyncSession = Depends(get_db)):
+    try:
+        await db.execute(delete(Position))
+        await db.execute(delete(Order))
+        await db.execute(update(TeamLedger).values(cash_paise=100000000))
+        await db.execute(update(Team).values(research_level=0, capital_level=0, speed_level=0, eliminated=False))
+        await db.commit()
+        return await engine_app.unlock_demo_round()
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/demo/reset", dependencies=[Depends(verify_admin)])
+async def reset_demo_route(db: AsyncSession = Depends(get_db)):
+    try:
+        await db.execute(delete(Position))
+        await db.execute(delete(Order))
+        await db.execute(update(TeamLedger).values(cash_paise=100000000))
+        await db.execute(update(Team).values(research_level=0, capital_level=0, speed_level=0, eliminated=False))
+        await db.commit()
+        return await engine_app.unlock_demo_round()
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/demo/exit", dependencies=[Depends(verify_admin)])
+async def exit_demo_route(db: AsyncSession = Depends(get_db)):
+    try:
+        await db.execute(delete(Position))
+        await db.execute(delete(Order))
+        await db.execute(update(TeamLedger).values(cash_paise=100000000))
+        await db.execute(update(Team).values(research_level=0, capital_level=0, speed_level=0, eliminated=False))
+        await db.commit()
+        return await engine_app.exit_demo_round()
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.post("/freeze", dependencies=[Depends(verify_admin)])
 async def freeze_route():
     return await engine_app.freeze()
@@ -131,6 +170,7 @@ async def get_sessions():
         "current_g": engine_app.current_g,
         "n": engine_app.n,
         "states": engine_app.session_states,
+        "is_demo": engine_app.is_demo,
         "is_frozen": engine_app.is_frozen,
         "r2_unlocked": engine_app.r2_unlocked,
         "news_history": engine_app.news_ledger,

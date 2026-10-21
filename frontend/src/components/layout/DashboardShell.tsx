@@ -39,12 +39,14 @@ export function DashboardShell({
 
   useEffect(() => {
     const token = localStorage.getItem("merx_token");
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        setTeamId(payload.sub);
-      } catch (e) {}
+    if (!token) {
+      router.replace("/login");
+      return;
     }
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      setTeamId(payload.sub);
+    } catch (e) {}
 
     const fetchPortfolio = async () => {
       try {
@@ -139,8 +141,13 @@ export function DashboardShell({
               </span>
 
               {/* Session indicator */}
-              <span className="text-[10px] font-mono font-bold text-warn bg-warn-dim px-1.5 sm:px-2 py-0.5 rounded border border-warn-border shrink-0">
-                S{currentSession} · {isRound2 ? "R2" : "R1"}
+              <span className={clsx(
+                "text-[10px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded border shrink-0",
+                currentSession === 0 
+                  ? "text-amber-400 bg-amber-500/15 border-amber-500/30 font-extrabold" 
+                  : "text-warn bg-warn-dim border-warn-border"
+              )}>
+                {currentSession === 0 ? "DEMO ROUND" : `S${currentSession} · ${isRound2 ? "R2" : "R1"}`}
               </span>
 
               {/* Minimal Green Ticker Indicator (no text) */}

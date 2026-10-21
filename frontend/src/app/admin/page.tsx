@@ -280,7 +280,9 @@ export default function AdminDashboard() {
   const filteredTeams = teams.filter(t => t.id.toLowerCase().includes(searchQuery.toLowerCase()));
 
   let currentRoundStr = "Market Halted";
-  if (sysState.current_g < 7 && sysState.current_g > 0) {
+  if (sysState.current_g === 0) {
+    currentRoundStr = "Demo Practice Round (7 Assets)";
+  } else if (sysState.current_g < 7 && sysState.current_g > 0) {
     currentRoundStr = `Round 1 (Retail) • S${sysState.current_g}`;
   } else if (sysState.current_g >= 7 && sysState.current_g <= 11) {
     currentRoundStr = `Round 2 (Inst) • S${sysState.current_g - 6}`;
@@ -423,6 +425,100 @@ export default function AdminDashboard() {
                   <span className="text-tx-primary font-bold">{formattedTime} remaining</span>
                 </div>
               </div>
+            </div>
+
+            {/* Demo Round Block */}
+            <div className="glass-panel p-5 sm:p-6 border border-amber-500/30 bg-amber-500/[0.03] rounded-2xl relative overflow-hidden">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-amber-500/20">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-base sm:text-lg font-bold text-tx-primary tracking-tight">
+                        Demo Practice Round
+                      </h2>
+                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-500/15 border border-amber-500/30 text-amber-300">
+                        Practice Session
+                      </span>
+                    </div>
+                    <p className="text-xs text-tx-secondary mt-0.5">
+                      Practice session with the 7 R1S1 assets, realistic randomized prices, and simulated breaking news shocks.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {sysState.current_g === 0 ? (
+                    <span className="text-xs font-mono font-bold px-2.5 py-1 rounded border border-amber-500/40 bg-amber-500/20 text-amber-200 uppercase tracking-wider animate-pulse">
+                      Active: {sysState.states?.[0] || "READY"}
+                    </span>
+                  ) : (
+                    <button
+                      disabled={loading}
+                      onClick={() => handleAction("/admin/demo/unlock")}
+                      className="px-3.5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-tx-inverse font-mono font-bold text-xs uppercase tracking-wider rounded-lg transition-all shadow-md active:scale-[0.98] flex items-center gap-2 cursor-pointer"
+                    >
+                      <Zap className="w-3.5 h-3.5" />
+                      Unlock Demo Round
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {sysState.current_g === 0 && (
+                <div className="bg-bg-base/80 border border-amber-500/20 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-mono font-bold text-amber-400 uppercase tracking-wider">
+                      Demo Telemetry:
+                    </span>
+                    <span className="text-xs font-mono font-bold text-tx-primary">
+                      Tick T+{sysState.n || 0} / 200
+                    </span>
+                    <span className="text-tx-muted">•</span>
+                    <span className="text-xs font-mono font-bold text-accent">
+                      {formattedTime} remaining
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      disabled={loading}
+                      onClick={() => handleAction("/admin/sessions/0/start")}
+                      className="bg-gain-dim text-gain hover:bg-gain hover:text-tx-inverse border border-gain-border text-xs font-mono font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-lg transition-all active:scale-[0.98]"
+                    >
+                      Start Demo
+                    </button>
+                    <button
+                      disabled={loading}
+                      onClick={() => handleAction("/admin/sessions/0/pause")}
+                      className="bg-warn-dim text-warn hover:bg-warn hover:text-tx-inverse border border-warn-border text-xs font-mono font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-lg transition-all active:scale-[0.98]"
+                    >
+                      Pause
+                    </button>
+                    <button
+                      disabled={loading}
+                      onClick={() => handleAction("/admin/sessions/0/end")}
+                      className="bg-bg-raised text-tx-secondary hover:text-tx-primary border border-bd-subtle text-xs font-mono font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-lg transition-all active:scale-[0.98]"
+                    >
+                      End
+                    </button>
+                    <button
+                      disabled={loading}
+                      onClick={() => handleAction("/admin/demo/reset")}
+                      className="bg-accent-dim text-accent hover:bg-accent hover:text-tx-inverse border border-accent-border text-xs font-mono font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-lg transition-all active:scale-[0.98]"
+                    >
+                      Reset Demo
+                    </button>
+                    <button
+                      disabled={loading}
+                      onClick={() => handleAction("/admin/demo/exit")}
+                      className="bg-loss-dim text-loss hover:bg-loss hover:text-tx-inverse border border-loss-border text-xs font-mono font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-lg transition-all active:scale-[0.98]"
+                    >
+                      Exit Demo (Return to S1)
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Round 1 Block */}

@@ -524,9 +524,17 @@ export default function StockDetailPage() {
   const router = useRouter();
   const ticker = (params?.ticker as string) || "RLNT";
 
+  const handleBack = () => {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/market");
+    }
+  };
+
   return (
     <DashboardShell activeTab="chart" isViewingStock={true}>
-      <AssetDetailTab ticker={ticker} onBack={() => router.push("/market")} />
+      <AssetDetailTab ticker={ticker} onBack={handleBack} />
     </DashboardShell>
   );
 }

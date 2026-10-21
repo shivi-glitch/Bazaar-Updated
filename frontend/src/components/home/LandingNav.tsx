@@ -1,9 +1,15 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "../ui/Button";
 
 export function LandingNav() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    setIsLoggedIn(Boolean(localStorage.getItem("merx_token")));
+  }, []);
 
   const scrollTo = (id: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -55,13 +61,13 @@ export function LandingNav() {
             Leaderboard
           </a>
 
-          <Link href="/login" tabIndex={-1}>
+          <Link href={isLoggedIn ? "/market" : "/login"} tabIndex={-1}>
             <Button
-              variant="secondary"
+              variant={isLoggedIn ? "primary" : "secondary"}
               size="md"
               className="text-[12px] sm:text-[13px] px-3 sm:px-4 py-1.5 h-auto font-medium"
             >
-              Login
+              {isLoggedIn ? "Terminal" : "Login"}
             </Button>
           </Link>
         </div>

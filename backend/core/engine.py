@@ -28,12 +28,62 @@ WAVE_PROFILE_24 = [
     1.01, 1.00, 1.00, 1.00
 ]
 
+DEMO_NEWS_DATABASE = [
+    {
+        "g": 0,
+        "public_tick": 25,
+        "source": "IN",
+        "ticker": "INFN",
+        "text": "CONFIDENTIAL: Sovereign cloud infrastructure modernization contract awarded to Infinity Systems.",
+        "impact": 0.055,
+        "is_fake": False
+    },
+    {
+        "g": 0,
+        "public_tick": 65,
+        "source": "NP",
+        "ticker": "RLNT",
+        "text": "National Power Commission authorizes long-term transmission tariff revision for Reliant Energy Corp.",
+        "impact": 0.040,
+        "is_fake": False
+    },
+    {
+        "g": 0,
+        "public_tick": 105,
+        "source": "FF",
+        "ticker": "PULSE",
+        "text": "PULSECHAIN PUMP IMMINENT! Massive liquidity migration confirmed by top whales! Buy now 🚀🚀",
+        "impact": -0.075,
+        "is_fake": True
+    },
+    {
+        "g": 0,
+        "public_tick": 145,
+        "source": "AN",
+        "ticker": "HRZN",
+        "text": "Northgate Securities cautions on Horizon Commercial Bank credit spreads amid interbank liquidity tightening.",
+        "impact": -0.035,
+        "is_fake": False
+    },
+    {
+        "g": 0,
+        "public_tick": 180,
+        "source": "NP",
+        "ticker": "GOLDCORE",
+        "text": "Central reserves allocate ₹1,500 Cr into physical bullion custody as defensive hedge.",
+        "impact": 0.025,
+        "is_fake": False
+    }
+]
+
 class MarketEngine:
     def __init__(self):
         self.current_g: int = 1
         self.n: int = 0
-        self.session_states: Dict[int, str] = {i: "LOCKED" for i in range(1, 12)}
+        self.session_states: Dict[int, str] = {i: "LOCKED" for i in range(0, 12)}
         self.session_states[1] = "READY"
+        self.is_demo: bool = False
+        self.demo_anchors: Dict[str, float] = {}
         self.r2_unlocked: bool = False
         self.is_frozen: bool = False
         
@@ -66,12 +116,12 @@ class MarketEngine:
             blocks = res.scalars().all()
             
             if not blocks:
-                for i in range(1, 12):
-                    r_num = 1 if i < 7 else 2
+                for i in range(0, 12):
+                    r_num = 0 if i == 0 else (1 if i < 7 else 2)
                     state = "READY" if i == 1 else "LOCKED"
                     db.add(SessionBlock(g=i, round_num=r_num, state=state))
                 await db.commit()
-                self.session_states = {i: "LOCKED" for i in range(1, 12)}
+                self.session_states = {i: "LOCKED" for i in range(0, 12)}
                 self.session_states[1] = "READY"
                 self.current_g = 1
                 self.n = 0
@@ -79,20 +129,31 @@ class MarketEngine:
                 for b in blocks:
                     self.session_states[b.g] = b.state
                 
+                # Ensure demo session 0 is tracked
+                if 0 not in self.session_states:
+                    self.session_states[0] = "LOCKED"
+
                 # Determine current active session
                 self.current_g = 1
-                for i in range(1, 12):
-                    if self.session_states[i] in ["STARTING", "RUNNING", "PAUSED", "READY"]:
+                for i in range(0, 12):
+                    if self.session_states.get(i) in ["STARTING", "RUNNING", "PAUSED", "READY"]:
                         self.current_g = i
                         break
                 
+                self.is_demo = (self.current_g == 0)
                 self.r2_unlocked = (self.session_states.get(7) != "LOCKED")
                 self.n = 0 # Restart tick counter after crash
 
     async def _update_db_state(self, g: int, state: str):
         try:
             async with AsyncSessionLocal() as db:
-                await db.execute(update(SessionBlock).where(SessionBlock.g == g).values(state=state))
+                res = await db.execute(select(SessionBlock).where(SessionBlock.g == g))
+                block = res.scalar_one_or_none()
+                if block:
+                    block.state = state
+                else:
+                    r_num = 0 if g == 0 else (1 if g < 7 else 2)
+                    db.add(SessionBlock(g=g, round_num=r_num, state=state))
                 await db.commit()
         except Exception:
             pass
@@ -138,12 +199,12 @@ class MarketEngine:
             return dict(r1_s1)
         return {
             "RLNT": [245000, 1000],
+            "TYRL": [88000, 1500],
             "INFN": [152000, 1200],
-            "HRZN": [168000, 1100],
-            "BZR-V": [32000, 2500],
-            "PULSE": [11500, 3000],
+            "HRZN": [164000, 1100],
+            "BZR-V": [64000, 2500],
             "GOLDCORE": [620000, 500],
-            "TYRL": [98000, 1500]
+            "PULSE": [85000, 3000]
         }
 
     def get_last_close_for_ticker(self, ticker: str, default_p: float) -> float:
@@ -174,6 +235,7 @@ class MarketEngine:
                 "g": g,
                 "n": self.n,
                 "state": state,
+                "is_demo": (g == 0 or self.is_demo),
                 "prices": prices
             })
 
@@ -184,7 +246,10 @@ class MarketEngine:
         self.session_states[g] = "STARTING"
         
         # Immediately prepare baseline prices for this session
-        if g < 7:
+        if g == 0:
+            if not self.current_prices or not self.demo_anchors:
+                await self.unlock_demo_round()
+        elif g < 7:
             g_data = self.price_table.get(g, {})
             p_first_tick = g_data.get(0, {})
             
@@ -316,13 +381,74 @@ class MarketEngine:
     async def end_session(self, g: int):
         self.session_states[g] = "FINISHED"
         await self._update_db_state(g, "FINISHED")
-        if g < 11: 
+        if 0 < g < 11: 
             self.session_states[g + 1] = "READY"
             await self._update_db_state(g + 1, "READY")
         await self.broadcast_state(g, "FINISHED")
         if g >= 7:
             asyncio.create_task(self._record_round2_snapshots(g))
         return {"status": "FINISHED"}
+
+    async def unlock_demo_round(self):
+        self.is_demo = True
+        self.current_g = 0
+        self.n = 0
+        self.is_frozen = False
+        self.session_states[0] = "READY"
+
+        # Initialize slightly randomized realistic baseline prices around the 7 R1S1 assets
+        self.current_prices = {
+            "RLNT": [random.randint(243000, 247000), random.randint(800, 1400)],
+            "TYRL": [random.randint(87000, 89500), random.randint(1200, 1800)],
+            "INFN": [random.randint(150000, 154500), random.randint(900, 1500)],
+            "HRZN": [random.randint(162000, 166500), random.randint(900, 1400)],
+            "BZR-V": [random.randint(63000, 65500), random.randint(1800, 2800)],
+            "GOLDCORE": [random.randint(618000, 623000), random.randint(400, 700)],
+            "PULSE": [random.randint(83500, 87500), random.randint(2000, 3500)]
+        }
+        self.demo_anchors = {t: d[0] / 100.0 for t, d in self.current_prices.items()}
+        self.active_shocks.clear()
+        self.delivered_news.clear()
+        if 0 not in self.price_table:
+            self.price_table[0] = {}
+        self.price_table[0][0] = {t: [d[0], d[1]] for t, d in self.current_prices.items()}
+
+        await self._update_db_state(0, "READY")
+        await self.broadcast_state(0, "READY")
+        if self.ws_manager:
+            await self.ws_manager.broadcast({
+                "type": "session",
+                "g": 0,
+                "n": 0,
+                "state": "READY",
+                "is_demo": True,
+                "prices": self.current_prices
+            })
+        return {"status": "DEMO_ROUND_UNLOCKED", "g": 0, "prices": self.current_prices}
+
+    async def exit_demo_round(self):
+        self.is_demo = False
+        self.current_g = 1
+        self.n = 0
+        self.is_frozen = False
+        self.session_states[0] = "LOCKED"
+        self.session_states[1] = "READY"
+        self.active_shocks.clear()
+        self.delivered_news.clear()
+        self._load_and_verify_data()
+        await self._update_db_state(0, "LOCKED")
+        await self._update_db_state(1, "READY")
+        await self.broadcast_state(1, "READY")
+        if self.ws_manager:
+            await self.ws_manager.broadcast({
+                "type": "reset",
+                "g": 1,
+                "n": 0,
+                "state": "READY",
+                "is_demo": False,
+                "prices": self.get_live_or_initial_prices()
+            })
+        return {"status": "EXITED_DEMO", "g": 1}
 
     async def unlock_round2(self):
         self.r2_unlocked = True
@@ -346,19 +472,21 @@ class MarketEngine:
     async def reset_event(self):
         self.current_g = 1
         self.n = 0
+        self.is_demo = False
         self.r2_unlocked = False
         self.is_frozen = False
-        self.session_states = {i: "LOCKED" for i in range(1, 12)}
+        self.session_states = {i: "LOCKED" for i in range(0, 12)}
         self.session_states[1] = "READY"
         
         async with AsyncSessionLocal() as db:
-            for i in range(1, 12):
+            for i in range(0, 12):
                 state = "READY" if i == 1 else "LOCKED"
                 await db.execute(update(SessionBlock).where(SessionBlock.g == i).values(state=state))
             await db.commit()
             
         self.price_table.clear()
         self.r2_states.clear()
+        self.demo_anchors.clear()
         self.delivered_news.clear()
         self.active_shocks.clear()
         self._load_and_verify_data()
@@ -369,6 +497,7 @@ class MarketEngine:
                 "g": 1,
                 "n": 0,
                 "state": "READY",
+                "is_demo": False,
                 "prices": self.get_live_or_initial_prices()
             })
         return {"status": "RESET"}
@@ -421,7 +550,7 @@ class MarketEngine:
                     continue
                 if g == target_g and n > target_n:
                     break
-                continuous_t = (g - 1) * 201 + n
+                continuous_t = n if g == 0 else (g - 1) * 201 + n
                 for ticker, p_data in g_data[n].items():
                     if ticker not in history:
                         history[ticker] = []
@@ -459,7 +588,8 @@ class MarketEngine:
 
     async def check_and_dispatch_scripted_news(self):
         """Handles 9-second early leaks and queues multi-tick price shocks."""
-        for item in SCRIPTED_NEWS_DATABASE:
+        news_source_list = DEMO_NEWS_DATABASE if self.current_g == 0 else SCRIPTED_NEWS_DATABASE
+        for item in news_source_list:
             if item["g"] != self.current_g:
                 continue
                 
@@ -491,9 +621,26 @@ class MarketEngine:
                 if self.ws_manager:
                     await self.ws_manager.dispatch_targeted_news(news_payload)
                 
+                # In Demo Round (g == 0), queue shock to demo_anchors
+                if self.current_g == 0 and item["impact"] != 0:
+                    targets = []
+                    if item["ticker"] == "GLOBAL":
+                        targets = [t for t in self.current_prices.keys() if t != "GOLDCORE"]
+                    elif item["ticker"] in self.current_prices:
+                        targets = [item["ticker"]]
+                    
+                    for t in targets:
+                        curr_f = self.demo_anchors.get(t, (self.current_prices[t][0] / 100.0) if t in self.current_prices else 100.0)
+                        self.active_shocks.append({
+                            "ticker": t,
+                            "total_impact": item["impact"],
+                            "current_step": 0,
+                            "total_steps": 24,
+                            "base_f": curr_f,
+                            "volume_boost": 3.0
+                        })
                 # In Round 2 (g >= 7), queue a multi-wave price discovery shock to the fundamental anchor F(t)
-                # In Round 1 (g < 7), the authentic multi-wave trajectory is already embedded in prices_r1.parquet!
-                if self.current_g >= 7 and item["impact"] != 0:
+                elif self.current_g >= 7 and item["impact"] != 0:
                     targets = []
                     if item["ticker"] == "GLOBAL":
                         targets = [t for t in self.current_prices.keys() if t != "GOLDCORE"]
@@ -524,9 +671,11 @@ class MarketEngine:
                 if base_f is None:
                     base_f = shock.get("base_paise", 10000) / 100.0
                 
+                # In Demo Round (g == 0), evolve demo_anchors
+                if self.current_g == 0 and ticker in self.demo_anchors:
+                    self.demo_anchors[ticker] = base_f * (1.0 + shock["total_impact"] * fraction)
                 # In Round 2 (g >= 7), smoothly evolve the fundamental anchor F(t).
-                # The market engine and bot populations naturally pull P(t) without artificial snaps.
-                if self.current_g >= 7 and ticker in self.r2_f_values:
+                elif self.current_g >= 7 and ticker in self.r2_f_values:
                     self.r2_f_values[ticker] = base_f * (1.0 + shock["total_impact"] * fraction)
                     
                 shock["current_step"] = step + 1
@@ -554,8 +703,26 @@ class MarketEngine:
                 # 2. Check if new news needs to be dispatched today / queue new shocks
                 await self.check_and_dispatch_scripted_news()
                     
-                # 3. R1: Deterministic Engine with continuous session continuity
-                if self.current_g < 7:
+                # 3. Dynamic price generation: Demo, R1, or R2
+                if self.current_g == 0:
+                    for ticker in list(self.current_prices.keys()):
+                        base_anchor = self.demo_anchors.get(ticker, self.current_prices[ticker][0] / 100.0)
+                        noise_limit = 0.001
+                        if ticker in ["BZR-V", "PULSE"]:
+                            noise_limit = 0.0035
+                        elif ticker in ["INFN", "HRZN"]:
+                            noise_limit = 0.0015
+                        elif ticker == "GOLDCORE":
+                            noise_limit = 0.0004
+                        drift = random.uniform(-noise_limit, noise_limit)
+                        new_p_paise = max(100, int(base_anchor * 100 * (1.0 + drift)))
+                        base_vol = random.randint(180, 520)
+                        for shock in self.active_shocks:
+                            if shock["ticker"] in [ticker, "GLOBAL"]:
+                                base_vol = int(base_vol * shock.get("volume_boost", 2.8))
+                                break
+                        self.current_prices[ticker] = [new_p_paise, base_vol]
+                elif self.current_g < 7:
                     g_data = self.price_table.get(self.current_g, {})
                     if self.n in g_data:
                         for t, p_v in g_data[self.n].items():
@@ -626,7 +793,7 @@ class MarketEngine:
                     current_vol = data[1]
                     
                     # For Round 1 only, inject small live stochastic drift to parquet ticks
-                    if self.current_g < 7:
+                    if 0 < self.current_g < 7:
                         noise_limit = 0.001 
                         if ticker in ["BZR-V", "PULSE"]:
                             noise_limit = 0.0035
@@ -641,8 +808,8 @@ class MarketEngine:
                         self.current_prices[ticker] = [current_paise, current_vol]
 
                     # Record into price_table for continuous historical chart continuity
-                    # Only overwrite price_table in R2 so R1 ground-truth parquet arrays stay clean
-                    if self.current_g >= 7:
+                    # Only overwrite price_table in R2 or Demo so R1 ground-truth parquet arrays stay clean
+                    if self.current_g >= 7 or self.current_g == 0:
                         if self.current_g not in self.price_table:
                             self.price_table[self.current_g] = {}
                         if self.n not in self.price_table[self.current_g]:
@@ -675,7 +842,7 @@ class MarketEngine:
 
                 if self.ws_manager:
                     asyncio.create_task(self.ws_manager.broadcast({
-                        "type": "tick", "g": self.current_g, "n": self.n, "prices": prices_payload
+                        "type": "tick", "g": self.current_g, "n": self.n, "is_demo": (self.current_g == 0 or self.is_demo), "prices": prices_payload
                     }))
 
                 self.n += 1

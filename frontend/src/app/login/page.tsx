@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { Lock, User, ArrowLeft, ArrowRight, Sun, Moon } from "lucide-react";
@@ -15,6 +15,13 @@ export default function LoginPage() {
   const router = useRouter();
   const { resolvedTheme, setTheme } = useTheme();
 
+  useEffect(() => {
+    const token = localStorage.getItem("merx_token");
+    if (token) {
+      router.replace("/market");
+    }
+  }, [router]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -27,7 +34,7 @@ export default function LoginPage() {
       if (typeof window !== "undefined") {
         window.dispatchEvent(new Event("merx_auth_change"));
       }
-      router.push("/market");
+      router.replace("/market");
     } catch (err: any) {
       setError(err.message || "Authentication failed. Check your Team ID and PIN.");
     } finally {
