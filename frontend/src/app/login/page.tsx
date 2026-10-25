@@ -121,7 +121,7 @@ export default function LoginPage() {
                 <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-tx-muted pointer-events-none" />
                 <input
                   type="text"
-                  placeholder="e.g. Team Big Bull"
+                  placeholder="e.g. Alpha Chasers"
                   value={teamId}
                   onChange={(e) => setTeamId(e.target.value)}
                   required
@@ -140,7 +140,7 @@ export default function LoginPage() {
                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-tx-muted pointer-events-none" />
                 <input
                   type="password"
-                  placeholder="Harshad Mehta"
+                  placeholder="123456"
                   value={pin}
                   onChange={(e) => setPin(e.target.value)}
                   required

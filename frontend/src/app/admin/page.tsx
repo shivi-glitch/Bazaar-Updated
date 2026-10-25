@@ -864,9 +864,9 @@ export default function AdminDashboard() {
               {activeAssets.map((asset) => {
                 const categoryColor =
                   asset.category === "Large Cap" ? "bg-accent-dim border-accent-border text-accent" :
-                  asset.category === "Sovereign Reserve" ? "bg-warn-dim border-warn-border text-warn" :
-                  asset.category === "Micro Cap" || asset.category === "Digital Asset" ? "bg-loss-dim border-loss-border text-loss" :
-                  "bg-cyan-500/10 border-cyan-500/30 text-cyan-400";
+                    asset.category === "Sovereign Reserve" ? "bg-warn-dim border-warn-border text-warn" :
+                      asset.category === "Micro Cap" || asset.category === "Digital Asset" ? "bg-loss-dim border-loss-border text-loss" :
+                        "bg-cyan-500/10 border-cyan-500/30 text-cyan-400";
 
                 return (
                   <div
@@ -1315,7 +1315,7 @@ export default function AdminDashboard() {
            ══════════════════════════════════════════════════════ */}
         {activeTab === "LEADERBOARD" && (
           <div className="space-y-6">
-            
+
             {/* Top Header & Telemetry */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
@@ -1489,7 +1489,7 @@ export default function AdminDashboard() {
             {/* ── View 2: Cumulative Multi-Round Leaderboard ── */}
             {leaderboardView === "CUMULATIVE" && (
               <div className="space-y-4">
-                
+
                 {/* Status banner when both rounds have not finished */}
                 {!cumulativeLeaderboard?.is_final ? (
                   <div className="glass-panel p-6 border border-bd-subtle bg-bg-raised/70 rounded-xl space-y-4">

@@ -12,6 +12,11 @@ export const viewport = {
 export const metadata: Metadata = {
   title: "EIC X Bazaar",
   description: "EIC X Bazaar · University Edition. A live stock market simulation where every headline moves prices.",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
   openGraph: {
     title: "EIC X Bazaar",
     description: "A live stock market simulation where every headline moves prices.",
@@ -31,6 +36,8 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <head>
+        <link rel="icon" href="/logo.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/logo.png" />
         <link
           rel="preload"
           href="/fonts/geist-font/Geist/webfonts/Geist[wght].woff2"

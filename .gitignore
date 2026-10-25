@@ -16,3 +16,4 @@ __pycache__/
 scratch*
 frontend/Haskoy/
 frontend/scratch_fix_admin.js
+*.pem
