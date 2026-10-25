@@ -44,9 +44,10 @@ app.add_middleware(
         "http://127.0.0.1:3000",
         "http://127.0.0.1:3001",
         frontend_url,
+        "https://bazaar.eicpec.com",
         "https://bazaar-updated.vercel.app"
     ],
-    allow_origin_regex=r"https://.*\.vercel\.app",
+    allow_origin_regex=r"https://.*(\.vercel\.app|\.eicpec\.com)",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
