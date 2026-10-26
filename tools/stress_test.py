@@ -88,10 +88,11 @@ class RealWorldStressTester:
                 print(f"   Login Latency: Avg = {avg_login:.1f}ms | p95 = {p95_login:.1f}ms")
 
             # ── 4. LIVE WEBSOCKET CONNECTIONS ──
-            print(f"\n[Phase 4] 📡 Connecting 250 Live WebSocket Streams...")
+            print(f"\n[Phase 4] 📡 Connecting {len(self.tokens)} Live WebSocket Streams...")
             ws_tasks = [self.run_ws_client(session, team_id, token) for team_id, token in self.tokens.items()]
-            ws_cluster = asyncio.create_task(asyncio.gather(*ws_tasks))
-            await asyncio.sleep(2) # Give 2s for connections to establish
+            ws_cluster = asyncio.create_task(asyncio.gather(*ws_tasks)) if ws_tasks else None
+            if ws_tasks:
+                await asyncio.sleep(2) # Give 2s for connections to establish
             print(f"✅ {self.ws_active_count} WebSocket connections actively listening for live ticks")
 
             # ── 5. START SESSION 1 ──
@@ -114,7 +115,8 @@ class RealWorldStressTester:
             total_order_time = time.time() - t_order_start
 
             # Stop WebSocket listeners
-            ws_cluster.cancel()
+            if ws_cluster:
+                ws_cluster.cancel()
 
             # ── 7. LEADERBOARD COMPUTATION UNDER LOAD ──
             print("\n[Phase 7] 🏆 Computing Full Live Leaderboard under trade load...")
@@ -135,7 +137,9 @@ class RealWorldStressTester:
                 self.login_latencies.append(lat)
                 if resp.status == 200:
                     data = await resp.json()
-                    self.tokens[team["team_id"]] = data["access_token"]
+                    tok = data.get("token") or data.get("access_token")
+                    if tok:
+                        self.tokens[team["team_id"]] = tok
         except Exception:
             pass
 
