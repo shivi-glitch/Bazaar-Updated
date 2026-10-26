@@ -211,4 +211,9 @@ class RealWorldStressTester:
         print("=" * 70)
 
 if __name__ == "__main__":
-    asyncio.run(RealWorldStressTester().run())
+    if sys.platform == "win32":
+        asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+    try:
+        asyncio.run(RealWorldStressTester().run())
+    except KeyboardInterrupt:
+        print("\nTest interrupted by user.")
