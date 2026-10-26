@@ -61,22 +61,27 @@ class RealWorldStressTester:
                     print(f"❌ Failed to generate teams: {await resp.text()}")
                     return
                 data = await resp.json()
-                self.teams = data.get("credentials", [])
+                self.teams = data.get("teams", data.get("credentials", []))
                 print(f"✅ Created {len(self.teams)} teams in database in {(time.time() - t_gen):.2f}s")
+
+            if not self.teams:
+                print("❌ No teams returned from server. Aborting.")
+                return
 
             # Pick 250 teams to perform simultaneous actions
             self.active_teams = self.teams[:ACTIVE_TEAMS_FOR_TEST]
 
             # ── 3. SIMULTANEOUS LOGIN SURGE (250 TEAMS AT ONCE) ──
-            print(f"\n[Phase 3] ⚡ SURGE: 250 Teams Logging in SIMULTANEOUSLY...")
+            print(f"\n[Phase 3] ⚡ SURGE: {len(self.active_teams)} Teams Logging in SIMULTANEOUSLY...")
             t_login_start = time.time()
             login_tasks = [self.login_single_team(session, team) for team in self.active_teams]
             await asyncio.gather(*login_tasks)
             login_duration = time.time() - t_login_start
             
             successful_logins = len(self.tokens)
-            print(f"✅ {successful_logins}/{ACTIVE_TEAMS_FOR_TEST} teams logged in successfully in {login_duration:.2f}s")
-            print(f"   Throughput: {successful_logins / login_duration:.1f} logins/sec")
+            safe_login_dur = max(0.001, login_duration)
+            print(f"✅ {successful_logins}/{len(self.active_teams)} teams logged in successfully in {login_duration:.2f}s")
+            print(f"   Throughput: {successful_logins / safe_login_dur:.1f} logins/sec")
             if self.login_latencies:
                 avg_login = sum(self.login_latencies) / len(self.login_latencies)
                 p95_login = sorted(self.login_latencies)[int(len(self.login_latencies) * 0.95)]
