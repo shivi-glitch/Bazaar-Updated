@@ -92,23 +92,43 @@ export function DashboardShell({
     router.push("/");
   };
   
+  // ── Countdown Timer ─────────────────────────────────────────────────────
+  // Rule: Tick smoothly every real second via setInterval.
+  // Only snap to server time when session STATE changes (not on every WS tick),
+  // which prevents the 2-4 min jump caused by batched/late tick arrivals.
   const [timeLeft, setTimeLeft] = useState(300);
 
+  // Sync clock ONCE when session state changes (READY→RUNNING, RUNNING→FINISHED, etc.)
   useEffect(() => {
+    if (sessionState === "RUNNING") {
+      // Estimate remaining time from current tick position
+      const serverSecs = Math.max(0, Math.floor((200 - (currentTick || 0)) * 1.5));
+      setTimeLeft(serverSecs);
+    } else if (sessionState === "FINISHED" || sessionState === "LOCKED") {
+      setTimeLeft(0);
+    } else if (sessionState === "READY" || sessionState === "PAUSED") {
+      setTimeLeft(300);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionState]); // ← intentionally NOT including currentTick — avoids jumps
+
+  // Smooth real-time countdown (1 tick per real second)
+  useEffect(() => {
+    if (sessionState !== "RUNNING") return;
     const timer = setInterval(() => {
-      setTimeLeft((prev) => (prev > 0 && sessionState === "RUNNING" ? prev - 1 : prev));
+      setTimeLeft((prev) => Math.max(0, prev - 1));
     }, 1000);
     return () => clearInterval(timer);
   }, [sessionState]);
 
+  // Gentle drift correction: only resync if we're >10s off from server estimate
+  // This prevents visible jumps while still catching major desync (e.g. tab sleep)
   useEffect(() => {
-    let serverSecs = Math.max(0, Math.floor((200 - currentTick) * 1.5));
-    if (sessionState === "FINISHED") serverSecs = 0;
-    else if (sessionState === "LOCKED" || sessionState === "READY") serverSecs = 300;
-    
+    if (sessionState !== "RUNNING") return;
+    const serverSecs = Math.max(0, Math.floor((200 - (currentTick || 0)) * 1.5));
     setTimeLeft((prev) => {
-      if (Math.abs(prev - serverSecs) > 2) return serverSecs;
-      return prev;
+      if (Math.abs(prev - serverSecs) > 10) return serverSecs; // big drift → hard snap
+      return prev; // small diff → let setInterval handle it smoothly
     });
   }, [currentTick, sessionState]);
 
