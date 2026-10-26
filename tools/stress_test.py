@@ -54,7 +54,7 @@ class RealWorldStressTester:
 
             # ── 2. TEAM GENERATION (300 TEAMS) ──
             print(f"\n[Phase 2] Generating {TOTAL_TEAMS_TO_GENERATE} Teams via Admin API...")
-            headers = {"X-Admin-Token": ADMIN_TOKEN}
+            headers = {"Authorization": f"Bearer {ADMIN_TOKEN}"}
             t_gen = time.time()
             async with session.post(f"{TARGET_URL}/admin/teams/generate?num_teams={TOTAL_TEAMS_TO_GENERATE}", headers=headers) as resp:
                 if resp.status != 200:
