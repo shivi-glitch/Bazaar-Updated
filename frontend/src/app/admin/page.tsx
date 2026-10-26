@@ -43,6 +43,35 @@ export default function AdminDashboard() {
   // Danger Zone State
   const [jumpTarget, setJumpTarget] = useState(1);
 
+  // ── Smooth countdown timer (placed at top to adhere to React Rules of Hooks) ──
+  const [adminTimeLeft, setAdminTimeLeft] = useState(300);
+  const sysSessionState = sysState?.states?.[sysState?.current_g] ?? "READY";
+
+  // Snap to server time only when session state changes
+  useEffect(() => {
+    if (!sysState) return;
+    const n = sysState.n || 0;
+    const serverSecs = Math.max(0, Math.floor((200 - n) * 1.5));
+    if (sysSessionState === "RUNNING") setAdminTimeLeft(serverSecs);
+    else if (sysSessionState === "FINISHED" || sysSessionState === "LOCKED") setAdminTimeLeft(0);
+    else setAdminTimeLeft(300);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sysSessionState]);
+
+  // Smooth 1s countdown
+  useEffect(() => {
+    if (sysSessionState !== "RUNNING") return;
+    const t = setInterval(() => setAdminTimeLeft((p) => Math.max(0, p - 1)), 1000);
+    return () => clearInterval(t);
+  }, [sysSessionState]);
+
+  // Gentle drift correction only when >10s off
+  useEffect(() => {
+    if (!sysState || sysSessionState !== "RUNNING") return;
+    const serverSecs = Math.max(0, Math.floor((200 - (sysState.n || 0)) * 1.5));
+    setAdminTimeLeft((prev) => Math.abs(prev - serverSecs) > 10 ? serverSecs : prev);
+  }, [sysState?.n, sysSessionState]);
+
   const getAdminToken = () => {
     if (typeof window === "undefined") return "";
     return sessionStorage.getItem("admin_auth") || "";
@@ -287,35 +316,6 @@ export default function AdminDashboard() {
   } else if (sysState.current_g >= 7 && sysState.current_g <= 11) {
     currentRoundStr = `Round 2 (Inst) • S${sysState.current_g - 6}`;
   }
-
-  // ── Smooth countdown timer (avoids jumps from batched WS ticks) ──────────
-  const [adminTimeLeft, setAdminTimeLeft] = useState(300);
-  const sysSessionState = sysState?.states?.[sysState?.current_g] ?? "READY";
-
-  // Snap to server time only when session state changes
-  useEffect(() => {
-    if (!sysState) return;
-    const n = sysState.n || 0;
-    const serverSecs = Math.max(0, Math.floor((200 - n) * 1.5));
-    if (sysSessionState === "RUNNING") setAdminTimeLeft(serverSecs);
-    else if (sysSessionState === "FINISHED" || sysSessionState === "LOCKED") setAdminTimeLeft(0);
-    else setAdminTimeLeft(300);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sysSessionState]);
-
-  // Smooth 1s countdown
-  useEffect(() => {
-    if (sysSessionState !== "RUNNING") return;
-    const t = setInterval(() => setAdminTimeLeft((p) => Math.max(0, p - 1)), 1000);
-    return () => clearInterval(t);
-  }, [sysSessionState]);
-
-  // Gentle drift correction only when >10s off
-  useEffect(() => {
-    if (!sysState || sysSessionState !== "RUNNING") return;
-    const serverSecs = Math.max(0, Math.floor((200 - (sysState.n || 0)) * 1.5));
-    setAdminTimeLeft((prev) => Math.abs(prev - serverSecs) > 10 ? serverSecs : prev);
-  }, [sysState?.n, sysSessionState]);
 
   const formattedTime = `${Math.floor(adminTimeLeft / 60).toString().padStart(2, '0')}:${(adminTimeLeft % 60).toString().padStart(2, '0')}`;
 
