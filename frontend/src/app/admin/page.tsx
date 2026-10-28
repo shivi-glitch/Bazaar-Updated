@@ -147,8 +147,8 @@ export default function AdminDashboard() {
     if (!isAuthenticated) return;
     fetchAllData();
 
-    // Fast 1s loop for session clock & teams
-    const sysInterval = setInterval(fetchSysData, 1000);
+    // Reduced to 3s to minimize layout thrashing from frequent re-renders
+    const sysInterval = setInterval(fetchSysData, 3000);
 
     // Dedicated 10s loop for Leaderboard automatic refresh
     const lbInterval = setInterval(fetchLeaderboard, 10000);
@@ -320,7 +320,7 @@ export default function AdminDashboard() {
   const formattedTime = `${Math.floor(adminTimeLeft / 60).toString().padStart(2, '0')}:${(adminTimeLeft % 60).toString().padStart(2, '0')}`;
 
   return (
-    <div className="min-h-[100dvh] w-full bg-bg-void text-tx-primary overflow-x-hidden font-sans selection:bg-accent-dim selection:text-accent flex flex-col">
+    <div className="min-h-[100dvh] w-full bg-bg-void text-tx-primary overflow-x-hidden font-sans selection:bg-accent-dim selection:text-accent flex flex-col" style={{ contain: 'layout style' }}>
 
       {/* ── TOP HEADER (LOGO AT LEFT, LOGOUT TERMINAL AT RIGHT) ── */}
       <header className="sticky top-0 z-30 w-full bg-bg-base/95 backdrop-blur-md border-b border-bd-subtle">
@@ -347,13 +347,13 @@ export default function AdminDashboard() {
             </div>
 
             {/* Center (Desktop Telemetry Pill) */}
-            <div className="hidden lg:flex items-center gap-4 text-xs font-mono bg-bg-raised/70 border border-bd-subtle px-4 py-1.5 rounded-full">
+            <div className="hidden lg:flex items-center gap-4 text-xs font-mono bg-bg-raised/70 border border-bd-subtle px-4 py-1.5 rounded-full" style={{ minWidth: '420px' }}>
               <div className="flex items-center gap-2">
                 <span className="text-tx-muted uppercase">Status:</span>
                 {sysState.is_frozen ? (
-                  <span className="text-loss font-bold">FROZEN</span>
+                  <span className="text-loss font-bold" style={{ minWidth: '52px', display: 'inline-block' }}>FROZEN</span>
                 ) : (
-                  <span className="text-gain font-bold flex items-center gap-1">
+                  <span className="text-gain font-bold flex items-center gap-1" style={{ minWidth: '52px' }}>
                     <span className="w-1.5 h-1.5 rounded-full bg-gain animate-pulse" />
                     ACTIVE
                   </span>
@@ -362,12 +362,12 @@ export default function AdminDashboard() {
               <span className="text-bd-strong">•</span>
               <div className="flex items-center gap-2">
                 <span className="text-tx-muted uppercase">Phase:</span>
-                <span className="text-tx-primary font-bold">{currentRoundStr}</span>
+                <span className="text-tx-primary font-bold" style={{ minWidth: '120px' }}>{currentRoundStr}</span>
               </div>
               <span className="text-bd-strong">•</span>
               <div className="flex items-center gap-2">
                 <span className="text-tx-muted uppercase">Clock:</span>
-                <span className="text-accent font-bold">T+{sysState.n || 0} ({formattedTime})</span>
+                <span className="text-accent font-bold" style={{ fontVariantNumeric: 'tabular-nums' }}>T+{sysState.n || 0} ({formattedTime})</span>
               </div>
             </div>
 
@@ -446,7 +446,7 @@ export default function AdminDashboard() {
                 </p>
               </div>
               <div className="flex items-center gap-2 self-start sm:self-auto font-mono text-xs">
-                <div className="px-3.5 py-2 rounded-lg border border-bd-subtle bg-bg-raised flex items-center gap-2">
+                <div className="px-3.5 py-2 rounded-lg border border-bd-subtle bg-bg-raised flex items-center gap-2" style={{ fontVariantNumeric: 'tabular-nums', minWidth: '200px' }}>
                   <span className="text-tx-muted uppercase font-bold">Tick:</span>
                   <span className="font-bold text-accent">T+{sysState.n || 0}</span>
                   <span className="text-tx-muted">•</span>
@@ -475,9 +475,9 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2" style={{ minWidth: '180px', justifyContent: 'flex-end' }}>
                   {sysState.current_g === 0 ? (
-                    <span className="text-xs font-mono font-bold px-2.5 py-1 rounded border border-amber-500/40 bg-amber-500/20 text-amber-200 uppercase tracking-wider animate-pulse">
+                    <span className="text-xs font-mono font-bold px-2.5 py-1 rounded border border-amber-500/40 bg-amber-500/20 text-amber-200 uppercase tracking-wider animate-pulse" style={{ minWidth: '120px', textAlign: 'center' }}>
                       Active: {sysState.states?.[0] || "READY"}
                     </span>
                   ) : (
@@ -493,9 +493,12 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {sysState.current_g === 0 && (
-                <div className="bg-bg-base/80 border border-amber-500/20 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
+              {/* Demo Telemetry - always reserve space to prevent layout shift */}
+              <div className={clsx(
+                "bg-bg-base/80 border border-amber-500/20 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 transition-opacity duration-200",
+                sysState.current_g === 0 ? "opacity-100" : "opacity-0 h-0 p-0 m-0 border-0 overflow-hidden"
+              )}>
+                  <div className="flex items-center gap-3" style={{ fontVariantNumeric: 'tabular-nums' }}>
                     <span className="text-xs font-mono font-bold text-amber-400 uppercase tracking-wider">
                       Demo Telemetry:
                     </span>
@@ -546,7 +549,6 @@ export default function AdminDashboard() {
                     </button>
                   </div>
                 </div>
-              )}
             </div>
 
             {/* Round 1 Block */}
@@ -580,30 +582,36 @@ export default function AdminDashboard() {
                           ? "border-accent/60 shadow-md shadow-accent/5 ring-1 ring-accent/30"
                           : "border-bd-subtle hover:border-bd-strong"
                       )}
+                      style={{ minHeight: '120px' }}
                     >
-                      <div className="flex justify-between items-center">
+                      <div className="flex justify-between items-center" style={{ minHeight: '28px' }}>
                         <div className="flex items-center gap-2">
                           <span className="font-mono font-bold text-sm text-tx-primary">Session {g}</span>
-                          {isCurrent && (
+                          {isCurrent ? (
                             <span className="text-[10px] font-mono font-bold text-accent bg-accent-dim px-2 py-0.5 rounded border border-accent-border uppercase">
+                              Active
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded border border-transparent uppercase invisible">
                               Active
                             </span>
                           )}
                         </div>
 
                         <div className="flex items-center gap-1.5">
-                          {isCurrent && (isRunning || isPaused) && (
-                            <span className="text-xs font-mono font-bold text-gain bg-gain-dim px-2 py-0.5 rounded border border-gain-border">
-                              {formattedTime}
-                            </span>
-                          )}
+                          <span className={clsx(
+                            "text-xs font-mono font-bold text-gain bg-gain-dim px-2 py-0.5 rounded border border-gain-border",
+                            isCurrent && (isRunning || isPaused) ? "visible" : "invisible"
+                          )} style={{ fontVariantNumeric: 'tabular-nums', minWidth: '55px', textAlign: 'center' }}>
+                            {formattedTime}
+                          </span>
                           <span className={clsx(
                             "text-xs font-mono font-bold px-2 py-0.5 rounded border uppercase tracking-wider",
                             isRunning ? "text-gain bg-gain-dim border-gain-border" :
                               isPaused ? "text-warn bg-warn-dim border-warn-border" :
                                 state === "ENDED" ? "text-tx-muted bg-bg-raised border-bd-subtle" :
                                   "text-tx-secondary bg-bg-raised border-bd-subtle"
-                          )}>
+                          )} style={{ minWidth: '65px', textAlign: 'center' }}>
                             {state}
                           </span>
                         </div>
@@ -683,31 +691,37 @@ export default function AdminDashboard() {
                           ? "border-purple-500/60 shadow-md shadow-purple-500/10 ring-1 ring-purple-500/30"
                           : "border-bd-subtle hover:border-bd-strong"
                       )}
+                      style={{ minHeight: '120px' }}
                     >
-                      <div className="flex justify-between items-center">
+                      <div className="flex justify-between items-center" style={{ minHeight: '28px' }}>
                         <div className="flex items-center gap-2">
                           <span className="font-mono font-bold text-sm text-tx-primary">Session {g - 6}</span>
                           <span className="text-xs font-mono text-tx-muted">(S{g})</span>
-                          {isCurrent && (
+                          {isCurrent ? (
                             <span className="text-[10px] font-mono font-bold text-purple-300 bg-purple-500/20 px-2 py-0.5 rounded border border-purple-500/40 uppercase">
+                              Active
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded border border-transparent uppercase invisible">
                               Active
                             </span>
                           )}
                         </div>
 
                         <div className="flex items-center gap-1.5">
-                          {isCurrent && (isRunning || isPaused) && (
-                            <span className="text-xs font-mono font-bold text-gain bg-gain-dim px-2 py-0.5 rounded border border-gain-border">
-                              {formattedTime}
-                            </span>
-                          )}
+                          <span className={clsx(
+                            "text-xs font-mono font-bold text-gain bg-gain-dim px-2 py-0.5 rounded border border-gain-border",
+                            isCurrent && (isRunning || isPaused) ? "visible" : "invisible"
+                          )} style={{ fontVariantNumeric: 'tabular-nums', minWidth: '55px', textAlign: 'center' }}>
+                            {formattedTime}
+                          </span>
                           <span className={clsx(
                             "text-xs font-mono font-bold px-2 py-0.5 rounded border uppercase tracking-wider",
                             isRunning ? "text-gain bg-gain-dim border-gain-border" :
                               isPaused ? "text-warn bg-warn-dim border-warn-border" :
                                 state === "ENDED" ? "text-tx-muted bg-bg-raised border-bd-subtle" :
                                   "text-tx-secondary bg-bg-raised border-bd-subtle"
-                          )}>
+                          )} style={{ minWidth: '65px', textAlign: 'center' }}>
                             {state}
                           </span>
                         </div>
