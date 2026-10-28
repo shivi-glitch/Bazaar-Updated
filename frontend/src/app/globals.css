@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 @variant dark (&:where(.dark, .dark *));
 
@@ -71,8 +72,8 @@
   --text-body-md:    clamp(14px, 1.2vw, 16px);
   --text-label:      12px;
 
-  /* ── FONTS ───────────────────────────────────────── */
-  --font-sans: "Geist", "Haskoy", system-ui, sans-serif;
+  /* ── FONTS (Groww-grade Clean Typography) ────────── */
+  --font-sans: "Inter", "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, monospace;
 }
 
@@ -223,6 +224,11 @@ html:not(.dark) {
   }
   .price-cell.tick-up   { color: var(--color-gain); }
   .price-cell.tick-down { color: var(--color-loss); }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1, "zero" 1;
+  }
 }
 
 @keyframes marquee {

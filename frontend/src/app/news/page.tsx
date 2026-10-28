@@ -67,15 +67,15 @@ export function NewsTab() {
   const getSourceBadge = (source: string) => {
     switch(source) {
       case "NP":
-        return <span className="px-2 py-0.5 rounded-sm text-[10px] font-mono font-bold tracking-wider uppercase bg-accent-dim border border-accent-border text-accent">Newspaper</span>;
+        return <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Newspaper</span>;
       case "AN":
-        return <span className="px-2 py-0.5 rounded-sm text-[10px] font-mono font-bold tracking-wider uppercase bg-cyan-500/10 border border-cyan-500/25 text-cyan-400">Analyst Wire</span>;
+        return <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Analyst Wire</span>;
       case "FF":
-        return <span className="px-2 py-0.5 rounded-sm text-[10px] font-mono font-bold tracking-wider uppercase bg-warn-dim border border-warn-border text-warn">Finfluencer</span>;
+        return <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">Fast Feed</span>;
       case "IN":
-        return <span className="px-2 py-0.5 rounded-sm text-[10px] font-mono font-bold tracking-wider uppercase bg-loss-dim border border-loss-border text-loss">Insider Rumor</span>;
+        return <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-purple-500/10 text-purple-300 border border-purple-500/20">Insider Wire</span>;
       default:
-        return <span className="px-2 py-0.5 rounded-sm text-[10px] font-mono font-bold tracking-wider uppercase bg-bg-base border border-bd-subtle text-tx-secondary">{source}</span>;
+        return <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-bg-raised text-tx-secondary border border-bd-subtle">{source}</span>;
     }
   };
 
@@ -109,17 +109,17 @@ export function NewsTab() {
             Real-time multi-round intelligence feed · Older catalysts cascade downward
           </p>
         </div>
-        <div className="flex items-center gap-2 font-mono text-[11px] text-tx-muted bg-bg-raised px-3 py-1.5 rounded-md border border-bd-subtle">
+        <div className="flex items-center gap-2 font-sans text-xs text-tx-muted bg-bg-raised px-3 py-1.5 rounded-lg border border-bd-subtle tabular-nums">
           <span className="w-2 h-2 rounded-full bg-gain animate-pulse" />
           <span>{news.length} Catalysts Logged</span>
         </div>
       </div>
 
       {news.length === 0 ? (
-        <div className="flex flex-col justify-center items-center h-64 text-tx-muted uppercase tracking-wider text-[11px] font-mono border border-dashed border-bd-subtle rounded-xl bg-bg-raised/40 p-6 text-center space-y-2">
+        <div className="flex flex-col justify-center items-center h-64 text-tx-muted text-xs font-sans border border-dashed border-bd-subtle rounded-xl bg-bg-raised/40 p-6 text-center space-y-2">
           <Newspaper className="w-8 h-8 opacity-25 mb-1" />
-          <div className="font-bold text-tx-secondary">Awaiting breaking news wire...</div>
-          <p className="text-[12px] text-tx-muted normal-case max-w-xs">
+          <div className="font-semibold text-tx-secondary">Awaiting breaking news wire...</div>
+          <p className="text-xs text-tx-muted max-w-xs">
             Market catalysts and news headlines will populate here in real-time as events unfold.
           </p>
         </div>
@@ -129,7 +129,7 @@ export function NewsTab() {
           
           {/* Vertical center divider line (centered on sm+, left-aligned on mobile) */}
           <div 
-            className="absolute top-0 bottom-0 left-4 sm:left-1/2 -translate-x-1/2 w-[2px] bg-gradient-to-b from-accent/60 via-bd-subtle to-transparent" 
+            className="absolute top-0 bottom-0 left-4 sm:left-1/2 -translate-x-1/2 w-[2px] bg-gradient-to-b from-accent/40 via-bd-subtle to-transparent" 
             aria-hidden="true"
           />
 
@@ -148,10 +148,10 @@ export function NewsTab() {
                 >
                   {/* Timeline Node on the center line */}
                   <div 
-                    className="absolute left-4 sm:left-1/2 -translate-x-1/2 top-4 w-4 h-4 rounded-full bg-bg-base border-2 border-accent flex items-center justify-center z-10 shadow-[0_0_8px_rgba(0,212,170,0.4)]"
+                    className="absolute left-4 sm:left-1/2 -translate-x-1/2 top-4 w-3.5 h-3.5 rounded-full bg-bg-base border-2 border-emerald-400 flex items-center justify-center z-10"
                     aria-hidden="true"
                   >
-                    <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                   </div>
 
                   {/* News Card: Left for Even, Right for Odd on sm+; Indented right on mobile */}
@@ -161,21 +161,21 @@ export function NewsTab() {
                       isEven ? "sm:pr-4" : "sm:pl-4"
                     )}
                   >
-                    <div className="bg-bg-raised/85 hover:bg-bg-raised border border-bd-subtle hover:border-accent-border/60 rounded-xl p-4 sm:p-5 transition-all shadow-card flex flex-col gap-3 group">
+                    <div className="bg-bg-raised/85 hover:bg-bg-raised border border-bd-subtle hover:border-bd-strong rounded-xl p-4 sm:p-5 transition-all shadow-card flex flex-col gap-3 group">
                       
                       {/* Meta header: Session + Source + Ticker */}
                       <div className="flex items-center justify-between gap-2 flex-wrap">
                         <div className="flex items-center gap-2 flex-wrap">
                           {getSourceBadge(item.source)}
                           {item.ticker && (
-                            <span className="px-2 py-0.5 rounded-sm text-[10px] font-mono font-bold uppercase bg-bg-base border border-bd-subtle text-tx-primary">
+                            <span className="px-2 py-0.5 rounded-md text-xs font-semibold bg-bg-base border border-bd-subtle text-tx-primary font-sans">
                               {item.ticker}
                             </span>
                           )}
                         </div>
 
                         {sessionInfo && (
-                          <span className="text-[10px] font-mono font-bold text-tx-muted uppercase tracking-wider bg-bg-base px-2 py-0.5 rounded border border-bd-hairline">
+                          <span className="text-xs font-sans text-tx-muted tabular-nums bg-bg-base px-2 py-0.5 rounded-md border border-bd-hairline">
                             {sessionInfo.roundText} {sessionInfo.tickText && `· ${sessionInfo.tickText}`}
                           </span>
                         )}

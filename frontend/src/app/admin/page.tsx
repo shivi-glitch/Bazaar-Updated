@@ -5,7 +5,8 @@ import { api } from "@/lib/api";
 import {
   Activity, Radio, Users, AlertTriangle, Search, LineChart, Trophy, LogOut,
   Sun, Moon, X, Zap, ArrowUpRight, ArrowDownRight, CheckCircle2, AlertCircle,
-  Lock, ShieldAlert, Plus, Power, RotateCcw, KeyRound, RefreshCw, Terminal
+  Lock, ShieldAlert, Plus, Power, RotateCcw, KeyRound, RefreshCw, Terminal,
+  Eye, EyeOff
 } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import clsx from "clsx";
@@ -40,8 +41,11 @@ export default function AdminDashboard() {
   const [newsTicker, setNewsTicker] = useState("RLNT");
   const [newsText, setNewsText] = useState("");
 
-  // Danger Zone State
-  const [jumpTarget, setJumpTarget] = useState(1);
+  // News Headline Reveal State
+  const [revealedHeadlines, setRevealedHeadlines] = useState<Record<string, boolean>>({});
+  const toggleHeadline = (key: string) => {
+    setRevealedHeadlines((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
   // ── Smooth countdown timer (placed at top to adhere to React Rules of Hooks) ──
   const [adminTimeLeft, setAdminTimeLeft] = useState(300);
@@ -232,41 +236,42 @@ export default function AdminDashboard() {
         <div className="absolute top-6 right-6">
           <button
             onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-            className="p-2.5 rounded-md border border-bd-subtle bg-bg-base hover:bg-bg-raised text-tx-secondary hover:text-tx-primary transition-colors"
+            className="p-2 rounded-lg border border-bd-subtle bg-bg-base hover:bg-bg-raised text-tx-secondary hover:text-tx-primary transition-colors cursor-pointer"
             title="Toggle theme"
           >
             {resolvedTheme === "dark" ? <Sun className="w-4 h-4 text-accent" /> : <Moon className="w-4 h-4 text-accent" />}
           </button>
         </div>
 
-        <div className="w-full max-w-md bg-bg-raised border border-bd-subtle rounded-xl p-8 shadow-card relative overflow-hidden">
-          <div className="flex flex-col items-center mb-8 text-center">
-            <div className="w-12 h-12 rounded-lg bg-accent-dim border border-accent-border flex items-center justify-center mb-4">
-              <Lock className="w-5 h-5 text-accent" />
+        <div className="w-full max-w-sm bg-bg-base border border-bd-subtle rounded-2xl p-7 shadow-xs relative">
+          <div className="flex flex-col items-center mb-6 text-center">
+            <div className="w-10 h-10 rounded-xl bg-bg-raised border border-bd-subtle flex items-center justify-center mb-3">
+              <Lock className="w-4 h-4 text-emerald-400" />
             </div>
 
-            <h1 className="text-2xl font-bold text-tx-primary tracking-tight">Admin Terminal</h1>
+            <h1 className="text-xl font-bold text-tx-primary tracking-tight">Admin Terminal</h1>
+            <p className="text-xs text-tx-secondary mt-1">Authenticate session to enter controls</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-[10px] font-mono uppercase tracking-wider text-tx-muted mb-2 font-bold">
-                Do you still love her?
+              <label className="block text-xs font-medium text-tx-secondary mb-1.5">
+                Admin Passkey
               </label>
               <input
                 type="password"
                 value={passwordInput}
                 onChange={(e) => setPasswordInput(e.target.value)}
                 placeholder="••••••••••••"
-                className="w-full bg-bg-base border border-bd-subtle rounded-lg px-4 py-3 text-tx-primary font-mono text-center tracking-widest text-sm outline-none focus:border-accent transition-colors placeholder:text-tx-muted"
+                className="w-full bg-bg-raised border border-bd-subtle rounded-lg px-3.5 py-2.5 text-tx-primary text-center text-sm outline-none focus:border-accent transition-colors placeholder:text-tx-muted"
                 autoFocus
               />
             </div>
             <button
               type="submit"
-              className="w-full bg-accent hover:bg-accent/90 text-tx-inverse font-mono font-bold text-xs uppercase tracking-wider py-3 rounded-lg transition-all shadow-md active:scale-[0.98]"
+              className="w-full bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-xs py-2.5 rounded-lg transition-colors cursor-pointer"
             >
-              Authenticate your Love
+              Sign In to Terminal
             </button>
           </form>
         </div>
@@ -277,9 +282,9 @@ export default function AdminDashboard() {
   // ── 1. LOADING STATE ──────────────────────────────────────────
   if (!sysState || !leaderboard) {
     return (
-      <div className="h-[100dvh] flex flex-col items-center justify-center bg-bg-void text-tx-secondary font-mono text-xs gap-3">
-        <Activity className="w-6 h-6 text-accent animate-pulse" />
-        <span className="uppercase tracking-widest">Connecting to simulation telemetry...</span>
+      <div className="h-[100dvh] flex flex-col items-center justify-center bg-bg-void text-tx-secondary text-xs gap-3 font-sans">
+        <Activity className="w-5 h-5 text-emerald-400 animate-pulse" />
+        <span className="text-tx-muted">Connecting to simulation telemetry...</span>
       </div>
     );
   }
@@ -298,7 +303,7 @@ export default function AdminDashboard() {
   });
 
   const tabs = [
-    { id: "SESSION" as const, name: "Session", icon: Activity },
+    { id: "SESSION" as const, name: "Sessions", icon: Activity },
     { id: "TEAMS" as const, name: "Teams", badge: teams.length, icon: Users },
     { id: "ASSETS" as const, name: "Assets", badge: activeAssets.length, icon: LineChart },
     { id: "NEWS" as const, name: "News", icon: Radio },
@@ -310,11 +315,11 @@ export default function AdminDashboard() {
 
   let currentRoundStr = "Market Halted";
   if (sysState.current_g === 0) {
-    currentRoundStr = "Demo Practice Round (7 Assets)";
+    currentRoundStr = "Demo Practice (7 Assets)";
   } else if (sysState.current_g < 7 && sysState.current_g > 0) {
-    currentRoundStr = `Round 1 (Retail) • S${sysState.current_g}`;
+    currentRoundStr = `Round 1 (Retail) · S${sysState.current_g}`;
   } else if (sysState.current_g >= 7 && sysState.current_g <= 11) {
-    currentRoundStr = `Round 2 (Inst) • S${sysState.current_g - 6}`;
+    currentRoundStr = `Round 2 (Inst) · S${sysState.current_g - 6}`;
   }
 
   const formattedTime = `${Math.floor(adminTimeLeft / 60).toString().padStart(2, '0')}:${(adminTimeLeft % 60).toString().padStart(2, '0')}`;
@@ -322,79 +327,70 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-[100dvh] w-full bg-bg-void text-tx-primary overflow-x-hidden font-sans selection:bg-accent-dim selection:text-accent flex flex-col" style={{ contain: 'layout style' }}>
 
-      {/* ── TOP HEADER (LOGO AT LEFT, LOGOUT TERMINAL AT RIGHT) ── */}
+      {/* ── TOP HEADER (CLEAN GROWW-STYLE PRECISION BAR) ── */}
       <header className="sticky top-0 z-30 w-full bg-bg-base/95 backdrop-blur-md border-b border-bd-subtle">
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
           {/* Row 1: Brand & Terminal Controls */}
-          <div className="h-16 flex items-center justify-between gap-4">
+          <div className="h-15 flex items-center justify-between gap-4">
 
             {/* Left: Logo */}
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-accent-dim border border-accent-border flex items-center justify-center">
-                <Activity className="w-4 h-4 text-accent" />
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                <Activity className="w-4 h-4" />
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-lg font-black tracking-tight"><span className="text-gain">MER</span><span className="text-loss">X</span></span>
-                <span className="bg-accent-dim text-accent text-[10px] font-mono px-2 py-0.5 rounded uppercase tracking-widest border border-accent-border font-bold">
-                  ADMIN
+                <span className="text-base font-bold tracking-tight"><span className="text-gain">MER</span><span className="text-loss">X</span></span>
+                <span className="bg-bg-raised text-tx-secondary text-[11px] font-medium px-2 py-0.5 rounded-md border border-bd-subtle">
+                  Admin
                 </span>
-                <span className={clsx(
-                  "w-2 h-2 rounded-full ml-1",
-                  sysState.is_frozen ? "bg-loss animate-pulse" : "bg-gain animate-pulse"
-                )} />
               </div>
             </div>
 
-            {/* Center (Desktop Telemetry Pill) */}
-            <div className="hidden lg:flex items-center gap-4 text-xs font-mono bg-bg-raised/70 border border-bd-subtle px-4 py-1.5 rounded-full" style={{ minWidth: '420px' }}>
-              <div className="flex items-center gap-2">
-                <span className="text-tx-muted uppercase">Status:</span>
-                {sysState.is_frozen ? (
-                  <span className="text-loss font-bold" style={{ minWidth: '52px', display: 'inline-block' }}>FROZEN</span>
-                ) : (
-                  <span className="text-gain font-bold flex items-center gap-1" style={{ minWidth: '52px' }}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-gain animate-pulse" />
-                    ACTIVE
-                  </span>
-                )}
+            {/* Center (Desktop Telemetry Strip - Clean & Tabular) */}
+            <div className="hidden lg:flex items-center gap-3 text-xs bg-bg-raised/60 border border-bd-subtle px-4 py-1.5 rounded-full">
+              <div className="flex items-center gap-1.5">
+                <span className={clsx("w-2 h-2 rounded-full", sysState.is_frozen ? "bg-loss" : "bg-gain")} />
+                <span className={clsx("font-semibold", sysState.is_frozen ? "text-loss" : "text-gain")}>
+                  {sysState.is_frozen ? "Frozen" : "Active"}
+                </span>
               </div>
-              <span className="text-bd-strong">•</span>
-              <div className="flex items-center gap-2">
-                <span className="text-tx-muted uppercase">Phase:</span>
-                <span className="text-tx-primary font-bold" style={{ minWidth: '120px' }}>{currentRoundStr}</span>
+              <span className="text-bd-strong">·</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-tx-muted">Phase:</span>
+                <span className="text-tx-primary font-medium">{currentRoundStr}</span>
               </div>
-              <span className="text-bd-strong">•</span>
-              <div className="flex items-center gap-2">
-                <span className="text-tx-muted uppercase">Clock:</span>
-                <span className="text-accent font-bold" style={{ fontVariantNumeric: 'tabular-nums' }}>T+{sysState.n || 0} ({formattedTime})</span>
+              <span className="text-bd-strong">·</span>
+              <div className="flex items-center gap-1.5 tabular-nums">
+                <span className="text-tx-muted">Clock:</span>
+                <span className="text-emerald-400 font-semibold">T+{sysState.n || 0}</span>
+                <span className="text-tx-secondary">({formattedTime})</span>
               </div>
             </div>
 
-            {/* Right: Theme Toggle & Logout Terminal */}
-            <div className="flex items-center gap-2.5">
+            {/* Right: Theme Toggle & Logout */}
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-                className="p-2 sm:px-2.5 sm:py-2 rounded-lg border border-bd-subtle hover:border-bd-strong bg-bg-raised text-tx-secondary hover:text-tx-primary transition-colors flex items-center gap-1.5"
-                title="Toggle Light / Dark Mode"
+                className="p-2 rounded-lg border border-bd-subtle hover:bg-bg-raised text-tx-secondary hover:text-tx-primary transition-colors flex items-center justify-center"
+                title="Toggle Theme"
               >
                 {resolvedTheme === "dark" ? <Sun className="w-4 h-4 text-accent" /> : <Moon className="w-4 h-4 text-accent" />}
               </button>
 
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-xs font-mono font-bold text-loss hover:text-loss bg-loss-dim/40 hover:bg-loss-dim border border-loss-border/40 hover:border-loss-border transition-all active:scale-[0.98]"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-tx-secondary hover:text-loss hover:bg-loss-dim/40 border border-bd-subtle hover:border-loss-border/40 transition-colors"
               >
                 <Terminal className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Logout Terminal</span>
-                <span className="sm:hidden">Logout</span>
+                <span>Logout</span>
               </button>
             </div>
 
           </div>
 
           {/* Row 2: Top Tabs Navigation */}
-          <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto scrollbar-none border-t border-bd-hairline py-1.5">
+          <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto scrollbar-none border-t border-bd-hairline py-1.5">
             {tabs.map(tab => {
               const isActive = activeTab === tab.id;
               return (
@@ -402,20 +398,20 @@ export default function AdminDashboard() {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={clsx(
-                    "flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-lg font-mono text-xs uppercase tracking-wider transition-all whitespace-nowrap",
+                    "flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap cursor-pointer",
                     isActive
-                      ? "bg-accent-dim text-accent border border-accent-border font-bold shadow-sm"
-                      : "text-tx-secondary hover:text-tx-primary hover:bg-bg-raised/70 border border-transparent"
+                      ? "bg-bg-raised text-tx-primary border border-bd-subtle font-semibold shadow-xs"
+                      : "text-tx-secondary hover:text-tx-primary hover:bg-bg-raised/40 border border-transparent"
                   )}
                 >
                   <tab.icon className={clsx("w-3.5 h-3.5", isActive ? "text-accent" : "text-tx-muted")} />
                   <span>{tab.name}</span>
                   {tab.badge !== undefined && (
                     <span className={clsx(
-                      "text-[10px] px-1.5 py-0.2 rounded font-mono border ml-0.5",
+                      "text-[10px] px-1.5 py-0.2 rounded-full tabular-nums font-medium",
                       isActive
-                        ? "bg-accent text-tx-inverse border-accent font-bold"
-                        : "bg-bg-raised text-tx-muted border-bd-subtle"
+                        ? "bg-accent/15 text-accent border border-accent/25"
+                        : "bg-bg-raised text-tx-muted border border-bd-subtle"
                     )}>
                       {tab.badge}
                     </span>
@@ -445,46 +441,43 @@ export default function AdminDashboard() {
                   Trigger, pause, and advance market simulations across Round 1 & Round 2.
                 </p>
               </div>
-              <div className="flex items-center gap-2 self-start sm:self-auto font-mono text-xs">
-                <div className="px-3.5 py-2 rounded-lg border border-bd-subtle bg-bg-raised flex items-center gap-2" style={{ fontVariantNumeric: 'tabular-nums', minWidth: '200px' }}>
-                  <span className="text-tx-muted uppercase font-bold">Tick:</span>
-                  <span className="font-bold text-accent">T+{sysState.n || 0}</span>
-                  <span className="text-tx-muted">•</span>
-                  <span className="text-tx-primary font-bold">{formattedTime} remaining</span>
+              <div className="flex items-center gap-2 self-start sm:self-auto text-xs">
+                <div className="px-3.5 py-1.5 rounded-lg border border-bd-subtle bg-bg-raised flex items-center gap-2 tabular-nums">
+                  <span className="text-tx-muted font-medium">Tick</span>
+                  <span className="font-semibold text-tx-primary">T+{sysState.n || 0}</span>
+                  <span className="text-tx-muted">·</span>
+                  <span className="text-emerald-400 font-semibold">{formattedTime} remaining</span>
                 </div>
               </div>
             </div>
 
-            {/* Demo Round Block */}
-            <div className="glass-panel p-5 sm:p-6 border border-amber-500/30 bg-amber-500/[0.03] rounded-2xl relative overflow-hidden">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-amber-500/20">
-                <div className="flex items-center gap-2.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-base sm:text-lg font-bold text-tx-primary tracking-tight">
-                        Demo Practice Round
-                      </h2>
-                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-500/15 border border-amber-500/30 text-amber-300">
-                        Practice Session
-                      </span>
-                    </div>
-                    <p className="text-xs text-tx-secondary mt-0.5">
-                      Practice session with the 7 R1S1 assets, realistic randomized prices, and simulated breaking news shocks.
-                    </p>
+            {/* Demo Round Block (Clean & Subtle) */}
+            <div className="p-5 border border-bd-subtle bg-bg-base hover:border-bd-strong rounded-xl transition-all">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-bd-hairline">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-base font-semibold text-tx-primary tracking-tight">
+                      Demo Practice Round
+                    </h2>
+                    <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/25 text-amber-400">
+                      Practice Environment
+                    </span>
                   </div>
+                  <p className="text-xs text-tx-secondary mt-1">
+                    7 core assets with randomized order flow and simulated breaking news shocks.
+                  </p>
                 </div>
 
-                <div className="flex items-center gap-2" style={{ minWidth: '180px', justifyContent: 'flex-end' }}>
+                <div className="flex items-center gap-2 self-start sm:self-auto">
                   {sysState.current_g === 0 ? (
-                    <span className="text-xs font-mono font-bold px-2.5 py-1 rounded border border-amber-500/40 bg-amber-500/20 text-amber-200 uppercase tracking-wider animate-pulse" style={{ minWidth: '120px', textAlign: 'center' }}>
+                    <span className="text-xs font-medium px-2.5 py-1 rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-300">
                       Active: {sysState.states?.[0] || "READY"}
                     </span>
                   ) : (
                     <button
                       disabled={loading}
                       onClick={() => handleAction("/admin/demo/unlock")}
-                      className="px-3.5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-tx-inverse font-mono font-bold text-xs uppercase tracking-wider rounded-lg transition-all shadow-md active:scale-[0.98] flex items-center gap-2 cursor-pointer"
+                      className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-medium text-xs rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                     >
                       <Zap className="w-3.5 h-3.5" />
                       Unlock Demo Round
@@ -493,75 +486,70 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* Demo Telemetry - always reserve space to prevent layout shift */}
+              {/* Demo Telemetry */}
               <div className={clsx(
-                "bg-bg-base/80 border border-amber-500/20 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 transition-opacity duration-200",
+                "bg-bg-raised/70 border border-bd-subtle rounded-lg p-3.5 mt-3 flex flex-col sm:flex-row items-center justify-between gap-3 transition-opacity duration-200",
                 sysState.current_g === 0 ? "opacity-100" : "opacity-0 h-0 p-0 m-0 border-0 overflow-hidden"
               )}>
-                  <div className="flex items-center gap-3" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                    <span className="text-xs font-mono font-bold text-amber-400 uppercase tracking-wider">
-                      Demo Telemetry:
-                    </span>
-                    <span className="text-xs font-mono font-bold text-tx-primary">
-                      Tick T+{sysState.n || 0} / 200
-                    </span>
-                    <span className="text-tx-muted">•</span>
-                    <span className="text-xs font-mono font-bold text-accent">
-                      {formattedTime} remaining
-                    </span>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2">
-                    <button
-                      disabled={loading}
-                      onClick={() => handleAction("/admin/sessions/0/start")}
-                      className="bg-gain-dim text-gain hover:bg-gain hover:text-tx-inverse border border-gain-border text-xs font-mono font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-lg transition-all active:scale-[0.98]"
-                    >
-                      Start Demo
-                    </button>
-                    <button
-                      disabled={loading}
-                      onClick={() => handleAction("/admin/sessions/0/pause")}
-                      className="bg-warn-dim text-warn hover:bg-warn hover:text-tx-inverse border border-warn-border text-xs font-mono font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-lg transition-all active:scale-[0.98]"
-                    >
-                      Pause
-                    </button>
-                    <button
-                      disabled={loading}
-                      onClick={() => handleAction("/admin/sessions/0/end")}
-                      className="bg-bg-raised text-tx-secondary hover:text-tx-primary border border-bd-subtle text-xs font-mono font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-lg transition-all active:scale-[0.98]"
-                    >
-                      End
-                    </button>
-                    <button
-                      disabled={loading}
-                      onClick={() => handleAction("/admin/demo/reset")}
-                      className="bg-accent-dim text-accent hover:bg-accent hover:text-tx-inverse border border-accent-border text-xs font-mono font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-lg transition-all active:scale-[0.98]"
-                    >
-                      Reset Demo
-                    </button>
-                    <button
-                      disabled={loading}
-                      onClick={() => handleAction("/admin/demo/exit")}
-                      className="bg-loss-dim text-loss hover:bg-loss hover:text-tx-inverse border border-loss-border text-xs font-mono font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-lg transition-all active:scale-[0.98]"
-                    >
-                      Exit Demo (Return to S1)
-                    </button>
-                  </div>
+                <div className="flex items-center gap-2.5 text-xs tabular-nums">
+                  <span className="font-medium text-amber-400">Demo Telemetry</span>
+                  <span className="text-tx-muted">·</span>
+                  <span className="font-semibold text-tx-primary">Tick T+{sysState.n || 0} / 200</span>
+                  <span className="text-tx-muted">·</span>
+                  <span className="font-semibold text-emerald-400">{formattedTime} remaining</span>
                 </div>
+
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <button
+                    disabled={loading}
+                    onClick={() => handleAction("/admin/sessions/0/start")}
+                    className="bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500 hover:text-black border border-emerald-500/25 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                  >
+                    Start Demo
+                  </button>
+                  <button
+                    disabled={loading}
+                    onClick={() => handleAction("/admin/sessions/0/pause")}
+                    className="bg-amber-500/10 text-amber-400 hover:bg-amber-500 hover:text-black border border-amber-500/25 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                  >
+                    Pause
+                  </button>
+                  <button
+                    disabled={loading}
+                    onClick={() => handleAction("/admin/sessions/0/end")}
+                    className="bg-bg-raised text-tx-secondary hover:text-tx-primary border border-bd-subtle text-xs font-medium px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                  >
+                    End
+                  </button>
+                  <button
+                    disabled={loading}
+                    onClick={() => handleAction("/admin/demo/reset")}
+                    className="bg-bg-raised text-tx-secondary hover:text-tx-primary border border-bd-subtle text-xs font-medium px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                  >
+                    Reset Demo
+                  </button>
+                  <button
+                    disabled={loading}
+                    onClick={() => handleAction("/admin/demo/exit")}
+                    className="bg-loss-dim/40 text-loss hover:bg-loss hover:text-white border border-loss-border/30 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                  >
+                    Exit Demo
+                  </button>
+                </div>
+              </div>
             </div>
 
-            {/* Round 1 Block */}
-            <div className="glass-panel p-5 sm:p-6 border border-bd-subtle">
+            {/* Round 1 Block (Clean Modern Groww Grid) */}
+            <div className="p-5 sm:p-6 border border-bd-subtle bg-bg-base rounded-xl">
               <div className="flex items-center justify-between mb-5 pb-3 border-b border-bd-hairline">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-accent" />
+                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
                     <h2 className="text-base sm:text-lg font-bold text-tx-primary tracking-tight">Round 1: Retail Order Flow</h2>
                   </div>
-                  <p className="text-xs text-tx-secondary mt-0.5">7 core assets • Retail participant market making</p>
+                  <p className="text-xs text-tx-secondary mt-0.5">7 core assets · Retail participant market making</p>
                 </div>
-                <span className="text-xs font-mono uppercase tracking-wider px-2.5 py-1 rounded bg-bg-base border border-bd-subtle text-tx-secondary font-bold">
+                <span className="text-xs font-medium px-2.5 py-1 rounded-md bg-bg-raised border border-bd-subtle text-tx-secondary">
                   Sessions 1 – 6
                 </span>
               </div>
@@ -577,22 +565,17 @@ export default function AdminDashboard() {
                     <div
                       key={g}
                       className={clsx(
-                        "p-4 rounded-xl border transition-all flex flex-col justify-between gap-4 bg-bg-base",
+                        "p-4 rounded-xl border transition-all flex flex-col justify-between gap-3.5 bg-bg-base",
                         isCurrent
-                          ? "border-accent/60 shadow-md shadow-accent/5 ring-1 ring-accent/30"
+                          ? "border-emerald-500/40 bg-emerald-500/[0.02] shadow-xs"
                           : "border-bd-subtle hover:border-bd-strong"
                       )}
-                      style={{ minHeight: '120px' }}
                     >
                       <div className="flex justify-between items-center" style={{ minHeight: '28px' }}>
                         <div className="flex items-center gap-2">
-                          <span className="font-mono font-bold text-sm text-tx-primary">Session {g}</span>
-                          {isCurrent ? (
-                            <span className="text-[10px] font-mono font-bold text-accent bg-accent-dim px-2 py-0.5 rounded border border-accent-border uppercase">
-                              Active
-                            </span>
-                          ) : (
-                            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded border border-transparent uppercase invisible">
+                          <span className="font-semibold text-sm text-tx-primary">Session {g}</span>
+                          {isCurrent && (
+                            <span className="text-[10px] font-medium text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
                               Active
                             </span>
                           )}
@@ -600,19 +583,21 @@ export default function AdminDashboard() {
 
                         <div className="flex items-center gap-1.5">
                           <span className={clsx(
-                            "text-xs font-mono font-bold text-gain bg-gain-dim px-2 py-0.5 rounded border border-gain-border",
-                            isCurrent && (isRunning || isPaused) ? "visible" : "invisible"
-                          )} style={{ fontVariantNumeric: 'tabular-nums', minWidth: '55px', textAlign: 'center' }}>
-                            {formattedTime}
-                          </span>
-                          <span className={clsx(
-                            "text-xs font-mono font-bold px-2 py-0.5 rounded border uppercase tracking-wider",
-                            isRunning ? "text-gain bg-gain-dim border-gain-border" :
-                              isPaused ? "text-warn bg-warn-dim border-warn-border" :
+                            "text-xs font-medium px-2 py-0.5 rounded-md border tabular-nums",
+                            isRunning ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/25 flex items-center gap-1.5" :
+                              isPaused ? "text-amber-400 bg-amber-500/10 border-amber-500/25 flex items-center gap-1.5" :
                                 state === "ENDED" ? "text-tx-muted bg-bg-raised border-bd-subtle" :
-                                  "text-tx-secondary bg-bg-raised border-bd-subtle"
-                          )} style={{ minWidth: '65px', textAlign: 'center' }}>
-                            {state}
+                                  state === "READY" ? "text-accent bg-accent-dim border-accent-border" :
+                                    "text-tx-muted bg-bg-raised border-bd-subtle flex items-center gap-1"
+                          )}>
+                            {isRunning && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />}
+                            {isPaused && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />}
+                            {state === "LOCKED" && <Lock className="w-3 h-3 text-tx-muted" />}
+                            {isRunning ? `Running · ${formattedTime}` :
+                              isPaused ? `Paused · ${formattedTime}` :
+                                state === "ENDED" ? "Completed" :
+                                  state === "READY" ? "Ready" :
+                                    "Locked"}
                           </span>
                         </div>
                       </div>
@@ -621,21 +606,31 @@ export default function AdminDashboard() {
                         <button
                           disabled={loading}
                           onClick={() => handleAction(`/admin/sessions/${g}/start`)}
-                          className="bg-gain-dim text-gain hover:bg-gain hover:text-tx-inverse border border-gain-border text-xs font-mono font-bold uppercase tracking-wider py-2 rounded-lg transition-all active:scale-[0.98]"
+                          className={clsx(
+                            "text-xs font-medium py-1.5 rounded-lg transition-colors cursor-pointer disabled:opacity-50",
+                            isCurrent && (state === "READY" || isPaused)
+                              ? "bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold"
+                              : "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20"
+                          )}
                         >
                           Start
                         </button>
                         <button
                           disabled={loading}
                           onClick={() => handleAction(`/admin/sessions/${g}/pause`)}
-                          className="bg-warn-dim text-warn hover:bg-warn hover:text-tx-inverse border border-warn-border text-xs font-mono font-bold uppercase tracking-wider py-2 rounded-lg transition-all active:scale-[0.98]"
+                          className={clsx(
+                            "text-xs font-medium py-1.5 rounded-lg transition-colors cursor-pointer disabled:opacity-50",
+                            isRunning
+                              ? "bg-amber-500 hover:bg-amber-400 text-zinc-950 font-semibold"
+                              : "bg-bg-raised hover:bg-bg-overlay text-tx-secondary hover:text-tx-primary border border-bd-subtle"
+                          )}
                         >
                           Pause
                         </button>
                         <button
                           disabled={loading}
                           onClick={() => handleAction(`/admin/sessions/${g}/end`)}
-                          className="bg-bg-raised text-tx-secondary hover:text-tx-primary hover:bg-bg-overlay border border-bd-subtle text-xs font-mono font-bold uppercase tracking-wider py-2 rounded-lg transition-all active:scale-[0.98]"
+                          className="bg-bg-raised text-tx-secondary hover:text-loss hover:bg-loss-dim/40 border border-bd-subtle hover:border-loss-border/40 text-xs font-medium py-1.5 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
                         >
                           End
                         </button>
@@ -647,27 +642,27 @@ export default function AdminDashboard() {
             </div>
 
             {/* Round 2 Block */}
-            <div className="glass-panel p-5 sm:p-6 border border-bd-subtle">
+            <div className="p-5 sm:p-6 border border-bd-subtle bg-bg-base rounded-xl">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-3 border-b border-bd-hairline">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-purple-400" />
+                    <span className="w-2 h-2 rounded-full bg-purple-400" />
                     <h2 className="text-base sm:text-lg font-bold text-tx-primary tracking-tight">Round 2: Institutional (Algorithmic Trading)</h2>
                   </div>
-                  <p className="text-xs text-tx-secondary mt-0.5">11 assets • AI order flow injection • Liquidity shocks</p>
+                  <p className="text-xs text-tx-secondary mt-0.5">11 assets · AI order flow injection · Liquidity shocks</p>
                 </div>
 
                 {!sysState.r2_unlocked ? (
                   <button
                     disabled={loading}
                     onClick={() => handleAction("/admin/round2/unlock")}
-                    className="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg text-xs font-mono font-bold uppercase tracking-wider transition-all shadow-md self-start sm:self-auto"
+                    className="bg-purple-600 hover:bg-purple-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer disabled:opacity-50 self-start sm:self-auto"
                   >
                     Unlock Round 2
                   </button>
                 ) : (
-                  <span className="text-xs font-mono uppercase tracking-wider px-2.5 py-1 rounded bg-purple-500/10 text-purple-300 border border-purple-500/30 font-bold self-start sm:self-auto">
-                    UNLOCKED • SESSIONS 1 – 5
+                  <span className="text-xs font-medium px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-300 border border-purple-500/25 self-start sm:self-auto">
+                    Unlocked · Sessions 1 – 5
                   </span>
                 )}
               </div>
@@ -686,23 +681,18 @@ export default function AdminDashboard() {
                     <div
                       key={g}
                       className={clsx(
-                        "p-4 rounded-xl border transition-all flex flex-col justify-between gap-4 bg-bg-base",
+                        "p-4 rounded-xl border transition-all flex flex-col justify-between gap-3.5 bg-bg-base",
                         isCurrent
-                          ? "border-purple-500/60 shadow-md shadow-purple-500/10 ring-1 ring-purple-500/30"
+                          ? "border-purple-500/40 bg-purple-500/[0.02] shadow-xs"
                           : "border-bd-subtle hover:border-bd-strong"
                       )}
-                      style={{ minHeight: '120px' }}
                     >
                       <div className="flex justify-between items-center" style={{ minHeight: '28px' }}>
                         <div className="flex items-center gap-2">
-                          <span className="font-mono font-bold text-sm text-tx-primary">Session {g - 6}</span>
-                          <span className="text-xs font-mono text-tx-muted">(S{g})</span>
-                          {isCurrent ? (
-                            <span className="text-[10px] font-mono font-bold text-purple-300 bg-purple-500/20 px-2 py-0.5 rounded border border-purple-500/40 uppercase">
-                              Active
-                            </span>
-                          ) : (
-                            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded border border-transparent uppercase invisible">
+                          <span className="font-semibold text-sm text-tx-primary">Session {g - 6}</span>
+                          <span className="text-xs text-tx-muted">(S{g})</span>
+                          {isCurrent && (
+                            <span className="text-[10px] font-medium text-purple-300 bg-purple-500/15 px-2 py-0.5 rounded-md border border-purple-500/30">
                               Active
                             </span>
                           )}
@@ -710,19 +700,21 @@ export default function AdminDashboard() {
 
                         <div className="flex items-center gap-1.5">
                           <span className={clsx(
-                            "text-xs font-mono font-bold text-gain bg-gain-dim px-2 py-0.5 rounded border border-gain-border",
-                            isCurrent && (isRunning || isPaused) ? "visible" : "invisible"
-                          )} style={{ fontVariantNumeric: 'tabular-nums', minWidth: '55px', textAlign: 'center' }}>
-                            {formattedTime}
-                          </span>
-                          <span className={clsx(
-                            "text-xs font-mono font-bold px-2 py-0.5 rounded border uppercase tracking-wider",
-                            isRunning ? "text-gain bg-gain-dim border-gain-border" :
-                              isPaused ? "text-warn bg-warn-dim border-warn-border" :
+                            "text-xs font-medium px-2 py-0.5 rounded-md border tabular-nums",
+                            isRunning ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/25 flex items-center gap-1.5" :
+                              isPaused ? "text-amber-400 bg-amber-500/10 border-amber-500/25 flex items-center gap-1.5" :
                                 state === "ENDED" ? "text-tx-muted bg-bg-raised border-bd-subtle" :
-                                  "text-tx-secondary bg-bg-raised border-bd-subtle"
-                          )} style={{ minWidth: '65px', textAlign: 'center' }}>
-                            {state}
+                                  state === "READY" ? "text-accent bg-accent-dim border-accent-border" :
+                                    "text-tx-muted bg-bg-raised border-bd-subtle flex items-center gap-1"
+                          )}>
+                            {isRunning && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />}
+                            {isPaused && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />}
+                            {state === "LOCKED" && <Lock className="w-3 h-3 text-tx-muted" />}
+                            {isRunning ? `Running · ${formattedTime}` :
+                              isPaused ? `Paused · ${formattedTime}` :
+                                state === "ENDED" ? "Completed" :
+                                  state === "READY" ? "Ready" :
+                                    "Locked"}
                           </span>
                         </div>
                       </div>
@@ -731,21 +723,31 @@ export default function AdminDashboard() {
                         <button
                           disabled={loading}
                           onClick={() => handleAction(`/admin/sessions/${g}/start`)}
-                          className="bg-gain-dim text-gain hover:bg-gain hover:text-tx-inverse border border-gain-border text-xs font-mono font-bold uppercase tracking-wider py-2 rounded-lg transition-all active:scale-[0.98]"
+                          className={clsx(
+                            "text-xs font-medium py-1.5 rounded-lg transition-colors cursor-pointer disabled:opacity-50",
+                            isCurrent && (state === "READY" || isPaused)
+                              ? "bg-purple-600 hover:bg-purple-500 text-white font-semibold"
+                              : "bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/20"
+                          )}
                         >
                           Start
                         </button>
                         <button
                           disabled={loading}
                           onClick={() => handleAction(`/admin/sessions/${g}/pause`)}
-                          className="bg-warn-dim text-warn hover:bg-warn hover:text-tx-inverse border border-warn-border text-xs font-mono font-bold uppercase tracking-wider py-2 rounded-lg transition-all active:scale-[0.98]"
+                          className={clsx(
+                            "text-xs font-medium py-1.5 rounded-lg transition-colors cursor-pointer disabled:opacity-50",
+                            isRunning
+                              ? "bg-amber-500 hover:bg-amber-400 text-zinc-950 font-semibold"
+                              : "bg-bg-raised hover:bg-bg-overlay text-tx-secondary hover:text-tx-primary border border-bd-subtle"
+                          )}
                         >
                           Pause
                         </button>
                         <button
                           disabled={loading}
                           onClick={() => handleAction(`/admin/sessions/${g}/end`)}
-                          className="bg-bg-raised text-tx-secondary hover:text-tx-primary hover:bg-bg-overlay border border-bd-subtle text-xs font-mono font-bold uppercase tracking-wider py-2 rounded-lg transition-all active:scale-[0.98]"
+                          className="bg-bg-raised text-tx-secondary hover:text-loss hover:bg-loss-dim/40 border border-bd-subtle hover:border-loss-border/40 text-xs font-medium py-1.5 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
                         >
                           End
                         </button>
@@ -766,7 +768,7 @@ export default function AdminDashboard() {
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-tx-primary tracking-tight">Teams & Credentials</h1>
+                <h1 className="text-xl sm:text-2xl font-bold text-tx-primary tracking-tight">Teams &amp; Credentials</h1>
                 <p className="text-tx-secondary text-sm mt-0.5">
                   Manage participant credentials, set or regenerate live PINs, and track connection status.
                 </p>
@@ -774,23 +776,23 @@ export default function AdminDashboard() {
               <button
                 onClick={handleAddTeam}
                 disabled={loading}
-                className="bg-accent hover:bg-accent/90 text-tx-inverse px-4 py-2 rounded-lg font-mono font-bold text-xs uppercase tracking-wider transition-all shadow-sm active:scale-[0.98] flex items-center gap-1.5 self-start sm:self-auto"
+                className="bg-emerald-500 hover:bg-emerald-400 text-zinc-950 px-3.5 py-1.5 rounded-lg font-medium text-xs transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50 self-start sm:self-auto"
               >
                 <Plus className="w-4 h-4" /> Add Team
               </button>
             </div>
 
-            <div className="glass-panel overflow-hidden border border-bd-subtle">
+            <div className="overflow-hidden border border-bd-subtle bg-bg-base rounded-xl">
               {/* Search Bar */}
-              <div className="p-4 border-b border-bd-subtle bg-bg-base">
-                <div className="relative max-w-md">
-                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-tx-muted" />
+              <div className="p-3.5 border-b border-bd-subtle">
+                <div className="relative max-w-sm">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-tx-muted" />
                   <input
                     type="text"
                     placeholder="Search teams by ID..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-bg-raised border border-bd-subtle rounded-lg pl-10 pr-4 py-2 text-sm text-tx-primary font-mono outline-none focus:border-accent transition-colors placeholder:text-tx-muted"
+                    className="w-full bg-bg-raised border border-bd-subtle rounded-lg pl-9 pr-3.5 py-1.5 text-xs text-tx-primary font-sans outline-none focus:border-accent transition-colors placeholder:text-tx-muted"
                   />
                 </div>
               </div>
@@ -798,57 +800,57 @@ export default function AdminDashboard() {
               {/* Table */}
               <div className="w-full overflow-x-auto">
                 <table className="w-full text-left text-sm">
-                  <thead className="text-xs font-mono font-bold text-tx-secondary bg-bg-base uppercase tracking-wider border-b border-bd-subtle">
+                  <thead className="text-xs font-medium text-tx-secondary bg-bg-raised/40 uppercase tracking-wider border-b border-bd-subtle">
                     <tr>
-                      <th className="px-5 py-3.5">Status</th>
-                      <th className="px-5 py-3.5">Team ID</th>
-                      <th className="px-5 py-3.5">Live PIN</th>
-                      <th className="px-5 py-3.5">Starting Cash</th>
-                      <th className="px-5 py-3.5 text-right">Actions</th>
+                      <th className="px-5 py-3">Status</th>
+                      <th className="px-5 py-3">Team ID</th>
+                      <th className="px-5 py-3">Live PIN</th>
+                      <th className="px-5 py-3">Starting Cash</th>
+                      <th className="px-5 py-3 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-bd-hairline">
                     {filteredTeams.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="text-center py-12 text-tx-muted font-mono text-sm">
+                        <td colSpan={5} className="text-center py-12 text-tx-muted font-sans text-xs">
                           No teams matching &quot;{searchQuery}&quot;
                         </td>
                       </tr>
                     ) : (
                       filteredTeams.map((t) => (
-                        <tr key={t.id} className="hover:bg-bg-overlay/40 transition-colors">
-                          <td className="px-5 py-4 whitespace-nowrap">
+                        <tr key={t.id} className="hover:bg-bg-raised/40 transition-colors">
+                          <td className="px-5 py-3.5 whitespace-nowrap">
                             {t.is_online ? (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gain-dim border border-gain-border text-xs font-mono font-bold text-gain">
-                                <span className="w-1.5 h-1.5 rounded-full bg-gain animate-pulse" /> ONLINE
+                              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-xs font-medium text-emerald-400">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Online
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-bg-raised border border-bd-subtle text-xs font-mono font-medium text-tx-muted">
-                                <span className="w-1.5 h-1.5 rounded-full bg-tx-muted" /> OFFLINE
+                              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-bg-raised border border-bd-subtle text-xs font-medium text-tx-muted">
+                                <span className="w-1.5 h-1.5 rounded-full bg-tx-muted" /> Offline
                               </span>
                             )}
                           </td>
-                          <td className="px-5 py-4 font-mono font-bold text-tx-primary whitespace-nowrap text-base">
+                          <td className="px-5 py-3.5 font-mono font-semibold text-tx-primary whitespace-nowrap text-sm">
                             {t.id}
                           </td>
-                          <td className="px-5 py-4 whitespace-nowrap">
-                            <span className="font-mono font-bold text-accent bg-accent-dim px-3 py-1.5 rounded-md border border-accent-border text-sm">
+                          <td className="px-5 py-3.5 whitespace-nowrap">
+                            <span className="font-mono font-semibold text-tx-primary bg-bg-raised px-2.5 py-1 rounded-md border border-bd-subtle text-xs tabular-nums">
                               {t.pin}
                             </span>
                           </td>
-                          <td className="px-5 py-4 font-mono font-bold text-tx-primary whitespace-nowrap text-sm">
+                          <td className="px-5 py-3.5 font-semibold text-tx-primary whitespace-nowrap text-sm tabular-nums">
                             ₹{(t.cash_paise / 100).toLocaleString('en-IN')}
                           </td>
-                          <td className="px-5 py-4 text-right whitespace-nowrap">
-                            <div className="flex items-center justify-end gap-2">
+                          <td className="px-5 py-3.5 text-right whitespace-nowrap">
+                            <div className="flex items-center justify-end gap-1.5">
                               {/* Set PIN by Admin */}
                               <button
                                 onClick={() => onSetTeamPin(t.id)}
                                 disabled={loading}
-                                className="text-xs font-mono font-bold text-accent hover:text-tx-inverse bg-accent-dim hover:bg-accent border border-accent-border px-3 py-1.5 rounded-md transition-all active:scale-[0.98] flex items-center gap-1"
+                                className="text-xs font-medium text-tx-secondary hover:text-tx-primary bg-bg-raised hover:bg-bg-overlay border border-bd-subtle px-2.5 py-1 rounded-md transition-colors flex items-center gap-1 cursor-pointer"
                                 title="Admin sets a custom PIN for this team"
                               >
-                                <KeyRound className="w-3.5 h-3.5" />
+                                <KeyRound className="w-3 h-3 text-accent" />
                                 <span>Set PIN</span>
                               </button>
 
@@ -856,7 +858,7 @@ export default function AdminDashboard() {
                               <button
                                 onClick={() => handleResetPin(t.id)}
                                 disabled={loading}
-                                className="text-xs font-mono font-bold text-warn hover:bg-warn-dim border border-warn-border px-3 py-1.5 rounded-md transition-colors"
+                                className="text-xs font-medium text-tx-secondary hover:text-amber-400 bg-bg-raised hover:bg-amber-500/10 border border-bd-subtle hover:border-amber-500/25 px-2.5 py-1 rounded-md transition-colors cursor-pointer"
                                 title="Generate a random new PIN"
                               >
                                 Reset PIN
@@ -866,7 +868,7 @@ export default function AdminDashboard() {
                               <button
                                 onClick={() => handleRemoveTeam(t.id)}
                                 disabled={loading}
-                                className="text-xs font-mono font-bold text-loss hover:bg-loss-dim border border-loss-border px-3 py-1.5 rounded-md transition-colors"
+                                className="text-xs font-medium text-tx-secondary hover:text-loss bg-bg-raised hover:bg-loss-dim/40 border border-bd-subtle hover:border-loss-border/30 px-2.5 py-1 rounded-md transition-colors cursor-pointer"
                                 title="Permanently delete team"
                               >
                                 Remove
@@ -897,7 +899,7 @@ export default function AdminDashboard() {
                     : "Round 1 Active: 7 Tradable Instruments"}
                 </p>
               </div>
-              <span className="text-xs font-mono font-bold text-accent bg-accent-dim px-3.5 py-2 rounded-lg border border-accent-border self-start sm:self-auto">
+              <span className="text-xs font-medium text-tx-secondary bg-bg-raised px-3 py-1.5 rounded-lg border border-bd-subtle self-start sm:self-auto tabular-nums">
                 {activeAssets.length} Active Instruments
               </span>
             </div>
@@ -908,32 +910,32 @@ export default function AdminDashboard() {
                   asset.category === "Large Cap" ? "bg-accent-dim border-accent-border text-accent" :
                     asset.category === "Sovereign Reserve" ? "bg-warn-dim border-warn-border text-warn" :
                       asset.category === "Micro Cap" || asset.category === "Digital Asset" ? "bg-loss-dim border-loss-border text-loss" :
-                        "bg-cyan-500/10 border-cyan-500/30 text-cyan-400";
+                        "bg-cyan-500/10 border-cyan-500/25 text-cyan-400";
 
                 return (
                   <div
                     key={asset.ticker}
-                    className="glass-panel p-5 border border-bd-subtle bg-bg-base hover:border-bd-strong transition-all flex flex-col justify-between gap-4 rounded-xl"
+                    className="p-4 border border-bd-subtle bg-bg-base hover:border-bd-strong transition-all flex flex-col justify-between gap-3.5 rounded-xl"
                   >
                     <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-3.5">
-                        <div className="w-11 h-11 rounded-lg bg-accent-dim border border-accent-border flex items-center justify-center font-mono font-bold text-accent text-sm">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-lg bg-bg-raised border border-bd-subtle flex items-center justify-center font-mono font-bold text-accent text-xs">
                           {asset.ticker.slice(0, 4)}
                         </div>
                         <div>
-                          <div className="font-mono font-bold text-tx-primary text-lg tracking-tight">
+                          <div className="font-semibold text-tx-primary text-base tracking-tight">
                             {asset.ticker}
                           </div>
-                          <div className="text-sm text-tx-secondary font-medium">
+                          <div className="text-xs text-tx-secondary font-normal">
                             {asset.name}
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-3.5 border-t border-bd-hairline text-xs font-mono">
-                      <span className="text-tx-secondary font-medium">{asset.sector}</span>
-                      <span className={clsx("text-xs uppercase tracking-wider font-bold px-2.5 py-1 rounded-md border", categoryColor)}>
+                    <div className="flex items-center justify-between pt-3 border-t border-bd-hairline text-xs">
+                      <span className="text-tx-secondary">{asset.sector}</span>
+                      <span className={clsx("text-[11px] font-medium px-2 py-0.5 rounded-md border", categoryColor)}>
                         {asset.category}
                       </span>
                     </div>
@@ -972,18 +974,18 @@ export default function AdminDashboard() {
 
           return (
             <div className="space-y-6 relative">
-              <div className="glass-panel overflow-hidden border border-bd-subtle">
+              <div className="overflow-hidden border border-bd-subtle bg-bg-base rounded-xl">
 
                 {/* Top Bar: Tabs & Actions */}
-                <div className="p-4 sm:p-5 border-b border-bd-subtle flex flex-col lg:flex-row items-start lg:items-center justify-between bg-bg-base gap-4">
+                <div className="p-4 sm:p-5 border-b border-bd-subtle flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
                     <div className="flex bg-bg-raised p-1 rounded-lg border border-bd-subtle">
                       <button
                         onClick={() => setNewsTabView("UPCOMING")}
                         className={clsx(
-                          "px-4 py-2 rounded-md font-mono text-xs uppercase tracking-wider font-bold transition-all",
+                          "px-3.5 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer",
                           newsTabView === "UPCOMING"
-                            ? "bg-accent text-tx-inverse shadow-sm"
+                            ? "bg-bg-base text-tx-primary font-semibold shadow-xs"
                             : "text-tx-secondary hover:text-tx-primary"
                         )}
                       >
@@ -992,9 +994,9 @@ export default function AdminDashboard() {
                       <button
                         onClick={() => setNewsTabView("HISTORY")}
                         className={clsx(
-                          "px-4 py-2 rounded-md font-mono text-xs uppercase tracking-wider font-bold transition-all",
+                          "px-3.5 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer",
                           newsTabView === "HISTORY"
-                            ? "bg-accent text-tx-inverse shadow-sm"
+                            ? "bg-bg-base text-tx-primary font-semibold shadow-xs"
                             : "text-tx-secondary hover:text-tx-primary"
                         )}
                       >
@@ -1006,108 +1008,102 @@ export default function AdminDashboard() {
                   <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
                     {newsTabView === "UPCOMING" && (
                       <div className="relative flex-1 sm:w-72">
-                        <Search className="w-4 h-4 text-tx-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <Search className="w-4 h-4 text-tx-muted absolute left-3 top-1/2 -translate-y-1/2" />
                         <input
                           type="text"
                           value={newsSearch}
                           onChange={(e) => setNewsSearch(e.target.value)}
                           placeholder="Search headlines, tickers, sources..."
-                          className="w-full bg-bg-raised border border-bd-subtle rounded-lg pl-10 pr-3.5 py-2 font-sans text-sm text-tx-primary placeholder:text-tx-muted focus:outline-none focus:border-accent"
+                          className="w-full bg-bg-raised border border-bd-subtle rounded-lg pl-9 pr-3.5 py-1.5 font-sans text-xs text-tx-primary placeholder:text-tx-muted focus:outline-none focus:border-accent"
                         />
                       </div>
                     )}
                     <button
                       onClick={() => setShowNewsModal(true)}
-                      className="bg-accent hover:bg-accent/90 text-tx-inverse px-4 py-2 rounded-lg font-mono text-xs uppercase tracking-wider font-bold transition-all shadow-sm flex items-center gap-2 active:scale-[0.98]"
+                      className="bg-emerald-500 hover:bg-emerald-400 text-zinc-950 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer"
                     >
-                      <Zap className="w-4 h-4" /> Draft News
+                      <Zap className="w-3.5 h-3.5" /> Draft News
                     </button>
                   </div>
                 </div>
 
                 {/* Session Filter Bar (for Upcoming) */}
                 {newsTabView === "UPCOMING" && (
-                  <div className="px-4 sm:px-5 py-3 bg-bg-base/70 border-b border-bd-subtle flex items-center gap-2 overflow-x-auto scrollbar-none">
-                    <span className="text-xs font-mono font-bold text-tx-secondary uppercase tracking-wider mr-1 shrink-0">Filter:</span>
+                  <div className="px-4 sm:px-5 py-2.5 bg-bg-raised/30 border-b border-bd-subtle flex items-center gap-1.5 overflow-x-auto scrollbar-none text-xs">
+                    <span className="font-medium text-tx-muted mr-1 shrink-0">Filter:</span>
                     <button
                       onClick={() => setNewsSessionFilter("ALL")}
                       className={clsx(
-                        "px-3 py-1.5 rounded-md font-mono text-xs uppercase tracking-wider font-bold shrink-0 transition-colors border",
+                        "px-2.5 py-1 rounded-md text-xs font-medium shrink-0 transition-colors border tabular-nums cursor-pointer",
                         newsSessionFilter === "ALL"
-                          ? "bg-accent text-tx-inverse border-accent"
+                          ? "bg-bg-overlay text-tx-primary border-bd-strong font-semibold"
                           : "bg-bg-raised text-tx-secondary border-bd-subtle hover:text-tx-primary"
                       )}
                     >
                       All ({allScriptedNews.length})
                     </button>
 
-                    <div className="h-5 w-px bg-bd-subtle mx-1 shrink-0" />
+                    <div className="h-4 w-px bg-bd-subtle mx-1 shrink-0" />
 
                     {/* Round 1 (1-6) */}
-                    <span className="text-xs font-mono font-bold text-accent uppercase tracking-wider shrink-0">R1:</span>
+                    <span className="font-medium text-tx-muted shrink-0">R1:</span>
                     {[1, 2, 3, 4, 5, 6].map(g => (
                       <button
                         key={g}
                         onClick={() => setNewsSessionFilter(g)}
                         className={clsx(
-                          "px-3 py-1.5 rounded-md font-mono text-xs font-bold shrink-0 transition-colors border flex items-center gap-1.5",
+                          "px-2.5 py-1 rounded-md text-xs font-medium shrink-0 transition-colors border flex items-center gap-1 tabular-nums cursor-pointer",
                           newsSessionFilter === g
-                            ? "bg-accent-dim text-accent border-accent-border font-bold"
-                            : g === sysState.current_g
-                              ? "bg-gain-dim text-gain border-gain-border font-bold"
-                              : "bg-bg-raised text-tx-secondary border-bd-subtle hover:text-tx-primary"
+                            ? "bg-bg-overlay text-tx-primary border-bd-strong font-semibold"
+                            : "bg-bg-raised text-tx-secondary border-bd-subtle hover:text-tx-primary"
                         )}
                       >
                         S{g}
-                        {g === sysState.current_g && <span className="w-1.5 h-1.5 rounded-full bg-gain animate-pulse" />}
-                        <span className="text-[11px] opacity-75">({sessionCounts[g] || 0})</span>
+                        <span className="text-[10px] text-tx-muted">({sessionCounts[g] || 0})</span>
                       </button>
                     ))}
 
-                    <div className="h-5 w-px bg-bd-subtle mx-1 shrink-0" />
+                    <div className="h-4 w-px bg-bd-subtle mx-1 shrink-0" />
 
                     {/* Round 2 (7-11) */}
-                    <span className="text-xs font-mono font-bold text-purple-400 uppercase tracking-wider shrink-0">R2:</span>
+                    <span className="font-medium text-tx-muted shrink-0">R2:</span>
                     {[7, 8, 9, 10, 11].map(g => (
                       <button
                         key={g}
                         onClick={() => setNewsSessionFilter(g)}
                         className={clsx(
-                          "px-3 py-1.5 rounded-md font-mono text-xs font-bold shrink-0 transition-colors border flex items-center gap-1.5",
+                          "px-2.5 py-1 rounded-md text-xs font-medium shrink-0 transition-colors border flex items-center gap-1 tabular-nums cursor-pointer",
                           newsSessionFilter === g
-                            ? "bg-purple-500/20 text-purple-300 border-purple-500/50 font-bold"
-                            : g === sysState.current_g
-                              ? "bg-purple-500/10 text-purple-400 border-purple-500/30 font-bold"
-                              : "bg-bg-raised text-tx-secondary border-bd-subtle hover:text-tx-primary"
+                            ? "bg-bg-overlay text-tx-primary border-bd-strong font-semibold"
+                            : "bg-bg-raised text-tx-secondary border-bd-subtle hover:text-tx-primary"
                         )}
                       >
                         S{g - 6}
-                        {g === sysState.current_g && <span className="w-1.5 h-1.5 rounded-full bg-gain animate-pulse" />}
-                        <span className="text-[11px] opacity-75">({sessionCounts[g] || 0})</span>
+                        <span className="text-[10px] text-tx-muted">({sessionCounts[g] || 0})</span>
                       </button>
                     ))}
                   </div>
                 )}
 
-                {/* News Table with Highly Readable Typography */}
+                {/* News Table with Clean Groww-Style Layout */}
                 <div className="w-full overflow-x-auto">
                   <table className="w-full text-left">
-                    <thead className="text-xs font-mono font-bold text-tx-secondary bg-bg-base uppercase tracking-wider border-b border-bd-subtle">
+                    <thead className="text-xs font-medium text-tx-secondary bg-bg-raised/40 uppercase tracking-wider border-b border-bd-subtle">
                       <tr>
-                        <th className="px-5 py-3.5 whitespace-nowrap">Session & Timing</th>
-                        <th className="px-4 py-3.5 whitespace-nowrap">Source</th>
-                        <th className="px-4 py-3.5 whitespace-nowrap">Target</th>
-                        <th className="px-6 py-3.5">Headline Content</th>
-                        <th className="px-4 py-3.5 text-center whitespace-nowrap">Impact</th>
-                        <th className="px-4 py-3.5 text-center whitespace-nowrap">Status</th>
-                        <th className="px-5 py-3.5 text-right whitespace-nowrap">Dispatch</th>
+                        <th className="px-5 py-3 whitespace-nowrap">Session &amp; Timing</th>
+                        <th className="px-4 py-3 whitespace-nowrap">Source</th>
+                        <th className="px-4 py-3 whitespace-nowrap">Target</th>
+                        <th className="px-6 py-3">Headline</th>
+                        <th className="px-4 py-3 text-center whitespace-nowrap">Impact</th>
+                        <th className="px-4 py-3 text-center whitespace-nowrap">Status</th>
+                        <th className="px-5 py-3 text-right whitespace-nowrap">Dispatch</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-bd-hairline">
                       {newsTabView === "UPCOMING" ? (
                         filteredUpcomingNews.length === 0 ? (
                           <tr>
-                            <td colSpan={7} className="px-6 py-12 text-center text-tx-muted font-sans text-sm">
+                            <td colSpan={7} className="px-6 py-12 text-center text-tx-muted font-sans text-xs">
                               No scripted news items match the active filters.
                             </td>
                           </tr>
@@ -1121,108 +1117,111 @@ export default function AdminDashboard() {
                             const isPositive = news.impact > 0;
                             const isNegative = news.impact < 0;
 
-                            const sourceDetails: Record<string, { label: string; color: string }> = {
-                              "IN": { label: "IN • Insider Leak", color: "bg-purple-500/15 text-purple-300 border-purple-500/40" },
-                              "AN": { label: "AN • Analyst Wire", color: "bg-accent-dim text-accent border-accent-border" },
-                              "NP": { label: "NP • Newspaper", color: "bg-gain-dim text-gain border-gain-border" },
-                              "FF": { label: "FF • Fast Feed", color: "bg-warn-dim text-warn border-warn-border" }
+                            const sourceLabels: Record<string, string> = {
+                              "IN": "Insider Leak",
+                              "AN": "Analyst Wire",
+                              "NP": "Newspaper",
+                              "FF": "Fast Feed"
                             };
-                            const badge = sourceDetails[news.source] || { label: news.source, color: "bg-bg-raised text-tx-secondary border-bd-subtle" };
+                            const sourceLabel = sourceLabels[news.source] || news.source;
+                            const headlineKey = `${news.g}-${news.public_tick}-${news.ticker}-${idx}`;
+                            const isRevealed = Boolean(revealedHeadlines[headlineKey]);
 
                             return (
-                              <tr key={idx} className={clsx("hover:bg-bg-overlay/40 transition-colors", isCurrentSession && "bg-accent-dim/10")}>
+                              <tr key={idx} className={clsx("hover:bg-bg-raised/40 transition-colors", isCurrentSession && "bg-bg-raised/20")}>
 
-                                {/* Session & Timing */}
-                                <td className="px-5 py-4 whitespace-nowrap">
-                                  <div className="flex items-center gap-2">
-                                    <span className={clsx(
-                                      "text-xs font-mono font-bold px-2 py-0.5 rounded border uppercase",
-                                      news.g <= 6
-                                        ? "bg-accent-dim text-accent border-accent-border"
-                                        : "bg-purple-500/15 text-purple-300 border-purple-500/30"
-                                    )}>
-                                      {news.g <= 6 ? `R1 • S${news.g}` : `R2 • S${news.g - 6}`}
-                                    </span>
-                                    {isCurrentSession && (
-                                      <span className="text-[10px] font-mono font-bold text-gain bg-gain-dim px-2 py-0.5 rounded border border-gain-border uppercase">
-                                        Active
-                                      </span>
-                                    )}
+                                {/* Session & Timing: Strictly session, round, and time */}
+                                <td className="px-5 py-3.5 whitespace-nowrap">
+                                  <div className="text-xs font-semibold text-tx-primary tracking-tight">
+                                    {news.g <= 6 ? `Round 1 · Session ${news.g}` : `Round 2 · Session ${news.g - 6}`}
                                   </div>
-                                  <div className="text-xs font-mono text-tx-secondary mt-1">
-                                    Tick <span className="font-bold text-tx-primary">T+{news.public_tick}</span>
-                                    <span className="text-tx-muted ml-1.5">({Math.floor(news.public_tick * 1.5)}s)</span>
+                                  <div className="text-xs text-tx-muted mt-0.5 tabular-nums">
+                                    T+{news.public_tick} ({Math.floor(news.public_tick * 1.5)}s)
                                   </div>
                                 </td>
 
-                                {/* Source */}
-                                <td className="px-4 py-4 whitespace-nowrap">
-                                  <span className={clsx("text-xs font-mono font-bold px-2.5 py-1 rounded-md border", badge.color)}>
-                                    {badge.label}
+                                {/* Source: Clean text without colored blob */}
+                                <td className="px-4 py-3.5 whitespace-nowrap">
+                                  <span className="text-xs font-medium text-tx-secondary">
+                                    {sourceLabel}
                                   </span>
                                 </td>
 
                                 {/* Target Asset */}
-                                <td className="px-4 py-4 whitespace-nowrap">
-                                  <div className="font-mono font-bold text-tx-primary text-base">{news.ticker}</div>
-                                  <div className="text-xs text-tx-muted truncate max-w-[130px] font-sans">
+                                <td className="px-4 py-3.5 whitespace-nowrap">
+                                  <div className="font-semibold text-tx-primary text-sm">{news.ticker}</div>
+                                  <div className="text-xs text-tx-muted truncate max-w-[130px]">
                                     {ASSET_META[news.ticker]?.name || "Broad Market"}
                                   </div>
                                 </td>
 
-                                {/* Headline (High Readability) */}
-                                <td className="px-6 py-4 max-w-2xl">
-                                  <p className="text-sm sm:text-base text-tx-primary font-normal leading-relaxed">
-                                    {news.text}
-                                  </p>
+                                {/* Headline: Wrapped in click-to-reveal */}
+                                <td className="px-6 py-3.5 max-w-xl">
+                                  {isRevealed ? (
+                                    <div className="space-y-1.5">
+                                      <p className="text-sm text-tx-primary font-normal leading-relaxed">
+                                        {news.text}
+                                      </p>
+                                      <button
+                                        type="button"
+                                        onClick={() => toggleHeadline(headlineKey)}
+                                        className="inline-flex items-center gap-1 text-[11px] text-tx-muted hover:text-tx-secondary cursor-pointer transition-colors"
+                                      >
+                                        <EyeOff className="w-3 h-3" /> Hide headline
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      onClick={() => toggleHeadline(headlineKey)}
+                                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium text-tx-secondary hover:text-tx-primary bg-bg-raised hover:bg-bg-overlay border border-bd-subtle transition-colors cursor-pointer"
+                                    >
+                                      <Eye className="w-3.5 h-3.5 text-tx-muted" />
+                                      <span>Click to read headline</span>
+                                    </button>
+                                  )}
                                 </td>
 
-                                {/* Impact */}
-                                <td className="px-4 py-4 whitespace-nowrap text-center">
+                                {/* Impact: Plain tabular text, no colored blob */}
+                                <td className="px-4 py-3.5 whitespace-nowrap text-center">
                                   {isPositive ? (
-                                    <span className="inline-flex items-center gap-1 font-mono text-xs font-bold px-2.5 py-1 rounded-md bg-gain-dim border border-gain-border text-gain">
-                                      <ArrowUpRight className="w-4 h-4" /> +{impactPercent}%
+                                    <span className="text-xs font-semibold text-gain tabular-nums">
+                                      +{impactPercent}%
                                     </span>
                                   ) : isNegative ? (
-                                    <span className="inline-flex items-center gap-1 font-mono text-xs font-bold px-2.5 py-1 rounded-md bg-loss-dim border border-loss-border text-loss">
-                                      <ArrowDownRight className="w-4 h-4" /> {impactPercent}%
+                                    <span className="text-xs font-semibold text-loss tabular-nums">
+                                      {impactPercent}%
                                     </span>
                                   ) : (
-                                    <span className="font-mono text-xs font-bold px-2.5 py-1 rounded-md bg-bg-raised text-tx-muted border border-bd-subtle">
+                                    <span className="text-xs font-medium text-tx-muted tabular-nums">
                                       0.0%
                                     </span>
                                   )}
                                 </td>
 
-                                {/* Authenticity */}
-                                <td className="px-4 py-4 whitespace-nowrap text-center">
-                                  {news.is_fake ? (
-                                    <span className="inline-flex items-center gap-1 text-xs font-mono font-bold px-2.5 py-1 rounded-md bg-warn-dim border border-warn-border text-warn">
-                                      <AlertCircle className="w-3.5 h-3.5" /> Rumor
-                                    </span>
-                                  ) : (
-                                    <span className="inline-flex items-center gap-1 text-xs font-mono font-bold px-2.5 py-1 rounded-md bg-gain-dim border border-gain-border text-gain">
-                                      <CheckCircle2 className="w-3.5 h-3.5" /> Verified
-                                    </span>
-                                  )}
+                                {/* Status: Plain text, no colored blob */}
+                                <td className="px-4 py-3.5 whitespace-nowrap text-center">
+                                  <span className="text-xs font-medium text-tx-secondary">
+                                    {news.is_fake ? "Rumor" : "Verified"}
+                                  </span>
                                 </td>
 
                                 {/* Dispatch Control */}
-                                <td className="px-5 py-4 whitespace-nowrap text-right">
+                                <td className="px-5 py-3.5 whitespace-nowrap text-right">
                                   <div className="flex items-center justify-end gap-2">
                                     {isFired ? (
-                                      <span className="text-xs font-mono font-bold text-tx-muted bg-bg-raised border border-bd-subtle px-2.5 py-1 rounded-md">
+                                      <span className="text-xs font-medium text-tx-muted">
                                         Dispatched
                                       </span>
                                     ) : isImminent ? (
-                                      <span className="text-xs font-mono font-bold text-warn bg-warn-dim border border-warn-border px-2.5 py-1 rounded-md">
+                                      <span className="text-xs font-medium text-tx-secondary tabular-nums">
                                         In {news.public_tick - sysState.n}t
                                       </span>
                                     ) : null}
 
                                     <button
                                       onClick={() => fireSpecificNews(news)}
-                                      className="text-xs font-mono font-bold text-accent hover:text-tx-inverse bg-accent-dim hover:bg-accent border border-accent-border px-3 py-1.5 rounded-md transition-all active:scale-[0.98]"
+                                      className="text-xs font-medium text-tx-secondary hover:text-tx-primary bg-bg-raised hover:bg-bg-overlay border border-bd-subtle px-2.5 py-1 rounded-md transition-colors cursor-pointer"
                                       title="Dispatch news immediately"
                                     >
                                       Trigger
@@ -1236,29 +1235,53 @@ export default function AdminDashboard() {
                       ) : (
                         !sysState.news_history || sysState.news_history.length === 0 ? (
                           <tr>
-                            <td colSpan={7} className="px-6 py-12 text-center text-tx-muted font-sans text-sm">
+                            <td colSpan={7} className="px-6 py-12 text-center text-tx-muted font-sans text-xs">
                               No live or custom news has been dispatched in this simulation session yet.
                             </td>
                           </tr>
                         ) : (
-                          sysState.news_history.map((news: any, idx: number) => (
-                            <tr key={idx} className="hover:bg-bg-overlay/40 transition-colors">
-                              <td className="px-5 py-4 font-mono text-sm text-tx-muted">
-                                #{idx + 1}
-                              </td>
-                              <td className="px-4 py-4">
-                                <span className="bg-accent-dim text-accent border border-accent-border text-xs font-mono font-bold px-2.5 py-1 rounded-md">
+                          sysState.news_history.map((news: any, idx: number) => {
+                            const histKey = `hist-${idx}`;
+                            const isHistRevealed = Boolean(revealedHeadlines[histKey]);
+                            return (
+                              <tr key={idx} className="hover:bg-bg-raised/40 transition-colors">
+                                <td className="px-5 py-3.5 text-xs text-tx-muted tabular-nums">
+                                  #{idx + 1}
+                                </td>
+                                <td className="px-4 py-3.5 text-xs text-tx-secondary font-medium">
                                   {news.source || "IN"}
-                                </span>
-                              </td>
-                              <td className="px-4 py-4 font-mono font-bold text-tx-primary text-base">
-                                {news.ticker || "GLOBAL"}
-                              </td>
-                              <td colSpan={4} className="px-6 py-4 text-tx-primary text-sm sm:text-base font-normal leading-relaxed">
-                                {news.text || "Market breaking event."}
-                              </td>
-                            </tr>
-                          ))
+                                </td>
+                                <td className="px-4 py-3.5 font-semibold text-tx-primary text-sm">
+                                  {news.ticker || "GLOBAL"}
+                                </td>
+                                <td colSpan={4} className="px-6 py-3.5 max-w-xl">
+                                  {isHistRevealed ? (
+                                    <div className="space-y-1.5">
+                                      <p className="text-sm text-tx-primary font-normal leading-relaxed">
+                                        {news.text || "Market breaking event."}
+                                      </p>
+                                      <button
+                                        type="button"
+                                        onClick={() => toggleHeadline(histKey)}
+                                        className="inline-flex items-center gap-1 text-[11px] text-tx-muted hover:text-tx-secondary cursor-pointer transition-colors"
+                                      >
+                                        <EyeOff className="w-3 h-3" /> Hide
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      onClick={() => toggleHeadline(histKey)}
+                                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium text-tx-secondary hover:text-tx-primary bg-bg-raised hover:bg-bg-overlay border border-bd-subtle transition-colors cursor-pointer"
+                                    >
+                                      <Eye className="w-3.5 h-3.5 text-tx-muted" />
+                                      <span>Click to read headline</span>
+                                    </button>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })
                         )
                       )}
                     </tbody>
@@ -1269,15 +1292,15 @@ export default function AdminDashboard() {
               {/* News Drafting Modal */}
               {showNewsModal && (
                 <div className="fixed inset-0 bg-bg-void/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                  <div className="bg-bg-raised border border-bd-subtle p-6 rounded-xl w-full max-w-lg shadow-card relative">
+                  <div className="bg-bg-base border border-bd-subtle p-6 rounded-xl w-full max-w-lg shadow-modal relative">
                     <div className="flex justify-between items-center mb-5 pb-4 border-b border-bd-subtle">
                       <div className="flex items-center gap-2">
-                        <Zap className="w-5 h-5 text-accent" />
-                        <h3 className="text-base font-bold text-tx-primary">Broadcast Custom Market News</h3>
+                        <Zap className="w-4 h-4 text-accent" />
+                        <h3 className="text-base font-semibold text-tx-primary">Broadcast Market News</h3>
                       </div>
                       <button
                         onClick={() => setShowNewsModal(false)}
-                        className="text-tx-muted hover:text-tx-primary p-1 rounded transition-colors"
+                        className="text-tx-muted hover:text-tx-primary p-1 rounded transition-colors cursor-pointer"
                       >
                         <X className="w-5 h-5" />
                       </button>
@@ -1286,13 +1309,13 @@ export default function AdminDashboard() {
                     <div className="space-y-4">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-xs font-mono font-bold text-tx-secondary uppercase mb-1.5">
+                          <label className="block text-xs font-medium text-tx-secondary mb-1.5">
                             Target Ticker
                           </label>
                           <select
                             value={newsTicker}
                             onChange={e => setNewsTicker(e.target.value)}
-                            className="w-full bg-bg-base border border-bd-subtle rounded-lg px-3.5 py-2.5 text-tx-primary font-mono text-sm font-bold outline-none focus:border-accent"
+                            className="w-full bg-bg-raised border border-bd-subtle rounded-lg px-3 py-2 text-tx-primary text-xs font-semibold outline-none focus:border-accent"
                           >
                             <option value="GLOBAL">GLOBAL (Market-Wide)</option>
                             <option value="RLNT">RLNT (Reliant Energy)</option>
@@ -1309,13 +1332,13 @@ export default function AdminDashboard() {
                           </select>
                         </div>
                         <div>
-                          <label className="block text-xs font-mono font-bold text-tx-secondary uppercase mb-1.5">
+                          <label className="block text-xs font-medium text-tx-secondary mb-1.5">
                             Intel Feed Source
                           </label>
                           <select
                             value={newsSource}
                             onChange={e => setNewsSource(e.target.value)}
-                            className="w-full bg-bg-base border border-bd-subtle rounded-lg px-3.5 py-2.5 text-tx-primary font-mono text-sm font-bold outline-none focus:border-accent"
+                            className="w-full bg-bg-raised border border-bd-subtle rounded-lg px-3 py-2 text-tx-primary text-xs font-semibold outline-none focus:border-accent"
                           >
                             <option value="IN">IN (Insider Leak - L2+)</option>
                             <option value="AN">AN (Analyst Wire)</option>
@@ -1326,23 +1349,23 @@ export default function AdminDashboard() {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-mono font-bold text-tx-secondary uppercase mb-1.5">
+                        <label className="block text-xs font-medium text-tx-secondary mb-1.5">
                           Breaking Headline Text
                         </label>
                         <textarea
                           value={newsText}
                           onChange={e => setNewsText(e.target.value)}
                           placeholder="Type custom breaking market headline..."
-                          className="w-full bg-bg-base border border-bd-subtle rounded-lg p-3.5 text-tx-primary text-sm sm:text-base outline-none min-h-[120px] placeholder:text-tx-muted focus:border-accent font-sans leading-relaxed"
+                          className="w-full bg-bg-raised border border-bd-subtle rounded-lg p-3 text-tx-primary text-sm outline-none min-h-[100px] placeholder:text-tx-muted focus:border-accent font-sans leading-relaxed"
                         />
                       </div>
 
                       <button
                         onClick={fireNews}
                         disabled={loading || !newsText.trim()}
-                        className="w-full bg-accent hover:bg-accent/90 disabled:opacity-50 text-tx-inverse font-mono font-bold text-xs uppercase tracking-wider py-3 rounded-lg transition-all shadow-md active:scale-[0.98]"
+                        className="w-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-zinc-950 font-semibold text-xs py-2.5 rounded-lg transition-colors cursor-pointer"
                       >
-                        Dispatch Alert Now To Market
+                        Dispatch Alert To Market
                       </button>
                     </div>
                   </div>
@@ -1362,7 +1385,7 @@ export default function AdminDashboard() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h1 className="text-xl sm:text-2xl font-bold text-tx-primary tracking-tight">
-                  EIC X Bazaar Tournament Leaderboards
+                  Tournament Leaderboards
                 </h1>
                 <p className="text-tx-secondary text-sm mt-0.5">
                   Round-specific active rankings and overall multi-round tournament standings.
@@ -1373,14 +1396,14 @@ export default function AdminDashboard() {
               <div className="flex flex-wrap items-center gap-2.5">
                 {/* 10s auto-refresh indicator (for active round) */}
                 {leaderboardView === "ROUND" && (
-                  <div className="px-3.5 py-1.5 rounded-lg border border-bd-subtle bg-bg-base flex items-center gap-2 text-xs font-mono">
-                    <span className="w-2 h-2 rounded-full bg-gain animate-pulse" />
-                    <span className="text-tx-secondary">Sync in:</span>
-                    <span className="font-bold text-accent">{lbSecondsRemaining}s</span>
+                  <div className="px-3.5 py-1.5 rounded-lg border border-bd-subtle bg-bg-base flex items-center gap-2 text-xs tabular-nums">
+                    <span className="w-1.5 h-1.5 rounded-full bg-gain" />
+                    <span className="text-tx-muted">Sync in</span>
+                    <span className="font-semibold text-emerald-400">{lbSecondsRemaining}s</span>
                     {lastLbSync && (
                       <>
-                        <span className="text-tx-muted">•</span>
-                        <span className="text-tx-muted">Synced: {lastLbSync}</span>
+                        <span className="text-tx-muted">·</span>
+                        <span className="text-tx-muted">{lastLbSync}</span>
                       </>
                     )}
                   </div>
@@ -1394,7 +1417,7 @@ export default function AdminDashboard() {
                       fetchCumulativeLeaderboard(true);
                     }
                   }}
-                  className="p-2 rounded-lg border border-bd-subtle bg-bg-raised hover:bg-bg-overlay text-tx-secondary hover:text-tx-primary transition-colors flex items-center gap-1.5 text-xs font-mono font-bold"
+                  className="px-3 py-1.5 rounded-lg border border-bd-subtle bg-bg-raised hover:bg-bg-overlay text-tx-secondary hover:text-tx-primary transition-colors flex items-center gap-1.5 text-xs font-medium cursor-pointer"
                   title="Force refresh standings now"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
@@ -1404,21 +1427,21 @@ export default function AdminDashboard() {
             </div>
 
             {/* ── Tab Switcher: Primary Round vs Cumulative ── */}
-            <div className="flex items-center gap-2 bg-bg-base p-1 rounded-xl border border-bd-subtle w-fit">
+            <div className="flex items-center gap-1.5 bg-bg-base p-1 rounded-xl border border-bd-subtle w-fit">
               <button
                 onClick={() => setLeaderboardView("ROUND")}
                 className={clsx(
-                  "px-4 py-2 rounded-lg text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer",
+                  "px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 cursor-pointer",
                   leaderboardView === "ROUND"
-                    ? "bg-accent text-tx-inverse shadow-sm"
-                    : "text-tx-secondary hover:text-tx-primary hover:bg-bg-raised"
+                    ? "bg-bg-raised text-tx-primary font-semibold shadow-xs"
+                    : "text-tx-secondary hover:text-tx-primary"
                 )}
               >
                 <Trophy className="w-3.5 h-3.5" />
-                <span>Round Leaderboard (Active Round)</span>
+                <span>Round Standings</span>
                 <span className={clsx(
-                  "text-[10px] px-1.5 py-0.2 rounded font-mono",
-                  leaderboardView === "ROUND" ? "bg-black/20 text-tx-inverse" : "bg-bg-raised text-tx-muted"
+                  "text-[10px] px-1.5 py-0.2 rounded-full tabular-nums font-medium",
+                  leaderboardView === "ROUND" ? "bg-accent/15 text-accent" : "bg-bg-raised text-tx-muted"
                 )}>
                   {leaderboard?.round === 2 ? "R2" : "R1"}
                 </span>
@@ -1430,20 +1453,20 @@ export default function AdminDashboard() {
                   fetchCumulativeLeaderboard();
                 }}
                 className={clsx(
-                  "px-4 py-2 rounded-lg text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer",
+                  "px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 cursor-pointer",
                   leaderboardView === "CUMULATIVE"
-                    ? "bg-accent text-tx-inverse shadow-sm"
-                    : "text-tx-secondary hover:text-tx-primary hover:bg-bg-raised"
+                    ? "bg-bg-raised text-tx-primary font-semibold shadow-xs"
+                    : "text-tx-secondary hover:text-tx-primary"
                 )}
               >
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Overall Cumulative Leaderboard</span>
+                <span>Overall Cumulative</span>
                 {cumulativeLeaderboard?.is_final ? (
-                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-gain-dim text-gain font-mono font-bold border border-gain-border">
+                  <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-gain-dim text-gain font-medium">
                     Finalized
                   </span>
                 ) : (
-                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-warn-dim text-warn font-mono font-bold border border-warn-border">
+                  <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-warn-dim text-warn font-medium">
                     Locks Post-R2
                   </span>
                 )}
@@ -1454,67 +1477,77 @@ export default function AdminDashboard() {
             {leaderboardView === "ROUND" && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between px-1">
-                  <div className="text-xs font-mono font-bold text-tx-secondary uppercase tracking-wider">
+                  <div className="text-xs font-medium text-tx-secondary uppercase tracking-wider">
                     {leaderboard?.round_name || "Active Round"} · Live MTM Standings
                   </div>
-                  <div className="text-xs font-mono text-tx-muted">
+                  <div className="text-xs text-tx-muted tabular-nums">
                     Auto-updates every 10 seconds
                   </div>
                 </div>
 
-                <div className="glass-panel overflow-hidden border border-bd-subtle">
+                <div className="overflow-hidden border border-bd-subtle bg-bg-base rounded-xl">
                   <div className="w-full overflow-x-auto">
                     <table className="w-full text-left text-sm">
-                      <thead className="text-xs font-mono font-bold text-tx-secondary bg-bg-base uppercase tracking-wider border-b border-bd-subtle">
+                      <thead className="text-xs font-medium text-tx-secondary bg-bg-raised/40 uppercase tracking-wider border-b border-bd-subtle">
                         <tr>
-                          <th className="px-6 py-4 w-28">Rank</th>
-                          <th className="px-6 py-4">Participant Team</th>
-                          <th className="px-6 py-4 text-center">Round Return %</th>
-                          <th className="px-6 py-4 text-right">Round Equity</th>
+                          <th className="px-6 py-3 w-24">Rank</th>
+                          <th className="px-6 py-3">Participant Team</th>
+                          <th className="px-6 py-3 text-center">Round Return</th>
+                          <th className="px-6 py-3 text-right">Round Equity</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-bd-hairline">
                         {!leaderboard?.rows || leaderboard.rows.length === 0 ? (
                           <tr>
-                            <td colSpan={4} className="text-center py-12 text-tx-muted font-sans text-sm">
+                            <td colSpan={4} className="text-center py-12 text-tx-muted font-sans text-xs">
                               No leaderboard standings available for this round yet.
                             </td>
                           </tr>
                         ) : (
                           leaderboard.rows.map((row: any) => {
-                            const rankColor =
-                              row.rank === 1 ? "text-accent font-bold" :
-                                row.rank === 2 ? "text-tx-primary font-bold" :
-                                  row.rank === 3 ? "text-warn font-bold" :
-                                    "text-tx-muted";
+                            const isTop3 = row.rank <= 3;
 
                             return (
-                              <tr key={row.team_id} className="hover:bg-bg-overlay/40 transition-colors">
-                                <td className="px-6 py-4 font-mono font-bold whitespace-nowrap">
-                                  <span className={clsx("text-base", rankColor)}>
-                                    #{row.rank}
-                                  </span>
+                              <tr key={row.team_id} className="hover:bg-bg-raised/40 transition-colors">
+                                <td className="px-6 py-3.5 whitespace-nowrap">
+                                  {row.rank === 1 ? (
+                                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-emerald-500/15 text-emerald-400 font-bold text-xs border border-emerald-500/25 tabular-nums">
+                                      1
+                                    </span>
+                                  ) : row.rank === 2 ? (
+                                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-slate-500/15 text-slate-300 font-bold text-xs border border-slate-500/25 tabular-nums">
+                                      2
+                                    </span>
+                                  ) : row.rank === 3 ? (
+                                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-amber-500/15 text-amber-400 font-bold text-xs border border-amber-500/25 tabular-nums">
+                                      3
+                                    </span>
+                                  ) : (
+                                    <span className="text-tx-muted text-xs font-medium tabular-nums pl-1.5">
+                                      #{row.rank}
+                                    </span>
+                                  )}
                                 </td>
-                                <td className="px-6 py-4 font-mono font-bold text-tx-primary whitespace-nowrap text-base">
+                                <td className="px-6 py-3.5 font-mono font-semibold text-tx-primary whitespace-nowrap text-sm">
                                   <div className="flex items-center gap-2">
                                     <span>{row.team_id}</span>
                                     {row.rank === 1 && (
-                                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-accent-dim text-accent border border-accent-border uppercase">
-                                        Round Leader
+                                      <span className="text-[10px] font-sans font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                        Leader
                                       </span>
                                     )}
                                   </div>
                                 </td>
-                                <td className="px-6 py-4 font-mono text-center whitespace-nowrap">
+                                <td className="px-6 py-3.5 text-center whitespace-nowrap tabular-nums">
                                   {row.return_pct !== undefined ? (
-                                    <span className={clsx("text-sm font-bold", row.return_pct > 0 ? "text-gain" : "text-loss")}>
-                                      {row.return_pct > 0 ? `+${row.return_pct.toFixed(2)}%` : `${row.return_pct.toFixed(2)}%`}
+                                    <span className={clsx("text-sm font-semibold", row.return_pct >= 0 ? "text-gain" : "text-loss")}>
+                                      {row.return_pct >= 0 ? `+${row.return_pct.toFixed(2)}%` : `${row.return_pct.toFixed(2)}%`}
                                     </span>
                                   ) : (
-                                    <span className="text-loss text-sm font-bold">0.00%</span>
+                                    <span className="text-tx-muted text-sm font-medium">0.00%</span>
                                   )}
                                 </td>
-                                <td className="px-6 py-4 font-mono font-bold text-right text-white text-base whitespace-nowrap">
+                                <td className="px-6 py-3.5 font-semibold text-right text-tx-primary text-sm whitespace-nowrap tabular-nums">
                                   ₹{(row.equity_paise / 100).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                                 </td>
                               </tr>
@@ -1534,31 +1567,31 @@ export default function AdminDashboard() {
 
                 {/* Status banner when both rounds have not finished */}
                 {!cumulativeLeaderboard?.is_final ? (
-                  <div className="glass-panel p-6 border border-bd-subtle bg-bg-raised/70 rounded-xl space-y-4">
+                  <div className="p-5 border border-bd-subtle bg-bg-base rounded-xl space-y-4">
                     <div className="flex items-start gap-3.5">
-                      <div className="w-10 h-10 rounded-xl bg-warn-dim border border-warn-border flex items-center justify-center text-warn shrink-0 mt-0.5">
-                        <Lock className="w-5 h-5" />
+                      <div className="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0 mt-0.5">
+                        <Lock className="w-4 h-4" />
                       </div>
                       <div className="space-y-1">
-                        <h3 className="text-base font-bold text-tx-primary tracking-tight">
-                          Cumulative Tournament Leaderboard Locked
+                        <h3 className="text-base font-semibold text-tx-primary tracking-tight">
+                          Cumulative Tournament Leaderboard
                         </h3>
-                        <p className="text-sm text-tx-secondary leading-relaxed max-w-2xl">
-                          The cumulative multi-round leaderboard combines portfolio performances from Round 1 (Retail Momentum) and Round 2 (Institutional Desk).
-                          As designed, cumulative standings only finalize and lock after Session 11 completes.
+                        <p className="text-xs text-tx-secondary leading-relaxed max-w-2xl">
+                          Combines portfolio performances from Round 1 (Retail Momentum) and Round 2 (Institutional Desk).
+                          Cumulative standings finalize and lock after Session 11 completes.
                         </p>
                       </div>
                     </div>
 
                     {/* Progress Trackers */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                      <div className="bg-bg-base border border-bd-subtle p-3.5 rounded-lg flex items-center justify-between">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                      <div className="bg-bg-raised/50 border border-bd-subtle p-3 rounded-lg flex items-center justify-between">
                         <div>
-                          <div className="text-xs font-mono font-bold text-tx-primary">Round 1 (Sessions 1 – 6)</div>
-                          <div className="text-[11px] text-tx-muted mt-0.5">Retail trading & liquidation rules</div>
+                          <div className="text-xs font-semibold text-tx-primary">Round 1 (Sessions 1 – 6)</div>
+                          <div className="text-[11px] text-tx-muted mt-0.5">Retail trading &amp; liquidation rules</div>
                         </div>
                         <span className={clsx(
-                          "text-xs font-mono font-bold px-2.5 py-1 rounded border",
+                          "text-xs font-medium px-2 py-0.5 rounded-md border",
                           cumulativeLeaderboard?.round_1_complete
                             ? "bg-gain-dim text-gain border-gain-border"
                             : "bg-warn-dim text-warn border-warn-border"
@@ -1567,13 +1600,13 @@ export default function AdminDashboard() {
                         </span>
                       </div>
 
-                      <div className="bg-bg-base border border-bd-subtle p-3.5 rounded-lg flex items-center justify-between">
+                      <div className="bg-bg-raised/50 border border-bd-subtle p-3 rounded-lg flex items-center justify-between">
                         <div>
-                          <div className="text-xs font-mono font-bold text-tx-primary">Round 2 (Sessions 7 – 11)</div>
-                          <div className="text-[11px] text-tx-muted mt-0.5">Institutional execution & Stat Shop</div>
+                          <div className="text-xs font-semibold text-tx-primary">Round 2 (Sessions 7 – 11)</div>
+                          <div className="text-[11px] text-tx-muted mt-0.5">Institutional execution &amp; Stat Shop</div>
                         </div>
                         <span className={clsx(
-                          "text-xs font-mono font-bold px-2.5 py-1 rounded border",
+                          "text-xs font-medium px-2 py-0.5 rounded-md border",
                           cumulativeLeaderboard?.round_2_complete
                             ? "bg-gain-dim text-gain border-gain-border"
                             : "bg-bg-raised text-tx-muted border-bd-subtle"
@@ -1583,38 +1616,38 @@ export default function AdminDashboard() {
                       </div>
                     </div>
 
-                    <div className="pt-2 flex items-center gap-3">
+                    <div className="pt-1 flex items-center gap-3">
                       <button
                         onClick={() => fetchCumulativeLeaderboard(true)}
-                        className="px-3.5 py-2 bg-bg-base hover:bg-bg-overlay border border-bd-subtle hover:border-accent-border rounded-md text-xs font-mono font-bold text-tx-secondary hover:text-tx-primary transition-all cursor-pointer"
+                        className="px-3.5 py-1.5 bg-bg-raised hover:bg-bg-overlay border border-bd-subtle rounded-md text-xs font-medium text-tx-secondary hover:text-tx-primary transition-colors cursor-pointer"
                       >
-                        Preview Live Multi-Round Estimates
+                        Preview Live Estimates
                       </button>
                     </div>
                   </div>
                 ) : (
                   <div className="flex items-center justify-between px-1">
-                    <div className="text-xs font-mono font-bold text-gain flex items-center gap-2 uppercase tracking-wider">
-                      <span className="w-2 h-2 rounded-full bg-gain animate-pulse" />
+                    <div className="text-xs font-medium text-gain flex items-center gap-2 uppercase tracking-wider">
+                      <span className="w-2 h-2 rounded-full bg-gain" />
                       Final Tournament Standings Locked (Round 1 + Round 2 Cumulative)
                     </div>
                   </div>
                 )}
 
-                {/* Cumulative Table (Renders preview or final standings) */}
+                {/* Cumulative Table */}
                 {cumulativeLeaderboard?.rows && cumulativeLeaderboard.rows.length > 0 && (
-                  <div className="glass-panel overflow-hidden border border-bd-subtle">
+                  <div className="overflow-hidden border border-bd-subtle bg-bg-base rounded-xl">
                     <div className="w-full overflow-x-auto">
                       <table className="w-full text-left text-sm">
-                        <thead className="text-xs font-mono font-bold text-tx-secondary bg-bg-base uppercase tracking-wider border-b border-bd-subtle">
+                        <thead className="text-xs font-medium text-tx-secondary bg-bg-raised/40 uppercase tracking-wider border-b border-bd-subtle">
                           <tr>
-                            <th className="px-6 py-4 w-28">Overall Rank</th>
-                            <th className="px-6 py-4">Participant Team</th>
-                            <th className="px-6 py-4 text-center">R1 Return %</th>
-                            <th className="px-6 py-4 text-center">R2 Return %</th>
-                            <th className="px-6 py-4 text-center">Cumulative Return %</th>
-                            <th className="px-6 py-4 text-right">Net Tournament P&L</th>
-                            <th className="px-6 py-4 text-center">Status</th>
+                            <th className="px-6 py-3 w-24">Rank</th>
+                            <th className="px-6 py-3">Participant Team</th>
+                            <th className="px-6 py-3 text-center">R1 Return</th>
+                            <th className="px-6 py-3 text-center">R2 Return</th>
+                            <th className="px-6 py-3 text-center">Cumulative Return</th>
+                            <th className="px-6 py-3 text-right">Net P&amp;L</th>
+                            <th className="px-6 py-3 text-center">Status</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-bd-hairline">
@@ -1622,55 +1655,68 @@ export default function AdminDashboard() {
                             const isFirst = row.rank === 1;
                             const isSecond = row.rank === 2;
                             const isThird = row.rank === 3;
-                            const rankColor = isFirst ? "text-accent font-bold" : isSecond ? "text-tx-primary font-bold" : isThird ? "text-warn font-bold" : "text-tx-muted";
                             const isElim = row.status === "ELIM";
 
                             return (
-                              <tr key={row.team_id} className={clsx("hover:bg-bg-overlay/40 transition-colors", isFirst && "bg-accent-dim/10")}>
-                                <td className="px-6 py-4 font-mono font-bold whitespace-nowrap">
-                                  <span className={clsx("text-base", rankColor)}>
-                                    #{row.rank}
-                                  </span>
+                              <tr key={row.team_id} className={clsx("hover:bg-bg-raised/40 transition-colors", isFirst && "bg-emerald-500/[0.03]")}>
+                                <td className="px-6 py-3.5 whitespace-nowrap">
+                                  {isFirst ? (
+                                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-emerald-500/15 text-emerald-400 font-bold text-xs border border-emerald-500/25 tabular-nums">
+                                      1
+                                    </span>
+                                  ) : isSecond ? (
+                                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-slate-500/15 text-slate-300 font-bold text-xs border border-slate-500/25 tabular-nums">
+                                      2
+                                    </span>
+                                  ) : isThird ? (
+                                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-amber-500/15 text-amber-400 font-bold text-xs border border-amber-500/25 tabular-nums">
+                                      3
+                                    </span>
+                                  ) : (
+                                    <span className="text-tx-muted text-xs font-medium tabular-nums pl-1.5">
+                                      #{row.rank}
+                                    </span>
+                                  )}
                                 </td>
-                                <td className="px-6 py-4 font-mono font-bold text-tx-primary whitespace-nowrap text-base">
+                                <td className="px-6 py-3.5 font-mono font-semibold text-tx-primary whitespace-nowrap text-sm">
                                   <div className="flex items-center gap-2">
                                     <span>{row.team_id}</span>
                                     {isFirst && (
-                                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-accent-dim text-accent border border-accent-border uppercase shadow-xs">
-                                        Tournament Champion
+                                      <span className="text-[10px] font-sans font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                        Champion
                                       </span>
                                     )}
                                   </div>
                                 </td>
-                                <td className="px-6 py-4 font-mono text-center whitespace-nowrap text-sm">
-                                  <span className={row.r1_return_pct >= 0 ? "text-gain" : "text-loss"}>
+                                <td className="px-6 py-3.5 text-center whitespace-nowrap text-xs tabular-nums">
+                                  <span className={row.r1_return_pct >= 0 ? "text-gain font-semibold" : "text-loss font-semibold"}>
                                     {row.r1_return_pct >= 0 ? `+${row.r1_return_pct.toFixed(2)}%` : `${row.r1_return_pct.toFixed(2)}%`}
                                   </span>
                                 </td>
-                                <td className="px-6 py-4 font-mono text-center whitespace-nowrap text-sm">
-                                  <span className={row.r2_return_pct >= 0 ? "text-gain" : "text-loss"}>
+                                <td className="px-6 py-3.5 text-center whitespace-nowrap text-xs tabular-nums">
+                                  <span className={row.r2_return_pct >= 0 ? "text-gain font-semibold" : "text-loss font-semibold"}>
                                     {row.r2_return_pct >= 0 ? `+${row.r2_return_pct.toFixed(2)}%` : `${row.r2_return_pct.toFixed(2)}%`}
                                   </span>
                                 </td>
-                                <td className="px-6 py-4 font-mono text-center whitespace-nowrap">
-                                  <span className={clsx("text-sm sm:text-base font-bold", row.cumulative_return_pct >= 0 ? "text-gain font-bold" : "text-loss font-bold")}>
+                                <td className="px-6 py-3.5 text-center whitespace-nowrap tabular-nums">
+                                  <span className={clsx("text-sm font-bold", row.cumulative_return_pct >= 0 ? "text-gain" : "text-loss")}>
                                     {row.cumulative_return_pct >= 0 ? `+${row.cumulative_return_pct.toFixed(2)}%` : `${row.cumulative_return_pct.toFixed(2)}%`}
                                   </span>
                                 </td>
-                                <td className="px-6 py-4 font-mono font-bold text-right whitespace-nowrap text-sm sm:text-base">
+                                <td className="px-6 py-3.5 font-semibold text-right whitespace-nowrap text-sm tabular-nums">
                                   <span className={row.cumulative_pnl_paise >= 0 ? "text-gain" : "text-loss"}>
                                     {row.cumulative_pnl_paise >= 0 ? "+" : ""}
                                     ₹{(row.cumulative_pnl_paise / 100).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                                   </span>
                                 </td>
-                                <td className="px-6 py-4 text-center whitespace-nowrap">
+                                <td className="px-6 py-3.5 text-center whitespace-nowrap">
                                   {isElim ? (
-                                    <span className="text-xs font-mono font-bold text-loss bg-loss-dim px-2.5 py-1 rounded-md border border-loss-border">
-                                      LIQUIDATED
+                                    <span className="text-xs font-medium text-loss bg-loss-dim px-2 py-0.5 rounded-md border border-loss-border">
+                                      Liquidated
                                     </span>
                                   ) : (
-                                    <span className="text-xs font-mono font-bold text-gain bg-gain-dim px-2.5 py-1 rounded-md border border-gain-border">
-                                      ACTIVE
+                                    <span className="text-xs font-medium text-gain bg-gain-dim px-2 py-0.5 rounded-md border border-gain-border">
+                                      Active
                                     </span>
                                   )}
                                 </td>
@@ -1692,87 +1738,66 @@ export default function AdminDashboard() {
             TAB 6: DANGER ZONE
            ══════════════════════════════════════════════════════ */}
         {activeTab === "DANGER" && (
-          <div className="space-y-6">
+          <div className="space-y-6 max-w-4xl">
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-tx-primary tracking-tight">Danger Zone & Override Controls</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-tx-primary tracking-tight">Danger Zone</h1>
               <p className="text-tx-secondary text-sm mt-0.5">
-                Emergency market halts, state jump overrides, and nuclear reset controls.
+                Emergency market halts and full simulation reset controls.
               </p>
             </div>
 
-            {/* Environment Jump & Freeze */}
-            <div className="glass-panel p-6 border border-bd-subtle space-y-6">
+            {/* Market Operations Card */}
+            <div className="p-6 border border-bd-subtle bg-bg-base rounded-xl space-y-4">
               <div>
-                <div className="flex items-center gap-2">
-                  <Zap className="w-5 h-5 text-warn" />
-                  <h2 className="text-base font-bold text-tx-primary">Session Jump Override</h2>
-                </div>
-                <p className="text-xs text-tx-secondary mt-1">Force snap the simulation state directly to any target session.</p>
+                <h2 className="text-base font-semibold text-tx-primary">Market Trading Status</h2>
+                <p className="text-xs text-tx-secondary mt-0.5">
+                  Temporarily pause all participant order placements or resume trading across all active order books.
+                </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center bg-bg-base p-4 rounded-xl border border-bd-subtle">
-                <span className="text-xs font-mono font-bold text-tx-secondary uppercase shrink-0">Target:</span>
-                <select
-                  value={jumpTarget}
-                  onChange={(e) => setJumpTarget(Number(e.target.value))}
-                  className="flex-1 bg-bg-raised border border-bd-subtle rounded-lg px-3.5 py-2.5 text-tx-primary font-mono text-xs font-bold outline-none focus:border-accent"
-                >
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(g => (
-                    <option key={g} value={g}>
-                      {g < 7 ? `Round 1 • Session ${g}` : `Round 2 • Session ${g - 6}`}
-                    </option>
-                  ))}
-                </select>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                 <button
-                  onClick={() => handleAction("/admin/sessions/jump", { target_g: jumpTarget })}
+                  onClick={() => handleAction("/admin/freeze")}
                   disabled={loading}
-                  className="bg-accent hover:bg-accent/90 text-tx-inverse px-5 py-2.5 rounded-lg font-mono font-bold text-xs uppercase tracking-wider transition-all shadow-sm active:scale-[0.98]"
+                  className="bg-bg-raised hover:bg-bg-overlay text-tx-primary border border-bd-subtle hover:border-bd-strong py-2.5 px-4 rounded-lg text-xs font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 >
-                  Execute Jump
+                  <AlertTriangle className="w-4 h-4 text-amber-400" />
+                  <span>Freeze Market (Halt Orders)</span>
+                </button>
+                <button
+                  onClick={() => handleAction("/admin/unfreeze")}
+                  disabled={loading}
+                  className="bg-bg-raised hover:bg-bg-overlay text-tx-primary border border-bd-subtle hover:border-bd-strong py-2.5 px-4 rounded-lg text-xs font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  <Power className="w-4 h-4 text-emerald-400" />
+                  <span>Resume Market (Unfreeze)</span>
                 </button>
               </div>
-
-              <div className="pt-4 border-t border-bd-hairline">
-                <h3 className="text-xs font-mono font-bold text-tx-secondary uppercase tracking-wider mb-3">Emergency Engine Freeze</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <button
-                    onClick={() => handleAction("/admin/freeze")}
-                    className="bg-loss-dim hover:bg-loss hover:text-tx-inverse border border-loss-border text-loss py-4 px-4 rounded-xl font-mono text-xs font-bold uppercase tracking-wider transition-all flex flex-col items-center justify-center gap-2 shadow-sm active:scale-[0.98]"
-                  >
-                    <AlertTriangle className="w-5 h-5" />
-                    <span>Freeze Engine (Halt All Trades)</span>
-                  </button>
-                  <button
-                    onClick={() => handleAction("/admin/unfreeze")}
-                    className="bg-gain-dim hover:bg-gain hover:text-tx-inverse border border-gain-border text-gain py-4 px-4 rounded-xl font-mono text-xs font-bold uppercase tracking-wider transition-all flex flex-col items-center justify-center gap-2 shadow-sm active:scale-[0.98]"
-                  >
-                    <Power className="w-5 h-5" />
-                    <span>Resume Engine (Unfreeze)</span>
-                  </button>
-                </div>
-              </div>
             </div>
 
-            {/* Nuclear Reset */}
-            <div className="p-6 rounded-xl border border-loss-border/50 bg-loss-dim/20 space-y-4">
-              <div className="flex items-center gap-2">
-                <ShieldAlert className="w-5 h-5 text-loss" />
-                <h2 className="text-base font-bold text-loss">Nuclear Reset Option</h2>
+            {/* Hard Reset Card */}
+            <div className="p-6 border border-bd-subtle bg-bg-base rounded-xl space-y-4">
+              <div>
+                <h2 className="text-base font-semibold text-tx-primary">Reset Entire Simulation</h2>
+                <p className="text-xs text-tx-secondary mt-0.5 leading-relaxed">
+                  Permanently clears all trades, resets participant cash back to starting ₹1,00,00,000 (₹1 Crore), removes purchased stat upgrades, and rewinds the engine to Round 1 Session 1.
+                </p>
               </div>
-              <p className="text-xs text-tx-secondary leading-relaxed">
-                Permanently wipe all trades, reset participant ledger balances back to ₹1,00,00,000 (₹1 Crore), strip upgrades, and rewind the engine clock to Round 1 Session 1.
-              </p>
-              <button
-                onClick={() => {
-                  if (window.confirm("CRITICAL WARNING: This action is irreversible. Wipe all ledger entries and restart the event from scratch?")) {
-                    handleAction("/admin/sessions/reset");
-                  }
-                }}
-                className="bg-loss hover:bg-loss/90 text-tx-inverse w-full py-3 rounded-lg font-mono font-bold text-xs uppercase tracking-wider transition-all shadow-md active:scale-[0.98] flex items-center justify-center gap-2"
-              >
-                <RotateCcw className="w-4 h-4" />
-                Hard Reset Entire Simulation
-              </button>
+
+              <div className="pt-1">
+                <button
+                  onClick={() => {
+                    if (window.confirm("Are you sure you want to reset the simulation? All trades and balances will be wiped back to Session 1.")) {
+                      handleAction("/admin/sessions/reset");
+                    }
+                  }}
+                  disabled={loading}
+                  className="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 hover:border-rose-500/50 px-4 py-2 rounded-lg font-medium text-xs transition-colors inline-flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Reset Simulation</span>
+                </button>
+              </div>
             </div>
           </div>
         )}

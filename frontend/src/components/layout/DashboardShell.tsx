@@ -155,27 +155,27 @@ export function DashboardShell({
             <span className="text-bd-strong hidden sm:inline">|</span>
 
             {/* Team and Session Info */}
-            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-              <span className="text-[10px] sm:text-[11px] font-mono font-bold text-tx-secondary uppercase tracking-wider px-2 py-0.5 rounded bg-bg-raised border border-bd-subtle truncate max-w-[80px] sm:max-w-none">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-xs font-medium text-tx-secondary px-2.5 py-1 rounded-md bg-bg-raised border border-bd-subtle truncate max-w-[100px] sm:max-w-none">
                 {teamId || "Trader"}
               </span>
 
               {/* Session indicator */}
               <span className={clsx(
-                "text-[10px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded border shrink-0",
+                "text-xs font-medium px-2.5 py-1 rounded-md border shrink-0",
                 currentSession === 0 
-                  ? "text-amber-400 bg-amber-500/15 border-amber-500/30 font-extrabold" 
-                  : "text-warn bg-warn-dim border-warn-border"
+                  ? "text-amber-400 bg-amber-500/10 border-amber-500/25 font-semibold" 
+                  : "text-tx-secondary bg-bg-raised border-bd-subtle"
               )}>
-                {currentSession === 0 ? "DEMO ROUND" : `S${currentSession} · ${isRound2 ? "R2" : "R1"}`}
+                {currentSession === 0 ? "Demo Round" : `S${currentSession} · ${isRound2 ? "R2" : "R1"}`}
               </span>
 
-              {/* Minimal Green Ticker Indicator (no text) */}
+              {/* Minimal Green Ticker Indicator (no text, clean pulse) */}
               <span 
                 className={clsx(
-                  "w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full shrink-0 shadow-xs",
+                  "w-2 h-2 rounded-full shrink-0",
                   !connected ? 'bg-loss' :
-                  sessionState === 'RUNNING' ? 'bg-gain animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.7)]' :
+                  sessionState === 'RUNNING' ? 'bg-gain animate-pulse' :
                   sessionState === 'STARTING' ? 'bg-accent animate-ping' :
                   sessionState === 'PAUSED' ? 'bg-warn' : 'bg-tx-muted'
                 )} 
@@ -183,9 +183,9 @@ export function DashboardShell({
               />
 
               {/* Clock */}
-              <span className="text-[10px] sm:text-[11px] font-mono font-bold text-tx-primary bg-bg-raised px-2 py-0.5 rounded border border-bd-subtle flex items-center gap-1.5 shrink-0 shadow-xs">
-                <Clock className="w-3 h-3 text-tx-muted" />
-                <span className="font-mono font-bold tracking-wider">{formattedTime}</span>
+              <span className="text-xs font-semibold text-tx-primary bg-bg-raised px-2.5 py-1 rounded-md border border-bd-subtle flex items-center gap-1.5 shrink-0 tabular-nums">
+                <Clock className="w-3.5 h-3.5 text-tx-muted" />
+                <span className="tabular-nums font-semibold">{formattedTime}</span>
               </span>
             </div>
           </div>
@@ -195,12 +195,12 @@ export function DashboardShell({
             <div className="relative shrink-0">
               <button 
                 onClick={() => setSettingsOpen(!settingsOpen)} 
-                className="p-1.5 sm:px-2.5 sm:py-1.5 text-tx-secondary hover:text-tx-primary bg-bg-raised hover:bg-bg-overlay rounded-md border border-bd-subtle transition-colors flex items-center gap-1.5 text-[11px] font-mono cursor-pointer"
+                className="px-2.5 py-1.5 text-tx-secondary hover:text-tx-primary bg-bg-raised hover:bg-bg-overlay rounded-md border border-bd-subtle transition-colors flex items-center gap-1.5 text-xs font-medium cursor-pointer"
                 aria-label="Open settings"
                 title="Settings"
               >
                 <Settings className="w-3.5 h-3.5 text-tx-secondary" />
-                <span className="hidden sm:inline text-tx-muted">Settings</span>
+                <span className="hidden sm:inline">Settings</span>
               </button>
 
               {settingsOpen && (
@@ -209,8 +209,8 @@ export function DashboardShell({
                     className="fixed inset-0 z-40" 
                     onClick={() => setSettingsOpen(false)} 
                   />
-                  <div className="absolute right-0 top-full mt-2 w-48 bg-bg-base border border-bd-subtle rounded-xl shadow-modal p-2 z-50 flex flex-col gap-1 text-[12px] font-mono animate-in fade-in slide-in-from-top-2 duration-150">
-                    <div className="px-2 py-1 text-[10px] uppercase font-bold text-tx-muted tracking-wider border-b border-bd-hairline">
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-bg-base border border-bd-subtle rounded-xl shadow-modal p-2 z-50 flex flex-col gap-1 text-xs font-sans animate-in fade-in slide-in-from-top-2 duration-150">
+                    <div className="px-2.5 py-1.5 text-[11px] font-medium text-tx-muted tracking-wider border-b border-bd-hairline">
                       User Settings
                     </div>
                     
@@ -224,9 +224,9 @@ export function DashboardShell({
                     >
                       <span className="flex items-center gap-2">
                         {resolvedTheme === 'dark' ? <Sun className="w-3.5 h-3.5 text-warn" /> : <Moon className="w-3.5 h-3.5 text-accent" />}
-                        <span>Mode</span>
+                        <span>Appearance</span>
                       </span>
-                      <span className="text-[10px] text-tx-muted uppercase font-bold">{resolvedTheme === 'dark' ? 'Dark' : 'Light'}</span>
+                      <span className="text-xs text-tx-muted capitalize font-medium">{resolvedTheme === 'dark' ? 'Dark' : 'Light'}</span>
                     </button>
 
                     {/* Logout Button */}
@@ -235,7 +235,7 @@ export function DashboardShell({
                         setSettingsOpen(false);
                         handleLogout();
                       }}
-                      className="flex items-center gap-2 w-full px-2.5 py-2 rounded-md text-loss hover:bg-loss-dim transition-colors cursor-pointer font-bold"
+                      className="flex items-center gap-2 w-full px-2.5 py-2 rounded-md text-loss hover:bg-loss-dim transition-colors cursor-pointer font-medium"
                     >
                       <LogOut className="w-3.5 h-3.5 text-loss" />
                       <span>Logout</span>
@@ -255,7 +255,7 @@ export function DashboardShell({
           role="tablist" 
           aria-label="Dashboard sub-tabs"
         >
-          <div className="flex max-w-7xl mx-auto w-full min-w-max gap-1 sm:gap-2 py-1.5">
+          <div className="flex max-w-7xl mx-auto w-full min-w-max gap-1.5 py-2">
             {navItems.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
@@ -265,13 +265,13 @@ export function DashboardShell({
                   role="tab"
                   aria-selected={isActive}
                   className={clsx(
-                    "flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 font-mono font-bold text-[11px] sm:text-[12px] uppercase tracking-wider transition-all rounded-md relative cursor-pointer",
+                    "flex items-center gap-2 px-3.5 py-1.5 font-medium text-xs sm:text-sm transition-all rounded-lg cursor-pointer",
                     isActive 
-                      ? "text-accent bg-accent-dim border border-accent-border shadow-[0_0_12px_rgba(0,212,170,0.15)]" 
-                      : "text-tx-secondary hover:text-tx-primary hover:bg-bg-raised border border-transparent"
+                      ? "text-tx-primary bg-bg-raised border border-bd-subtle font-semibold shadow-xs" 
+                      : "text-tx-secondary hover:text-tx-primary hover:bg-bg-raised/60 border border-transparent"
                   )}
                 >
-                  <tab.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                  <tab.icon className="w-4 h-4 shrink-0" />
                   <span>{tab.name}</span>
                 </button>
               );

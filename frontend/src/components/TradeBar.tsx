@@ -225,32 +225,32 @@ export function TradeBar({ ticker, currentPricePaise, variant = "bar", className
         {/* Header */}
         <div className="flex items-center justify-between border-b border-bd-hairline pb-3 relative z-10">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-            <span className="text-[11px] font-bold text-tx-muted uppercase tracking-[0.06em]">
+            <span className="w-2 h-2 rounded-full bg-emerald-400" />
+            <span className="text-xs font-medium text-tx-muted">
               Order Ticket
             </span>
           </div>
-          <span className="text-[13px] font-mono font-bold text-accent">
+          <span className="text-sm font-semibold text-tx-primary tabular-nums">
             ₹{(currentPricePaise / 100).toFixed(2)}
           </span>
         </div>
 
         {/* Current Position Status */}
         <div className="bg-bg-void border border-bd-subtle rounded-lg p-3 flex items-center justify-between relative z-10">
-          <span className="text-[11px] font-mono text-tx-secondary uppercase tracking-wider font-medium">Position</span>
+          <span className="text-xs font-medium text-tx-secondary">Position</span>
           <div>
             {currentPos > 0 ? (
-              <span className="font-mono font-bold text-[12px] text-gain bg-gain-dim border border-gain-border px-2.5 py-0.5 rounded inline-flex items-center gap-1.5 shadow-xs">
-                <span className="w-1.5 h-1.5 rounded-full bg-gain animate-pulse" />
+              <span className="font-semibold text-xs text-gain bg-gain-dim border border-gain-border px-2.5 py-0.5 rounded-md inline-flex items-center gap-1.5 tabular-nums">
+                <span className="w-1.5 h-1.5 rounded-full bg-gain" />
                 LONG: {currentPos}
               </span>
             ) : currentPos < 0 ? (
-              <span className="font-mono font-bold text-[12px] text-loss bg-loss-dim border border-loss-border px-2.5 py-0.5 rounded inline-flex items-center gap-1.5 shadow-xs">
-                <span className="w-1.5 h-1.5 rounded-full bg-loss animate-pulse" />
+              <span className="font-semibold text-xs text-loss bg-loss-dim border border-loss-border px-2.5 py-0.5 rounded-md inline-flex items-center gap-1.5 tabular-nums">
+                <span className="w-1.5 h-1.5 rounded-full bg-loss" />
                 SHORT: {Math.abs(currentPos)}
               </span>
             ) : (
-              <span className="font-mono font-bold text-[12px] text-tx-muted bg-bg-raised border border-bd-subtle px-2 py-0.5 rounded">
+              <span className="font-medium text-xs text-tx-muted bg-bg-raised border border-bd-subtle px-2.5 py-0.5 rounded-md tabular-nums">
                 FLAT: 0
               </span>
             )}

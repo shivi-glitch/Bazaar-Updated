@@ -22,12 +22,12 @@ export function BottomNav() {
           key={item.name}
           onClick={() => router.push(item.path)}
           className={clsx(
-            "flex flex-col items-center flex-1 py-2 font-mono transition-colors", 
-            pathname === item.path ? "text-accent" : "text-tx-muted hover:text-tx-primary"
+            "flex flex-col items-center flex-1 py-2 font-sans transition-colors cursor-pointer", 
+            pathname === item.path ? "text-emerald-400 font-semibold" : "text-tx-muted hover:text-tx-primary font-medium"
           )}
         >
           <item.icon className="w-4 h-4 mb-1" />
-          <span className="text-[10px] font-bold uppercase tracking-wider">{item.name}</span>
+          <span className="text-xs">{item.name}</span>
         </button>
       ))}
     </div>

@@ -10,6 +10,7 @@ import { ArrowLeft, ArrowUpRight, ArrowDownRight, Briefcase } from "lucide-react
 import clsx from "clsx";
 import { OrderDepth } from "@/components/OrderDepth";
 import { TradeBar } from "@/components/TradeBar";
+import { getInstitutionalMemo } from "@/lib/institutionalMemos";
 
 export interface AssetFundamental {
   name: string;
@@ -312,6 +313,10 @@ export function AssetDetailTab({ ticker, onBack }: { ticker: string, onBack: () 
   const currentPricePaise = prices[ticker]?.[0] || 0;
   const currentPrice = currentPricePaise / 100;
 
+  const activeMemo = useMemo(() => {
+    return getInstitutionalMemo(ticker, currentSession, meta.deskNote);
+  }, [ticker, currentSession, meta.deskNote]);
+
   const chartData: PricePoint[] = useMemo(() => {
     return rawHistory.map((p: any, idx: number) => {
       const val = typeof p === 'number' ? p / 100 : (p?.value ? p.value / 100 : 0);
@@ -347,11 +352,11 @@ export function AssetDetailTab({ ticker, onBack }: { ticker: string, onBack: () 
         <div className="flex items-center justify-between">
           <button 
             onClick={onBack} 
-            className="flex items-center gap-2 px-3 py-1.5 bg-bg-raised hover:bg-bg-overlay border border-bd-subtle hover:border-bd-strong rounded-md text-tx-secondary hover:text-tx-primary transition-colors text-[12px] font-mono font-bold uppercase tracking-wider cursor-pointer"
+            className="flex items-center gap-2 px-3 py-1.5 bg-bg-raised hover:bg-bg-overlay border border-bd-subtle hover:border-bd-strong rounded-lg text-tx-secondary hover:text-tx-primary transition-colors text-xs font-medium cursor-pointer"
           >
             <ArrowLeft className="w-3.5 h-3.5" /> Back to Markets
           </button>
-          <div className="text-[10px] font-mono font-bold text-tx-muted uppercase tracking-widest">ASSET TERMINAL</div>
+          <div className="text-xs font-medium text-tx-muted">Market Terminal</div>
         </div>
 
         {/* 2-Column Responsive Layout: 8 cols Left (Chart & Company), 4 cols Right (Execution & Metrics) */}
@@ -364,15 +369,15 @@ export function AssetDetailTab({ ticker, onBack }: { ticker: string, onBack: () 
             <div className="bg-bg-raised/75 border border-bd-subtle rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 shadow-card">
               <div>
                 <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
-                  <h1 className="text-[24px] sm:text-[30px] font-sans font-bold tracking-tight text-tx-primary">{ticker}</h1>
-                  <span className="text-[10px] font-mono uppercase tracking-wider font-bold px-2.5 py-0.5 rounded border bg-bg-void/80 border-bd-subtle text-accent">
+                  <h1 className="text-2xl sm:text-3xl font-sans font-bold tracking-tight text-tx-primary">{ticker}</h1>
+                  <span className="text-xs font-medium px-2 py-0.5 rounded-md border bg-bg-base border-bd-subtle text-tx-secondary">
                     {meta.category}
                   </span>
                 </div>
-                <p className="text-tx-secondary text-[12px] sm:text-[13px] mt-0.5 font-medium">{meta.name} · <span className="text-tx-muted font-mono">{meta.sector}</span></p>
+                <p className="text-tx-secondary text-xs sm:text-sm mt-0.5 font-medium">{meta.name} · <span className="text-tx-muted">{meta.sector}</span></p>
               </div>
               <div className="text-left sm:text-right">
-                <div className="text-[26px] sm:text-[32px] font-mono font-bold text-tx-primary tracking-tight">₹{currentPrice.toFixed(2)}</div>
+                <div className="text-2xl sm:text-3xl font-bold text-tx-primary tracking-tight tabular-nums">₹{currentPrice.toFixed(2)}</div>
               </div>
             </div>
 
@@ -451,19 +456,19 @@ export function AssetDetailTab({ ticker, onBack }: { ticker: string, onBack: () 
               <TradeBar ticker={ticker} currentPricePaise={currentPricePaise} variant="card" />
             </div>
 
-            {/* Institutional Equity Research Note */}
+            {/* Institutional Equity Research Note (Session-Wise Tactical Memo) */}
             <div className="bg-bg-void border-l-4 border-l-accent border border-bd-subtle rounded-xl p-4 sm:p-5 shadow-card space-y-2.5">
               <div className="flex items-center justify-between gap-2">
-                <div className="text-[11px] font-bold text-accent uppercase tracking-[0.06em] flex items-center gap-1.5">
+                <div className="text-xs font-semibold text-accent uppercase tracking-wider flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
                   Institutional Desk Memo
                 </div>
-                <span className="text-[9px] font-mono text-tx-muted uppercase tracking-wider bg-bg-raised px-2 py-0.5 rounded border border-bd-subtle">
-                  Tactical Flow Clue
+                <span className="text-xs font-medium text-tx-secondary bg-bg-raised px-2.5 py-0.5 rounded-md border border-bd-subtle tabular-nums">
+                  {activeMemo.tag}
                 </span>
               </div>
-              <p className="text-[12px] sm:text-[13px] text-tx-secondary leading-relaxed font-medium">
-                {meta.deskNote}
+              <p className="text-xs sm:text-sm text-tx-secondary leading-relaxed font-normal">
+                {activeMemo.memo}
               </p>
             </div>
 
