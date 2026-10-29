@@ -1,7 +1,7 @@
 import os
 import time
 import uuid
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, HTTPException, Header, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import update, delete, select
 
@@ -165,7 +165,9 @@ async def unfreeze_route():
     return await engine_app.unfreeze()
 
 @router.get("/sessions", dependencies=[Depends(verify_admin)])
-async def get_sessions():
+async def get_sessions(response: Response):
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
     return {
         "current_g": engine_app.current_g,
         "n": engine_app.n,
@@ -174,7 +176,9 @@ async def get_sessions():
         "is_frozen": engine_app.is_frozen,
         "r2_unlocked": engine_app.r2_unlocked,
         "news_history": engine_app.news_ledger,
-        "scripted_news": SCRIPTED_NEWS_DATABASE
+        "scripted_news": SCRIPTED_NEWS_DATABASE,
+        "remaining_seconds": engine_app.get_remaining_seconds(),
+        "server_time": time.time()
     }
 
 @router.get("/news/scripted", dependencies=[Depends(verify_admin)])

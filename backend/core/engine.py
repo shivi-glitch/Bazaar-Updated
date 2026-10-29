@@ -227,16 +227,28 @@ class MarketEngine:
         target_g = g if g is not None else self.current_g
         return self.session_states.get(target_g, "LOCKED")
 
+    def get_remaining_seconds(self) -> int:
+        state = self.get_current_session_state()
+        if state in ["RUNNING", "PAUSED"]:
+            return max(0, int(round((200 - self.n) * 1.5)))
+        elif state in ["FINISHED", "LOCKED"]:
+            return 0
+        else:
+            return 300
+
     async def broadcast_state(self, g: int, state: str):
         if self.ws_manager:
             prices = self.get_live_or_initial_prices()
+            rem = self.get_remaining_seconds()
             await self.ws_manager.broadcast({
                 "type": "session",
                 "g": g,
                 "n": self.n,
                 "state": state,
                 "is_demo": (g == 0 or self.is_demo),
-                "prices": prices
+                "prices": prices,
+                "remaining_seconds": rem,
+                "server_time": time.time()
             })
 
     async def start_session(self, g: int):
@@ -841,8 +853,15 @@ class MarketEngine:
                     prices_payload[ticker] = [current_paise, current_vol, bids, asks]
 
                 if self.ws_manager:
+                    rem = max(0, int(round((200 - self.n) * 1.5)))
                     asyncio.create_task(self.ws_manager.broadcast({
-                        "type": "tick", "g": self.current_g, "n": self.n, "is_demo": (self.current_g == 0 or self.is_demo), "prices": prices_payload
+                        "type": "tick",
+                        "g": self.current_g,
+                        "n": self.n,
+                        "is_demo": (self.current_g == 0 or self.is_demo),
+                        "prices": prices_payload,
+                        "remaining_seconds": rem,
+                        "server_time": time.time()
                     }))
 
                 self.n += 1

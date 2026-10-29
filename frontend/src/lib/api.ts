@@ -19,9 +19,17 @@ export const api = {
   },
 
   async get(endpoint: string, token?: string) {
-    const headers: HeadersInit = {};
+    const headers: HeadersInit = {
+      "Cache-Control": "no-cache, no-store, must-revalidate",
+      "Pragma": "no-cache",
+    };
     if (token) headers["Authorization"] = `Bearer ${token}`;
-    const res = await fetch(`${API_BASE}${endpoint}`, { headers });
+    const sep = endpoint.includes("?") ? "&" : "?";
+    const cacheBuster = `${sep}_t=${Date.now()}`;
+    const res = await fetch(`${API_BASE}${endpoint}${cacheBuster}`, {
+      headers,
+      cache: "no-store",
+    });
     if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
     return res.json();
   },

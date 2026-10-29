@@ -25,6 +25,7 @@ interface MarketState {
   currentSession: number;
   serverTime: number;
   globalTick: number;
+  remainingSeconds: number | null;
   prices: Record<string, [number, number]>;
   priceHistory: Record<string, HistoryPoint[]>; 
   orderBooks: Record<string, OrderBook>;
@@ -58,6 +59,7 @@ export const useMarketStore = create<MarketState>((set) => ({
   currentSession: 1, 
   serverTime: 0,
   globalTick: 0,
+  remainingSeconds: null,
   prices: DEFAULT_R1_PRICES,
   priceHistory: {},
   orderBooks: {},
@@ -96,6 +98,7 @@ export const useMarketStore = create<MarketState>((set) => ({
           serverTime: msg.server_time, 
           currentSession: msg.g !== undefined ? msg.g : state.currentSession,
           globalTick: typeof msg.n === 'number' ? msg.n : state.globalTick,
+          remainingSeconds: typeof msg.remaining_seconds === 'number' ? msg.remaining_seconds : state.remainingSeconds,
           priceHistory: state.priceHistory,
           prices: initialPrices
         };
@@ -109,6 +112,7 @@ export const useMarketStore = create<MarketState>((set) => ({
           sessionState: msg.state, 
           currentSession: msg.g !== undefined ? msg.g : state.currentSession,
           globalTick: typeof msg.n === 'number' ? msg.n : state.globalTick,
+          remainingSeconds: typeof msg.remaining_seconds === 'number' ? msg.remaining_seconds : state.remainingSeconds,
           priceHistory: state.priceHistory,
           prices: updatedPrices
         };
@@ -118,6 +122,7 @@ export const useMarketStore = create<MarketState>((set) => ({
         sessionState: msg.state || "READY",
         currentSession: msg.g !== undefined ? msg.g : 1,
         globalTick: 0,
+        remainingSeconds: 300,
         priceHistory: {},
         prices: msg.prices || DEFAULT_R1_PRICES,
         orderBooks: {}
@@ -140,6 +145,9 @@ export const useMarketStore = create<MarketState>((set) => ({
       set((state) => {
         const g = msg.g || state.currentSession || 1;
         const n = typeof msg.n === 'number' ? msg.n : state.globalTick;
+        const rem = typeof msg.remaining_seconds === 'number'
+          ? msg.remaining_seconds
+          : Math.max(0, Math.floor((200 - n) * 1.5));
         const continuousTime = (g - 1) * 201 + Math.min(200, n);
         const newHistory = { ...state.priceHistory };
         const newBooks = { ...state.orderBooks };
@@ -175,6 +183,7 @@ export const useMarketStore = create<MarketState>((set) => ({
           priceHistory: newHistory,
           orderBooks: newBooks,
           globalTick: n,
+          remainingSeconds: rem,
           currentSession: g
         };
       });

@@ -30,6 +30,7 @@ export function DashboardShell({
   const currentSession = useMarketStore((s) => s.currentSession);
   const connected = useMarketStore((s) => s.connected);
   const currentTick = useMarketStore((s) => s.globalTick);
+  const remainingSecondsStore = useMarketStore((s) => s.remainingSeconds);
   const setPortfolioData = useMarketStore((s) => s.setPortfolioData);
   const isChartFullscreen = useMarketStore((s) => s.isChartFullscreen);
 
@@ -94,23 +95,29 @@ export function DashboardShell({
   
   // ── Countdown Timer ─────────────────────────────────────────────────────
   // Rule: Tick smoothly every real second via setInterval.
-  // Only snap to server time when session STATE changes (not on every WS tick),
-  // which prevents the 2-4 min jump caused by batched/late tick arrivals.
+  // Snap when session state changes, gently nudge on drift, freeze on pause.
   const [timeLeft, setTimeLeft] = useState(300);
 
-  // Sync clock ONCE when session state changes (READY→RUNNING, RUNNING→FINISHED, etc.)
+  // Sync clock when session state changes
   useEffect(() => {
     if (sessionState === "RUNNING") {
-      // Estimate remaining time from current tick position
-      const serverSecs = Math.max(0, Math.floor((200 - (currentTick || 0)) * 1.5));
+      const serverSecs = typeof remainingSecondsStore === "number"
+        ? remainingSecondsStore
+        : Math.max(0, Math.floor((200 - (currentTick || 0)) * 1.5));
       setTimeLeft(serverSecs);
     } else if (sessionState === "FINISHED" || sessionState === "LOCKED") {
       setTimeLeft(0);
-    } else if (sessionState === "READY" || sessionState === "PAUSED") {
+    } else if (sessionState === "PAUSED") {
+      // Freeze remaining seconds, do NOT reset to 300!
+      const serverSecs = typeof remainingSecondsStore === "number"
+        ? remainingSecondsStore
+        : Math.max(0, Math.floor((200 - (currentTick || 0)) * 1.5));
+      setTimeLeft((prev) => (prev > 0 ? prev : serverSecs));
+    } else {
       setTimeLeft(300);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionState]); // ← intentionally NOT including currentTick — avoids jumps
+  }, [sessionState]);
 
   // Smooth real-time countdown (1 tick per real second)
   useEffect(() => {
@@ -121,16 +128,19 @@ export function DashboardShell({
     return () => clearInterval(timer);
   }, [sessionState]);
 
-  // Gentle drift correction: only resync if we're >10s off from server estimate
-  // This prevents visible jumps while still catching major desync (e.g. tab sleep)
+  // Gentle drift correction: nudge by 1s if slightly off, hard snap only on major lag/sleep
   useEffect(() => {
     if (sessionState !== "RUNNING") return;
-    const serverSecs = Math.max(0, Math.floor((200 - (currentTick || 0)) * 1.5));
+    const serverSecs = typeof remainingSecondsStore === "number"
+      ? remainingSecondsStore
+      : Math.max(0, Math.floor((200 - (currentTick || 0)) * 1.5));
     setTimeLeft((prev) => {
-      if (Math.abs(prev - serverSecs) > 10) return serverSecs; // big drift → hard snap
-      return prev; // small diff → let setInterval handle it smoothly
+      const diff = serverSecs - prev;
+      if (Math.abs(diff) > 12) return serverSecs; // Major desync (tab sleep) -> snap
+      if (Math.abs(diff) > 3) return diff > 0 ? prev + 1 : prev - 1; // Subtle 1s nudge
+      return prev;
     });
-  }, [currentTick, sessionState]);
+  }, [currentTick, remainingSecondsStore, sessionState]);
 
   const formattedTime = `${Math.floor(timeLeft / 60).toString().padStart(2, '0')}:${(timeLeft % 60).toString().padStart(2, '0')}`;
   const isRound2 = currentSession >= 7;

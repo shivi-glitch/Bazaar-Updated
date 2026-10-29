@@ -55,10 +55,16 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (!sysState) return;
     const n = sysState.n || 0;
-    const serverSecs = Math.max(0, Math.floor((200 - n) * 1.5));
+    const serverSecs = typeof sysState.remaining_seconds === "number"
+      ? sysState.remaining_seconds
+      : Math.max(0, Math.floor((200 - n) * 1.5));
+
     if (sysSessionState === "RUNNING") setAdminTimeLeft(serverSecs);
     else if (sysSessionState === "FINISHED" || sysSessionState === "LOCKED") setAdminTimeLeft(0);
-    else setAdminTimeLeft(300);
+    else if (sysSessionState === "PAUSED") {
+      // Freeze at current remaining seconds, do NOT reset to 300!
+      setAdminTimeLeft((prev) => (prev > 0 ? prev : serverSecs));
+    } else setAdminTimeLeft(300);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sysSessionState]);
 
@@ -69,12 +75,20 @@ export default function AdminDashboard() {
     return () => clearInterval(t);
   }, [sysSessionState]);
 
-  // Gentle drift correction only when >10s off
+  // Gentle drift correction only when off
   useEffect(() => {
     if (!sysState || sysSessionState !== "RUNNING") return;
-    const serverSecs = Math.max(0, Math.floor((200 - (sysState.n || 0)) * 1.5));
-    setAdminTimeLeft((prev) => Math.abs(prev - serverSecs) > 10 ? serverSecs : prev);
-  }, [sysState?.n, sysSessionState]);
+    const serverSecs = typeof sysState.remaining_seconds === "number"
+      ? sysState.remaining_seconds
+      : Math.max(0, Math.floor((200 - (sysState.n || 0)) * 1.5));
+    
+    setAdminTimeLeft((prev) => {
+      const diff = serverSecs - prev;
+      if (Math.abs(diff) > 12) return serverSecs; // Large gap -> snap
+      if (Math.abs(diff) > 3) return diff > 0 ? prev + 1 : prev - 1; // Subtle 1s nudge
+      return prev;
+    });
+  }, [sysState?.n, sysState?.remaining_seconds, sysSessionState]);
 
   const getAdminToken = () => {
     if (typeof window === "undefined") return "";
@@ -126,15 +140,26 @@ export default function AdminDashboard() {
     }
   }, []);
 
-  // General simulation & teams fetcher
+  const fetchSysSeqRef = useRef(0);
+  // General simulation & teams fetcher (protected against out-of-order responses)
   const fetchSysData = useCallback(async () => {
     if (!getAdminToken()) return;
+    const seq = ++fetchSysSeqRef.current;
     try {
       const [stateRes, teamsRes] = await Promise.all([
         api.get("/admin/sessions", getAdminToken()),
         api.get("/admin/teams", getAdminToken())
       ]);
-      setSysState(stateRes);
+      if (seq < fetchSysSeqRef.current) return; // Stale out-of-order response, discard!
+      setSysState((prev: any) => {
+        if (prev && prev.current_g === stateRes.current_g && prev.states?.[prev.current_g] === "RUNNING") {
+          // Never let an older tick downgrade a newer tick
+          if ((stateRes.n || 0) < (prev.n || 0)) {
+            return { ...stateRes, n: prev.n, remaining_seconds: prev.remaining_seconds };
+          }
+        }
+        return stateRes;
+      });
       setTeams(teamsRes.teams || []);
     } catch {
       // background fetch fail
@@ -146,13 +171,103 @@ export default function AdminDashboard() {
     await Promise.all([fetchSysData(), fetchLeaderboard(), fetchCumulativeLeaderboard()]);
   }, [fetchSysData, fetchLeaderboard, fetchCumulativeLeaderboard]);
 
-  // Initial load & Polling loops
+  // Real-time WebSocket connection for Admin (eliminates need for aggressive HTTP polling)
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    let ws: WebSocket | null = null;
+    let isSubscribed = true;
+    let reconnectTimer: any = null;
+
+    const connectWs = () => {
+      const token = getAdminToken();
+      if (!token || !isSubscribed) return;
+      try {
+        const wsBase = process.env.NEXT_PUBLIC_WS_URL || "ws://127.0.0.1:8000/ws";
+        const socket = new WebSocket(`${wsBase}?token=${encodeURIComponent(token)}`);
+        ws = socket;
+
+        socket.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.type === "tick") {
+              setSysState((prev: any) => {
+                if (!prev) return prev;
+                return {
+                  ...prev,
+                  n: data.n,
+                  current_g: data.g,
+                  remaining_seconds: data.remaining_seconds
+                };
+              });
+              if (typeof data.remaining_seconds === "number") {
+                setAdminTimeLeft((prev) => {
+                  const diff = data.remaining_seconds - prev;
+                  if (Math.abs(diff) > 12) return data.remaining_seconds;
+                  if (Math.abs(diff) > 3) return diff > 0 ? prev + 1 : prev - 1;
+                  return prev;
+                });
+              }
+            } else if (data.type === "session") {
+              setSysState((prev: any) => {
+                if (!prev) return prev;
+                const newStates = { ...prev.states, [data.g]: data.state };
+                return {
+                  ...prev,
+                  current_g: data.g,
+                  states: newStates,
+                  n: data.n ?? prev.n,
+                  remaining_seconds: data.remaining_seconds
+                };
+              });
+              if (data.state === "RUNNING") {
+                const rem = typeof data.remaining_seconds === "number"
+                  ? data.remaining_seconds
+                  : Math.max(0, Math.floor((200 - (data.n || 0)) * 1.5));
+                setAdminTimeLeft(rem);
+              } else if (data.state === "FINISHED" || data.state === "LOCKED") {
+                setAdminTimeLeft(0);
+              } else if (data.state === "PAUSED") {
+                // Freeze! Keep current remaining seconds
+              } else {
+                setAdminTimeLeft(300);
+              }
+            } else if (data.type === "hello") {
+              if (typeof data.remaining_seconds === "number") {
+                setAdminTimeLeft(data.remaining_seconds);
+              }
+            } else if (data.type === "reset") {
+              setAdminTimeLeft(300);
+              fetchSysData();
+            }
+          } catch (e) {}
+        };
+
+        socket.onclose = () => {
+          if (isSubscribed) {
+            reconnectTimer = setTimeout(connectWs, 2000);
+          }
+        };
+      } catch (err) {}
+    };
+
+    connectWs();
+    return () => {
+      isSubscribed = false;
+      if (reconnectTimer) clearTimeout(reconnectTimer);
+      if (ws) {
+        ws.onclose = null;
+        ws.close();
+      }
+    };
+  }, [isAuthenticated, fetchSysData]);
+
+  // Initial load & Polling loops (gentle 30s background sync, no aggressive polling)
   useEffect(() => {
     if (!isAuthenticated) return;
     fetchAllData();
 
-    // Reduced to 3s to minimize layout thrashing from frequent re-renders
-    const sysInterval = setInterval(fetchSysData, 3000);
+    // Gentle 30s background sync (WebSocket handles instant live state & clock)
+    const sysInterval = setInterval(fetchSysData, 30000);
 
     // Dedicated 10s loop for Leaderboard automatic refresh
     const lbInterval = setInterval(fetchLeaderboard, 10000);

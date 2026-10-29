@@ -7,7 +7,7 @@ from sqlalchemy import select, func
 from backend.database import AsyncSessionLocal
 from backend.models import Team
 from backend.core.engine import engine_app
-from backend.core.security import SECRET_KEY, ALGORITHM
+from backend.core.security import SECRET_KEY, ALGORITHM, verify_admin_token
 
 router = APIRouter(tags=["websocket"])
 
@@ -99,44 +99,57 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(None)):
     if not token:
         await websocket.close(code=1008)
         return
-        
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        team_id = payload.get("sub")
-    except Exception:
-        await websocket.close(code=1008)
-        return
 
-    if not team_id:
-        await websocket.close(code=1008)
-        return
+    team_id = None
+    research_level = 0
 
-    async with AsyncSessionLocal() as db:
-        result = await db.execute(select(Team).where(func.lower(Team.id) == str(team_id).strip().lower()))
-        team = result.scalar_one_or_none()
-        if not team:
+    # 1. Check if connecting with Admin credentials
+    if verify_admin_token(token):
+        team_id = "__admin__"
+        research_level = 3
+    else:
+        # 2. Decode Team JWT
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            team_id = payload.get("sub")
+        except Exception:
             await websocket.close(code=1008)
             return
-        research_level = team.research_level
+
+        if not team_id:
+            await websocket.close(code=1008)
+            return
+
+        async with AsyncSessionLocal() as db:
+            result = await db.execute(select(Team).where(func.lower(Team.id) == str(team_id).strip().lower()))
+            team = result.scalar_one_or_none()
+            if not team:
+                await websocket.close(code=1008)
+                return
+            research_level = team.research_level
 
     await manager.connect(websocket, team_id, research_level)
     
     try:
         initial_prices = engine_app.get_live_or_initial_prices()
+        rem = engine_app.get_remaining_seconds()
         await manager.safe_send(websocket, json.dumps({
             "type": "hello",
             "server_time": time.time(),
             "state": engine_app.get_current_session_state(),
             "g": engine_app.current_g,
             "n": engine_app.n,
-            "prices": initial_prices
+            "prices": initial_prices,
+            "remaining_seconds": rem
         }))
         if initial_prices:
             await manager.safe_send(websocket, json.dumps({
                 "type": "tick",
                 "g": engine_app.current_g,
                 "n": engine_app.n,
-                "prices": initial_prices
+                "prices": initial_prices,
+                "remaining_seconds": rem,
+                "server_time": time.time()
             }))
         
         # Send full continuous price history across sessions run so far
